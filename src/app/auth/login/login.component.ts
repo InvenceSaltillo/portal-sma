@@ -3,6 +3,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CustomDialogComponent } from '../../shared/components/custom-dialog/custom-dialog.component';
 import { CustomDialogConfig, FormControlConfig, FormControlType } from '../../interfaces/custom.dialog.interfaces';
+import { NgxSpinnerService } from 'ngx-spinner';
 
 @Component({
   selector: 'app-login',
@@ -91,6 +92,8 @@ export class LoginComponent implements OnInit {
     svgIconPath: 'M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z'
   };
 
+  private spinnerService = inject(NgxSpinnerService);
+
   ngOnInit() {
     this.loginForm = this.formBuilder.group({
       email: new FormControl(
@@ -115,6 +118,13 @@ export class LoginComponent implements OnInit {
       return;
     }
     console.log('DEBUG: recoverPasswordForm', form.value);
+  }
+
+  test() {
+    this.spinnerService.show();
+    setTimeout(() => {
+      this.spinnerService.hide();
+    }, 5000);
   }
 
 }
