@@ -68,6 +68,7 @@
           class="disabled:bg-slate-400  text-white font-semibold rounded-md py-2 px-4 w-full mb-3"
           [class.bg-custom-gradient]="loginForm.valid"
           [disabled]="loginForm.invalid"
+          (click)="login()"
         >
           Ingresar
         </button>
@@ -81,7 +82,7 @@
       </form>
       <!-- Sign up Link -->
       <div class="mt-6 text-black text-center flex flex-row justify-evenly items-center w-full p-0 gap-x-4">
-        <a class="text-blue-500">¿No tienes cuenta?</a>
+        <a>¿No tienes cuenta?</a>
         <button
           type="button"
           class="bg-custom-gradient text-white font-semibold rounded-md py-2 px-4 w-1/2"
@@ -89,18 +90,11 @@
         >
           Crear cuenta
         </button>
-        <button
-          type="button"
-          class="bg-custom-gradient text-white font-semibold rounded-md py-2 px-4 w-1/2"
-          (click)="test()"
-        >
-          Crear cuenta
-        </button>
       </div>
     </div>
     <!-- Left: Image -->
-    <div class="lg:w-1/2 lg:block bg-custom-gradient flex flex-col justify-center items-center p-12">
-      <div class="text-white text-center px-3 py-4 p-md-5 mx-md-4">
+    <div class="lg:w-1/2 lg:block bg-custom-gradient flex flex-col justify-start items-start p-12">
+      <div class="text-white px-3 py-4 p-md-5 mx-md-4">
         <h2 class="text-2xl font-bold">Secretaría de Medio Ambiente</h2>
         <h2 >
           La Subdirección de Vida Silvestre, de la Secretaría de Medio Ambiente del Estado de Coahuila de Zaragoza , utilizará los datos personales requeridos en su solicitud y aquí recabados para mantener actualizada la base de datos perteneciente al sistema de Unidades de Manejo para la Conservación y Aprovechamiento de la Vida Silvestre en el estado y la expedición de oficios relativos a autorizaciones, modificaciones, expedición de cintillos de cobro cinegético, oficios relativos a la conservación, manejo y aprovechamiento de la vida silvestre.

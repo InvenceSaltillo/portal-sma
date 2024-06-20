@@ -4,6 +4,7 @@ import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } 
 import { CustomDialogComponent } from '../../shared/components/custom-dialog/custom-dialog.component';
 import { CustomDialogConfig, FormControlConfig, FormControlType } from '../../interfaces/custom.dialog.interfaces';
 import { NgxSpinnerService } from 'ngx-spinner';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-login',
@@ -93,17 +94,18 @@ export class LoginComponent implements OnInit {
   };
 
   private spinnerService = inject(NgxSpinnerService);
+  private router = inject(Router);
 
   ngOnInit() {
     this.loginForm = this.formBuilder.group({
       email: new FormControl(
-        '',
+        'cesar.riojas@hotmail.com',
         [
           Validators.required,
           Validators.email,
         ]
       ),
-      password: new FormControl('', [Validators.required,]),
+      password: new FormControl('asdasdasd', [Validators.required,]),
     });
   }
 
@@ -120,11 +122,12 @@ export class LoginComponent implements OnInit {
     console.log('DEBUG: recoverPasswordForm', form.value);
   }
 
-  test() {
+  login() {
     this.spinnerService.show();
     setTimeout(() => {
       this.spinnerService.hide();
-    }, 5000);
+      this.router.navigateByUrl('dashboard')
+    }, 2000);
   }
 
 }

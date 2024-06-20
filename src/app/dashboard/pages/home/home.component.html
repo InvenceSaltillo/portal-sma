@@ -1,0 +1,45 @@
+
+<app-title-bar
+  [title]="'PORTAL DE TRÁMITES DE VIDA SILVESTRE'"
+  [textCenter]="true"
+/>
+
+<div
+  class="text-3xl text-white relative p-3 overflow-hidden border  border-slate-100 rounded-md mt-4 mx-20 shadow-md"
+>
+  <swiper-container
+    class="w-full"
+    loop="true"
+    autoplay="true"
+    speed="2000"
+    navigation="true"
+  >
+    <swiper-slide class="flex justify-center items-center">
+      <img
+        width="50%"
+        src="assets/img/perrito-pradera.jpg"
+        alt="perrito-pradera"
+      >
+    </swiper-slide>
+    <swiper-slide class="flex justify-center items-center">
+      <img
+        width="50%"
+        src="assets/img/oso-negro.jpg"
+        alt="oso-negro"
+      >
+    </swiper-slide>
+    <swiper-slide class="flex justify-center items-center">
+      <img
+        width="50%"
+        src="assets/img/cotorra-cerrana-criental.jpg"
+        alt="cotorra-cerrana-criental"
+      >
+    </swiper-slide>
+  </swiper-container>
+  <div class="flex justify-center items-center text-center mt-4">
+    <span class="text-black">
+      Inicia tu Solicitud de Trámite <a [routerLink]="['/dashboard/request']" class="text-yellow-300 cursor-pointer">Aquí</a>
+    </span>
+  </div>
+</div>
+
