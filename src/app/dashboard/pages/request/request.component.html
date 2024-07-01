@@ -1,3 +1,77 @@
 <app-title-bar
   [title]="'Solicitud de Trámite'"
 />
+<div
+  class="text-3xl text-black relative p-3 border  border-slate-100 rounded-md mt-4 mx-20 shadow-md"
+>
+  <div
+    class="text-3xl text-black relative p-3 border  border-slate-100 mb-4 rounded-md shadow-md"
+  >
+    <h3 class="text-xl font-bold">Datos del Trámite</h3>
+    <form [formGroup]="processForm" (ngSubmit)="onSubmitForm()">
+      <div class="flex space-x-4 mt-2">
+        <div class="w-1/2">
+          <label for="serviceType" class="block text-gray-700 text-lg">
+            <span class="text-red-600 text-lg font-bold">*</span> Tipo de trámite/Servicio:
+          </label>
+          <select
+            formControlName="serviceType"
+            class="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
+            autocomplete="off"
+          >
+            <option value="">-- Seleccione --</option>
+          </select>
+          @if (
+            (processForm.hasError('required', 'serviceType')) && processForm.controls['serviceType'].touched
+          ) {
+            <div
+              class="text-sm text-red-500"
+            >
+              <p>Este campo es requerido.</p>
+            </div>
+          }
+        </div>
+        <div class="w-1/2">
+          <label for="service" class="block text-gray-700 text-lg">
+            <span class="text-red-600 text-lg font-bold">*</span> Trámite:
+          </label>
+          <select
+            formControlName="service"
+            class="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
+            autocomplete="off"
+          >
+            <option value="">-- Sin opción --</option>
+            <option value="value1">Tramite 1</option>
+          </select>
+          @if (
+            (processForm.hasError('required', 'service')) && processForm.controls['service'].touched
+          ) {
+            <div
+              class="text-sm text-red-500"
+            >
+              <p>Este campo es requerido.</p>
+            </div>
+          }
+        </div>
+      </div>
+    </form>
+
+    <h3 class="text-xl">Trámite seleccionado:</h3>
+    @if (!!processForm.get('service')?.value) {
+      <h3 class="text-lg text-bold my-2">{{ processForm.get('service')!.value }}</h3>
+    }
+  </div>
+
+  <app-request-location-form (formEmitter)="requestLocationForm = $event"/>
+  <app-general-data-form (formEmitter)="generalDataForm = $event"/>
+  <app-individual-entity-form (formEmitter)="individualEntityForm = $event"/>
+  <button
+    type="button"
+    class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
+    (click)="submit()"
+  >
+    Guardar
+  </button>
+
+</div>
+

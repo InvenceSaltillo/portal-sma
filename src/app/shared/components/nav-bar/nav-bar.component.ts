@@ -1,7 +1,11 @@
+import { LocalStorageService } from './../../../services/local-storage/local-storage.service';
 import { trigger, state, style, transition, animate } from '@angular/animations';
-import { Component } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { TooltipComponent } from '../tooltip/tooltip.component';
+import { User } from '../../../interfaces/user.interface';
+import { ToastrService } from 'ngx-toastr';
+import { AppUtils } from '../../../app.utils';
 
 @Component({
   selector: 'app-nav-bar',
@@ -34,5 +38,8 @@ import { TooltipComponent } from '../tooltip/tooltip.component';
 })
 export class NavBarComponent {
   showProfileMenu = false;
+
+  constructor() {
+  }
 
 }

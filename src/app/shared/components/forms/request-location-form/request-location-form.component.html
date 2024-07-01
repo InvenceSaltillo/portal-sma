@@ -1,0 +1,61 @@
+<div
+  class="text-3xl text-black relative p-3 border border-slate-100 mb-4 rounded-md shadow-md"
+>
+  <div class="flex items-center justify-between space-x-4">
+    <h3 class="text-xl font-bold">Lugar de solicitud</h3>
+    <app-popover-icon
+      [position]="'right'"
+      [title]="'1. Lugar de solicitud'"
+      [id]="'request-location'"
+      [text]="'Indicar el lugar donde se presenta la solicitud, municipio y estado, ejemplo: Coyoacán, Ciudad de México.'"
+    />
+  </div>
+
+  <form [formGroup]="requestLocationForm" (ngSubmit)="onSubmitForm()">
+    <div class="flex space-x-4 mt-2">
+      <div class="w-1/2">
+        <label for="state" class="block text-gray-700 text-lg">
+          <span class="text-red-600 text-lg font-bold">*</span> Estado:
+        </label>
+        <select
+          formControlName="state"
+          class="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
+          autocomplete="off"
+        >
+          <option value="">-- Seleccione --</option>
+        </select>
+        @if (
+          (requestLocationForm.hasError('required', 'state')) && requestLocationForm.controls['state'].touched
+        ) {
+          <div
+            class="text-sm text-red-500"
+          >
+            <p>Este campo es requerido.</p>
+          </div>
+        }
+      </div>
+      <div class="w-1/2">
+        <label for="municipality" class="block text-gray-700 text-lg">
+          <span class="text-red-600 text-lg font-bold">*</span> Municipio:
+        </label>
+        <select
+          formControlName="municipality"
+          class="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
+          autocomplete="off"
+        >
+          <option value="">-- Sin opción --</option>
+          <option value="value1">Tramite 1</option>
+        </select>
+        @if (
+          (requestLocationForm.hasError('required', 'municipality')) && requestLocationForm.controls['municipality'].touched
+        ) {
+          <div
+            class="text-sm text-red-500"
+          >
+            <p>Este campo es requerido.</p>
+          </div>
+        }
+      </div>
+    </div>
+  </form>
+</div>

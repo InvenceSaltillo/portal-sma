@@ -5,6 +5,9 @@ import { CustomDialogComponent } from '../../shared/components/custom-dialog/cus
 import { CustomDialogConfig, FormControlConfig, FormControlType } from '../../interfaces/custom.dialog.interfaces';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { Router } from '@angular/router';
+import { AuthService } from '../../services/auth/auth.service';
+import { ToastrService } from 'ngx-toastr';
+import { LocalStorageService } from '../../services/local-storage/local-storage.service';
 
 @Component({
   selector: 'app-login',
@@ -95,23 +98,53 @@ export class LoginComponent implements OnInit {
 
   private spinnerService = inject(NgxSpinnerService);
   private router = inject(Router);
+  public authService = inject(AuthService);
+  public toastr = inject(ToastrService);
+  public localStorageService = inject(LocalStorageService);
 
   ngOnInit() {
     this.loginForm = this.formBuilder.group({
       email: new FormControl(
-        'cesar.riojas@hotmail.com',
+        'riojas@mail.com',
         [
           Validators.required,
           Validators.email,
         ]
       ),
-      password: new FormControl('asdasdasd', [Validators.required,]),
+      password: new FormControl('jVRlTBdr', [Validators.required,]),
     });
   }
 
   async onSubmitLoginForm() {
     console.log('DEBUG: formvalue', this.loginForm.value);
     this.loginForm.markAllAsTouched();
+    this.spinnerService.show();
+
+    const email = this.loginForm.get('email')?.value;
+    const password = this.loginForm.get('password')?.value;
+
+    let loginResponse;
+
+
+    try {
+      loginResponse = await this.authService.login(email, password);
+    } catch (error: any) {
+      this.spinnerService.hide();
+      const apiError = error.error.message;
+      this.toastr.error(apiError, '¡Ups!');
+      return;
+    }
+
+    this.spinnerService.hide();
+    this.toastr.success(
+      `${loginResponse.user.name} ${loginResponse.user.last_names} `,
+      'Bienvenid@',
+    );
+
+    this.localStorageService.setItem('user', JSON.stringify(loginResponse.user));
+    this.localStorageService.setItem('apiToken', loginResponse.token);
+
+    this.router.navigateByUrl('dashboard');
   }
 
   async onSubmitRecoverPasswordForm(form: FormGroup<any>) {
@@ -120,14 +153,6 @@ export class LoginComponent implements OnInit {
       return;
     }
     console.log('DEBUG: recoverPasswordForm', form.value);
-  }
-
-  login() {
-    this.spinnerService.show();
-    setTimeout(() => {
-      this.spinnerService.hide();
-      this.router.navigateByUrl('dashboard')
-    }, 2000);
   }
 
 }
