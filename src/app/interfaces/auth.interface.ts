@@ -5,3 +5,9 @@ export interface LoginResponse {
   user:   User;
   token:  string;
 }
+export interface RegisterResponse {
+  status: string;
+  message: string;
+  user:   User;
+  token:  string;
+}

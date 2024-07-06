@@ -8,6 +8,7 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth/auth.service';
 import { ToastrService } from 'ngx-toastr';
 import { LocalStorageService } from '../../services/local-storage/local-storage.service';
+import { User } from '../../interfaces/user.interface';
 
 @Component({
   selector: 'app-login',
@@ -49,6 +50,7 @@ export class LoginComponent implements OnInit {
         Validators.required,
         Validators.email,
       ],
+      initialValue: 'riojas@mail.com',
     },
     {
       name: 'firstName',
@@ -57,6 +59,7 @@ export class LoginComponent implements OnInit {
       validators: [
         Validators.required,
       ],
+      initialValue: 'Jhon',
     },
     {
       name: 'lastName',
@@ -65,6 +68,7 @@ export class LoginComponent implements OnInit {
       validators: [
         Validators.required,
       ],
+      initialValue: 'Doe',
     },
     {
       name: 'birthDate',
@@ -73,6 +77,7 @@ export class LoginComponent implements OnInit {
       validators: [
         Validators.required,
       ],
+      initialDate: new Date(1984, 7, 1),
     },
     {
       name: 'gender',
@@ -81,7 +86,7 @@ export class LoginComponent implements OnInit {
       validators: [
         Validators.required,
       ],
-      initialValue: '',
+      initialValue: 'male',
       placeholder: '--Seleccione una opción--',
       selectTypeOptions: [
         { value: 'male', label: 'Masculino' },
@@ -105,13 +110,13 @@ export class LoginComponent implements OnInit {
   ngOnInit() {
     this.loginForm = this.formBuilder.group({
       email: new FormControl(
-        'riojas@mail.com',
+        'cesar.riojas@hotmail.com',
         [
           Validators.required,
           Validators.email,
         ]
       ),
-      password: new FormControl('jVRlTBdr', [Validators.required,]),
+      password: new FormControl('XB20nRM8', [Validators.required,]),
     });
   }
 
@@ -147,12 +152,79 @@ export class LoginComponent implements OnInit {
     this.router.navigateByUrl('dashboard');
   }
 
+  async onSubmitRegisterForm(form: FormGroup) {
+    this.loginForm.markAllAsTouched();
+    if (form.invalid) {
+      return;
+    }
+    console.log('DEBUG: formvalue', form.value);
+    this.spinnerService.show();
+
+    const user = {
+      email: form.get('email')?.value,
+      name: form.get('firstName')?.value,
+      last_names: form.get('lastName')?.value,
+      birth_date: form.get('birthDate')?.value,
+      gender: form.get('gender')?.value,
+    };
+
+    let registerResponse;
+
+    try {
+      registerResponse = await this.authService.register(user);
+    } catch (error: any) {
+      this.spinnerService.hide();
+      const apiError = error.error.message;
+      this.toastr.error(apiError, '¡Ups!');
+      return;
+    }
+
+    console.log('DEBUG: registerResponse', registerResponse);
+    this.spinnerService.hide();
+    this.toastr.success(
+      registerResponse.message,
+    );
+
+    this.localStorageService.setItem('user', JSON.stringify(registerResponse.user));
+    this.localStorageService.setItem('apiToken', registerResponse.token);
+
+    this.router.navigateByUrl('dashboard');
+  }
+
   async onSubmitRecoverPasswordForm(form: FormGroup<any>) {
     form.markAllAsTouched();
     if (form.invalid) {
       return;
     }
-    console.log('DEBUG: recoverPasswordForm', form.value);
+    console.log('DEBUG: formvalue', form.value);
+    this.spinnerService.show();
+
+    const user = {
+      email: form.get('email')?.value,
+      name: form.get('firstName')?.value,
+      last_names: form.get('lastName')?.value,
+      birth_date: form.get('birthDate')?.value,
+      gender: form.get('gender')?.value,
+    };
+
+    let forgotPasswordResponse;
+    const email = form.get('email')?.value
+
+    try {
+      forgotPasswordResponse = await this.authService.forgotPassword(email);
+    } catch (error: any) {
+      this.spinnerService.hide();
+      const apiError = error.error.message;
+      this.toastr.error(apiError, '¡Ups!');
+      return;
+    }
+
+    console.log('DEBUG: registerResponse', forgotPasswordResponse);
+    this.showRecoverPasswordDialog = false;
+    this.spinnerService.hide();
+    this.toastr.success(
+      forgotPasswordResponse.message,
+    );
   }
 
 }

@@ -6,6 +6,7 @@ export interface FormControlConfig {
   type: FormControlType;
   validators?: ValidatorFn[];
   initialValue?: string;
+  initialDate?: Date;
   selectTypeOptions?: SelectInputTypeOptions[];
   placeholder?: string;
 }

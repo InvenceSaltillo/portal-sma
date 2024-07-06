@@ -5,7 +5,7 @@
   class="text-3xl text-black relative p-3 border  border-slate-100 rounded-md mt-4 mx-20 shadow-md"
 >
   <div
-    class="text-3xl text-black relative p-3 border  border-slate-100 mb-4 rounded-md shadow-md"
+    class="text-3xl text-black relative p-3 border border-slate-100 mb-4 rounded-md shadow-md"
   >
     <h3 class="text-xl font-bold">Datos del Trámite</h3>
     <form [formGroup]="processForm" (ngSubmit)="onSubmitForm()">
@@ -16,10 +16,17 @@
           </label>
           <select
             formControlName="serviceType"
-            class="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
+            class="w-full border border-gray-300 disabled:true rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
             autocomplete="off"
           >
-            <option value="">-- Seleccione --</option>
+            @if (serviceTypeService.serviceTypes()?.length) {
+              <option value="">-- Seleccione --</option>
+            }
+            @for (serviceType of serviceTypeService.serviceTypes(); track serviceType.id) {
+              <option [value]="serviceType.id">{{serviceType.name}}</option>
+            }@empty {
+              <option value="">Cargando...</option>
+            }
           </select>
           @if (
             (processForm.hasError('required', 'serviceType')) && processForm.controls['serviceType'].touched
@@ -40,8 +47,14 @@
             class="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
             autocomplete="off"
           >
-            <option value="">-- Sin opción --</option>
-            <option value="value1">Tramite 1</option>
+            @if (serviceService.services()?.length) {
+              <option value="">-- Seleccione --</option>
+            }
+            @for (service of serviceService.services(); track service) {
+              <option [value]="service.id">{{service.name}}</option>
+            }@empty {
+              <option value="">-- Sin opción --</option>
+            }
           </select>
           @if (
             (processForm.hasError('required', 'service')) && processForm.controls['service'].touched
@@ -58,7 +71,7 @@
 
     <h3 class="text-xl">Trámite seleccionado:</h3>
     @if (!!processForm.get('service')?.value) {
-      <h3 class="text-lg text-bold my-2">{{ processForm.get('service')!.value }}</h3>
+      <h3 class="text-lg text-bold my-2">{{ serviceNameSelected }}</h3>
     }
   </div>
 

@@ -1,4 +1,5 @@
 import { Component, input } from '@angular/core';
+import { Tooltip, TooltipInterface } from 'flowbite';
 
 @Component({
   selector: 'app-tooltip',
@@ -10,4 +11,5 @@ import { Component, input } from '@angular/core';
 export class TooltipComponent {
   id = input.required<string>();
   label = input.required<string>();
+  // tooltip: TooltipInterface = new Tooltip();
 }

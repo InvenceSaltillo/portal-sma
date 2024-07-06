@@ -1,6 +1,6 @@
 import { NgxSpinnerModule } from 'ngx-spinner';
-import { Component, Inject, OnInit, PLATFORM_ID } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Component, Inject, OnInit, PLATFORM_ID, inject } from '@angular/core';
+import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { initFlowbite } from 'flowbite';
 import { isPlatformBrowser } from '@angular/common';
 
@@ -11,13 +11,17 @@ import { isPlatformBrowser } from '@angular/common';
   templateUrl: './app.component.html',
   styleUrl: './app.component.css',
 })
-export class AppComponent implements OnInit{
+export class AppComponent implements OnInit {
   title = 'portal-sema-public';
-  constructor(@Inject(PLATFORM_ID) private platformId: Object) {}
+  router = inject(Router);
+
+  constructor() { }
 
   ngOnInit(): void {
-    if (isPlatformBrowser(this.platformId)) {
-      initFlowbite();
-    }
+    this.router.events.subscribe((event) => {
+      if (event instanceof NavigationEnd) {
+        setTimeout(() => { initFlowbite(); })
+      }
+    });
   }
 }

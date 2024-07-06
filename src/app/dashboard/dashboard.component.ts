@@ -1,5 +1,5 @@
 import { AfterViewInit, Component, OnInit, inject } from '@angular/core';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { NavBarComponent } from '../shared/components/nav-bar/nav-bar.component';
 import { TitleBarComponent } from '../shared/title-bar/title-bar.component';
 import { ToastrService } from 'ngx-toastr';
@@ -14,30 +14,28 @@ import { LocalStorageService } from '../services/local-storage/local-storage.ser
     RouterModule,
     NavBarComponent,
     TitleBarComponent,
- ],
+  ],
   templateUrl: './dashboard.component.html',
 })
-export default class DashboardComponent implements AfterViewInit{
+export default class DashboardComponent implements OnInit {
   readonly appUtils = AppUtils;
 
   private localStorageService = inject(LocalStorageService);
   public toastr = inject(ToastrService);
+  private router = inject(Router);
 
   user!: User;
-  userFullName = '';
 
-  ngAfterViewInit(): void {
+  ngOnInit(): void {
     const user = this.localStorageService.getUser();
+    console.log('DEBUG: user', user);
 
-    if (!!user) {
-      this.user = user;
-      this.userFullName = this.appUtils.getUserFullName(user);
-      console.log('DEBUG: user', typeof user);
-    } else {
-      console.log('DEBUG: aquiiii', typeof user);
+    if (!user) {
       this.toastr.error('No se pudo obtener la información del usuario');
+      this.router.navigateByUrl('login');
       return;
     }
+    this.user = user;
   }
 
 }
