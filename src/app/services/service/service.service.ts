@@ -4,6 +4,7 @@ import { ServiceType } from '../../interfaces/service-type.interface';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { Service } from '../../interfaces/service.interface';
+import { catchError, map, of } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -17,6 +18,7 @@ export class ServiceService {
   public services = computed(() => this.#state().data);
   public serviceSelected = computed(() => this.#state().data);
   public loading = computed(() => this.#state().loading);
+  public error = computed(() => this.#state().error);
 
   private http = inject(HttpClient);
   serviceUrl = `${environment.apiUrl}service`
@@ -24,28 +26,81 @@ export class ServiceService {
   constructor() { }
 
   getAll() {
-    this.http.get<Service[]>(this.serviceUrl)
-      .subscribe(response => {
-        console.log('DEBUG: response', response);
+    try {
+      this.http.get<Service[]>(this.serviceUrl).pipe(
+        catchError(error => {
+          this.#state.set({
+            loading: false,
+            data: [],
+            error: 'No se pudo obtener los servicios, intente de nuevo más tarde.'
+          });
+
+          return of();
+        })
+      ).subscribe(response => {
         this.#state.set({
           loading: false,
           data: response,
         });
       });
+    } catch (error) {
+      this.#state.set({
+        loading: false,
+        data: [],
+        error: error
+      });
+    }
   }
 
   getByServiceType(serviceTypeId: string) {
-    this.http.get<Service[]>(`${this.serviceUrl}/service-type/${serviceTypeId}`)
-      .subscribe(response => {
-        console.log('DEBUG: response', response);
-        this.#state.set({
-          loading: false,
-          data: response,
+    this.#state.set({ ...this.#state(), error: undefined });
+    try {
+      this.http.get<Service[]>(`${this.serviceUrl}/service-type/${serviceTypeId}`)
+        .pipe(
+          catchError(error => {
+            this.#state.set({
+              loading: false,
+              data: [],
+              error: 'No se pudo obtener los servicios, intente de nuevo más tarde.'
+            });
+
+            return of();
+          }))
+        .subscribe(response => {
+          this.#state.set({
+            loading: false,
+            data: response,
+          });
         });
+    } catch (error) {
+      this.#state.set({
+        loading: false,
+        data: [],
+        error: error
       });
+    }
   }
 
-  getServiceName(serviceId: string): string {
-    return this.services()?.find(service => service.id == serviceId)?.name ?? '';
+  getById(serviceId: string) {
+    this.#state.set({ ...this.#state(), error: undefined });
+    try {
+      return this.http.get<Service>(`${this.serviceUrl}/${serviceId}`)
+        .pipe(
+          map(response => response),
+          catchError(error => {
+            this.#state.set({
+              ...this.#state(),
+              error: 'No se pudo obtener el formulario del servicio, intente de nuevo más tarde.',
+            });
+            return of();
+          })
+        );
+    } catch (error) {
+      this.#state.set({
+        ...this.#state(),
+        error: 'No se pudo obtener el formulario del servicio, intente de nuevo más tarde.',
+      });
+      return undefined;
+    }
   }
 }

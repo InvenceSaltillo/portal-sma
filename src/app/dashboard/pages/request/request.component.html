@@ -71,13 +71,29 @@
 
     <h3 class="text-xl">Trámite seleccionado:</h3>
     @if (!!processForm.get('service')?.value) {
-      <h3 class="text-lg text-bold my-2">{{ serviceNameSelected }}</h3>
+      <h3 class="text-lg text-bold my-2">{{ serviceSelected?.name }}</h3>
     }
   </div>
 
-  <app-request-location-form (formEmitter)="requestLocationForm = $event"/>
-  <app-general-data-form (formEmitter)="generalDataForm = $event"/>
-  <app-individual-entity-form (formEmitter)="individualEntityForm = $event"/>
+  @for (formSection of serviceSelected?.form_sections; track $index) {
+    <div
+      class="text-3xl text-black relative p-3 border border-slate-100 mb-4 rounded-md shadow-md"
+    >
+      <div class="flex space-x-4">
+        <h3 class="text-xl font-bold">{{formSection.name}}</h3>
+
+        @if (formSection.popover_id) {
+          <app-popover-icon
+            [id]="formSection.popover?.id ?? ''"
+            [title]="formSection.popover?.title ?? ''"
+            [text]="formSection.popover?.text ?? ''"
+            [position]="formSection.popover?.position ?? 'top'"
+            [svgIconPath]="formSection.popover?.icon ?? ''"
+          />
+        }
+      </div>
+    </div>
+  }
   <button
     type="button"
     class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
@@ -87,4 +103,3 @@
   </button>
 
 </div>
-

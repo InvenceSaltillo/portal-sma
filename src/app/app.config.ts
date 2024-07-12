@@ -8,6 +8,7 @@ import { provideAnimations } from '@angular/platform-browser/animations';
 import { HttpClientModule, provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
 import { provideToastr } from 'ngx-toastr';
 import { authInterceptor } from './auth.interceptor';
+import { NgxTippyModule } from 'ngx-tippy-wrapper';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -26,6 +27,7 @@ export const appConfig: ApplicationConfig = {
     ),
     importProvidersFrom(
       HttpClientModule,
+      NgxTippyModule,
     ),
     provideToastr(),
   ]
