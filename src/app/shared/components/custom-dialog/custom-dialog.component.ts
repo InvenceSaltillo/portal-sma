@@ -27,7 +27,7 @@ export class CustomDialogComponent implements OnInit {
         const formattedDate = this.formatDateToISO(control.initialDate!);
         initialValue = formattedDate;
       } else {
-        initialValue = control.initialValue;
+        initialValue = control.initial_value;
       }
 
       this.form.addControl(control.name, new FormControl(

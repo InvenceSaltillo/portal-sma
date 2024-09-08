@@ -1,8 +1,12 @@
 <div
-  class=" text-white relative block p-3 overflow-hidden border bg-emerald-700 border-slate-100 rounded-md mb-1 mt-8 sm:mx-20 mx-2 shadow-md"
-  [ngClass]="{'text-center': textCenter()}"
+  id="titlebar"
+  class="sticky top-0 z-50 text-white block p-3 overflow-hidden border bg-indigo-500 border-slate-100 rounded-md mb-1 mt-8 shadow-md transition-all duration-200 ease-out"
+  [ngClass]="{'text-center': textCenter(), 'sm:mx-20': !isSticky, 'mx-2': !isSticky}"
   [class]="!textSize()  ? 'text-3xl' : 'text-2xl'"
 >
   {{title()}}
 
+  <div class="text-base">
+    {{subTitle() ?? ''}}
+  </div>
 </div>

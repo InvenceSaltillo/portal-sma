@@ -25,7 +25,7 @@ export class PopoverIconComponent implements OnInit {
     placement: 'right',
     theme: 'my-theme',
     arrow: true,
-    trigger: 'click',
+    trigger: 'mouseenter',
   };
 
   ngOnInit() {

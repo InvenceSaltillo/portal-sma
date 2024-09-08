@@ -11,7 +11,7 @@ import { catchError, map, of } from 'rxjs';
 })
 export class ServiceService {
   #state = signal<GlobalState<Service[]>>({
-    loading: true,
+    loading: false,
     data: [],
   });
 
@@ -53,7 +53,7 @@ export class ServiceService {
   }
 
   getByServiceType(serviceTypeId: string) {
-    this.#state.set({ ...this.#state(), error: undefined });
+    this.#state.set({ ...this.#state(), loading: true, error: undefined });
     try {
       this.http.get<Service[]>(`${this.serviceUrl}/service-type/${serviceTypeId}`)
         .pipe(

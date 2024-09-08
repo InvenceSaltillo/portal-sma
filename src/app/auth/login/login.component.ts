@@ -50,7 +50,7 @@ export class LoginComponent implements OnInit {
         Validators.required,
         Validators.email,
       ],
-      initialValue: 'riojas@mail.com',
+      initial_value: 'riojas@mail.com',
     },
     {
       name: 'firstName',
@@ -59,7 +59,7 @@ export class LoginComponent implements OnInit {
       validators: [
         Validators.required,
       ],
-      initialValue: 'Jhon',
+      initial_value: 'Jhon',
     },
     {
       name: 'lastName',
@@ -68,7 +68,7 @@ export class LoginComponent implements OnInit {
       validators: [
         Validators.required,
       ],
-      initialValue: 'Doe',
+      initial_value: 'Doe',
     },
     {
       name: 'birthDate',
@@ -86,11 +86,11 @@ export class LoginComponent implements OnInit {
       validators: [
         Validators.required,
       ],
-      initialValue: 'male',
+      initial_value: 'male',
       placeholder: '--Seleccione una opción--',
-      selectTypeOptions: [
-        { value: 'male', label: 'Masculino' },
-        { value: 'female', label: 'Femenino' },
+      select_options: [
+        { value: 'male', label: 'Masculino', is_selected: false, },
+        { value: 'female', label: 'Femenino', is_selected: false, },
       ],
     },
   ];
@@ -116,7 +116,7 @@ export class LoginComponent implements OnInit {
           Validators.email,
         ]
       ),
-      password: new FormControl('XB20nRM8', [Validators.required,]),
+      password: new FormControl('HNvuiNQW', [Validators.required,]),
     });
   }
 

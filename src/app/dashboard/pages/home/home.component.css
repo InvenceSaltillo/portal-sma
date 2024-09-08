@@ -1,0 +1,29 @@
+.bg-cover-image {
+  position: relative;
+  overflow: hidden;
+}
+
+.bg-cover-image::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('/assets/img/desierto.jpg');
+  background-size: cover;
+  background-position: center;
+  filter: brightness(0.8); /* Ajusta el nivel de oscuridad aquí */
+  z-index: -1;
+}
+
+.bg-cover-image::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.1); /* Ajusta el nivel de opacidad del color oscuro aquí */
+  z-index: 0;
+}

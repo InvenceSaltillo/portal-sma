@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, input } from '@angular/core';
+import { Component, HostListener, input } from '@angular/core';
 
 @Component({
   selector: 'app-title-bar',
@@ -12,7 +12,16 @@ import { Component, input } from '@angular/core';
 })
 export class TitleBarComponent {
   title = input.required<string>();
+  subTitle = input<string>();
   textCenter = input<boolean>();
   textSize = input<string>();
+  isSticky = false;
 
+  @HostListener('window:scroll', ['$event'])
+  onWindowScroll(event: Event) {
+    const titlebar = document.getElementById('titlebar');
+    if (titlebar) {
+      this.isSticky = window.scrollY > titlebar.offsetHeight;
+    }
+  }
 }

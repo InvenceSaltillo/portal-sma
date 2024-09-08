@@ -1,5 +1,5 @@
 <nav class="bg-gray-800">
-  <div class="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
+  <div class=" px-2 sm:px-6 lg:px-8">
     <div class="relative flex h-16 items-center justify-between">
       <div class="absolute inset-y-0 left-0 flex items-center sm:hidden">
         <!-- Mobile menu button-->
@@ -28,11 +28,8 @@
         <div class="flex flex-shrink-0 items-center">
           <img  src="assets/img/logo-sma.png" width="200px" alt="SMA Logo">
         </div>
-        <div class="border-l border-gray-300 h-10 ml-4"></div>
-        <span class="px-3 py-2 text-xl font-medium text-white" >Ecología</span>
         <div class="hidden sm:ml-6 sm:block w-full">
-          <div class="flex justify-end space-x-4">
-            <!-- Current: "bg-gray-900 text-white", Default: "text-gray-300 hover:bg-gray-700 hover:text-white" -->
+          <div class="flex space-x-4">
             <a
               [routerLink]="['home']"
               routerLinkActive="bg-gray-900"
@@ -71,7 +68,6 @@
         </div>
       </div>
       <div class="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
-        <!-- Profile dropdown -->
         <div class="relative ml-3">
           <div>
             <button
@@ -85,30 +81,33 @@
               <span class="absolute -inset-1.5"></span>
               <span class="sr-only">Open user menu</span>
               <img class="h-8 w-8 rounded-full" src="../../assets/img/avatar-default.png" alt="">
-              @if (!!user()) {
-                <span class="text-white ml-4 text-lg hidden lg:block">{{userFullName}}</span>
-              }
             </button>
           </div>
 
-          <div [@showOrHide]="showProfileMenu" class="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="user-menu-button" tabindex="-1">
-            <a
-              class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-400 hover:text-white hover:cursor-pointer"
-              role="menuitem"
-              tabindex="-1"
-              id="user-menu-item-0"
-            >
-              Cambiar contraseña
-            </a>
-            <a
-              class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-400 hover:text-white hover:cursor-pointer"
-              role="menuitem"
-              tabindex="-1"
-              id="user-menu-item-1"
-              (click)="logout()"
-            >
-              Cerrar sesión
-            </a>
+          <div [@showOrHide]="showProfileMenu" class="divide-y divide-gray-200 absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="user-menu-button" tabindex="-1">
+            <div class="px-4 py-3">
+              <span class="block text-sm text-gray-900 dark:text-white">{{userFullName}}</span>
+              <span class="block text-sm text-gray-500 truncate dark:text-gray-400">{{user().email}}</span>
+            </div>
+            <div>
+              <a
+                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-400 hover:text-white hover:cursor-pointer"
+                role="menuitem"
+                tabindex="-1"
+                id="user-menu-item-0"
+              >
+                Cambiar contraseña
+              </a>
+              <a
+                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-400 hover:text-white hover:cursor-pointer"
+                role="menuitem"
+                tabindex="-1"
+                id="user-menu-item-1"
+                (click)="logout()"
+              >
+                Cerrar sesión
+              </a>
+            </div>
           </div>
         </div>
       </div>

@@ -1,22 +1,29 @@
 <app-title-bar
   [title]="'Solicitud de Trámite'"
+  [subTitle]="'Trámite seleccionado: ' + (
+    !!serviceSelected?.name && !!serviceSelected?.name
+      ? serviceSelected!.name
+      : 'ninguno'
+  )"
+
 />
+
 <div
-  class="text-3xl text-black relative p-3 border  border-slate-100 rounded-md mt-4 mx-20 shadow-md"
+  class="text-3xl text-black relative p-3 border  border-slate-100 rounded-md mt-4 mx-2 sm:mx-20 shadow-md"
 >
   <div
     class="text-3xl text-black relative p-3 border border-slate-100 mb-4 rounded-md shadow-md"
   >
     <h3 class="text-xl font-bold">Datos del Trámite</h3>
     <form [formGroup]="processForm" (ngSubmit)="onSubmitForm()">
-      <div class="flex space-x-4 mt-2">
-        <div class="w-1/2">
+      <div class="flex flex-wrap mt-2 -mx-2">
+        <div class="w-full md:w-1/2 px-2 mb-4 md:mb-0">
           <label for="serviceType" class="block text-gray-700 text-lg">
             <span class="text-red-600 text-lg font-bold">*</span> Tipo de trámite/Servicio:
           </label>
           <select
             formControlName="serviceType"
-            class="w-full border border-gray-300 disabled:true rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
+            class="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
             autocomplete="off"
           >
             @if (serviceTypeService.serviceTypes()?.length) {
@@ -31,14 +38,12 @@
           @if (
             (processForm.hasError('required', 'serviceType')) && processForm.controls['serviceType'].touched
           ) {
-            <div
-              class="text-sm text-red-500"
-            >
+            <div class="text-sm text-red-500">
               <p>Este campo es requerido.</p>
             </div>
           }
         </div>
-        <div class="w-1/2">
+        <div class="w-full md:w-1/2 px-2">
           <label for="service" class="block text-gray-700 text-lg">
             <span class="text-red-600 text-lg font-bold">*</span> Trámite:
           </label>
@@ -59,47 +64,309 @@
           @if (
             (processForm.hasError('required', 'service')) && processForm.controls['service'].touched
           ) {
-            <div
-              class="text-sm text-red-500"
-            >
+            <div class="text-sm text-red-500">
               <p>Este campo es requerido.</p>
             </div>
           }
         </div>
       </div>
     </form>
-
-    <h3 class="text-xl">Trámite seleccionado:</h3>
-    @if (!!processForm.get('service')?.value) {
-      <h3 class="text-lg text-bold my-2">{{ serviceSelected?.name }}</h3>
-    }
   </div>
+
 
   @for (formSection of serviceSelected?.form_sections; track $index) {
     <div
       class="text-3xl text-black relative p-3 border border-slate-100 mb-4 rounded-md shadow-md"
     >
-      <div class="flex space-x-4">
-        <h3 class="text-xl font-bold">{{formSection.name}}</h3>
+      <div class="flex items-start space-x-4">
+        @if (formSection.is_active) {
+          <div class="accordion-menu">
 
-        @if (formSection.popover_id) {
-          <app-popover-icon
-            [id]="formSection.popover?.id ?? ''"
-            [title]="formSection.popover?.title ?? ''"
-            [text]="formSection.popover?.text ?? ''"
-            [position]="formSection.popover?.position ?? 'top'"
-            [svgIconPath]="formSection.popover?.icon ?? ''"
-          />
+            @if(formSection.has_checkbox) {
+              <div class="flex items-center mb-4 ml-3">
+                <input
+                  id="checkbox- {{formSection.id}}"
+                  type="checkbox"
+                  [value]="formSection.id"
+                  (change)="onCheckboxChange($event, formSection.id)"
+                  class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                >
+                <label
+                  for="checkbox- {{formSection.id}}"
+                  class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
+                >
+                  {{formSection.checkbox_label}}
+                </label>
+              </div>
+            }
+            <ul>
+                <li>
+                    <input
+                      type="checkbox"
+                      [checked]="!formSection.has_checkbox ? !formSection.expanded : (selectedOption !== formSection.id)"
+                    >
+                    <i class="arrow after:bg-indigo-500 before:bg-indigo-500"></i>
+                    <div class="flex items-start space-x-4">
+                      @if (formSection.popover_id) {
+                        <app-popover-icon
+                          [id]="formSection.popover?.id ?? ''"
+                          [title]="formSection.popover?.title ?? ''"
+                          [text]="formSection.popover?.text ?? ''"
+                          [position]="formSection.popover?.position ?? 'top'"
+                          [svgIconPath]="formSection.popover?.icon ?? ''"
+                          class="z-50"
+                        />
+                      }
+                      <h3 class="text-xl font-bold">{{formSection.name}}</h3>
+
+                  </div>
+                  <div class="flex flex-wrap mt-2 accordion-content">
+
+                    @if (!!formSection.text_alert) {
+                      <div class="w-full text-center p-4 mb-4 text-sm text-blue-800 rounded-lg bg-indigo-100 dark:bg-gray-800 dark:text-blue-400" role="alert">
+                        <span class="font-medium">{{formSection.text_alert}}</span>
+                      </div>
+                    }
+                    <form
+                      class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full"
+                      [formGroup]="dataForm"
+                      [ngClass]="{
+                        'lg:grid-cols-1': formSection.columns === 1,
+                        'lg:grid-cols-2': formSection.columns === 2,
+                        'lg:grid-cols-3': formSection.columns === 3,
+                        'lg:grid-cols-4': formSection.columns === 4,
+                        'lg:grid-cols-5': formSection.columns === 5
+                      }"
+                    >
+                    @for (control of formSection.form_controls; track $index) {
+
+                      <div class="mb-4">
+                        <div class="flex items-center space-x-1">
+                          @if (!formSection.text_alert) {
+                            <label [for]="control.name" class="block text-black text-base">{{control.label}}</label>
+                          }
+                            @if (control.popover && showPopovers) {
+                              <app-popover-icon
+                                [position]="control.popover.position"
+                                [title]="control.popover.title"
+                                [id]="control.popover.id"
+                                [text]="control.popover.text"
+                              ></app-popover-icon>
+                            }
+                        </div>
+
+                        @switch (control.type) {
+                          @case (FormControlType.FILE) {
+
+                            @if (!!formSection.text_alert) {
+                              <div
+                                class="text-black relative p-3 border border-slate-100 mb-4 rounded-md shadow-md"
+                              >
+                                <div class="text-center flex flex-col">
+                                  <label class="text-black text-base text-bold">{{control.label}}</label>
+                                  <label class="text-black text-sm">{{control.placeholder}}</label>
+                                </div>
+
+                                <div class="text-center mt-4 flex flex-col justify-center items-center">
+
+                                  @if (dataForm.get(control.name)?.value) {
+                                    Archivo seleccionado: <span class="text-bold">{{ dataForm.get(control.name)?.value?.name }}</span>
+                                  }
+
+                                  <button
+                                    type="button"
+                                    (click)="openFileSelectors(control.index!)"
+                                    class="inline-flex items-center text-sm tracking-wide font-semibold bg-indigo-500 text-gray-100 py-2 px-5 rounded-lg hover:bg-indigo-700 transition-all duration-300 ease-in-out focus:shadow-outline focus:outline-none"
+                                  >
+                                    <svg class="w-6 h-6 text-white dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                      <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 17v-5h1.5a1.5 1.5 0 1 1 0 3H5m12 2v-5h2m-2 3h2M5 10V7.914a1 1 0 0 1 .293-.707l3.914-3.914A1 1 0 0 1 9.914 3H18a1 1 0 0 1 1 1v6M5 19v1a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-1M10 3v4a1 1 0 0 1-1 1H5m6 4v5h1.375A1.627 1.627 0 0 0 14 15.375v-1.75A1.627 1.627 0 0 0 12.375 12H11Z"/>
+                                    </svg>
+                                    {{control.file_button_text}}
+                                  </button>
+
+                                  <input
+                                    type="file"
+                                    #fileInput
+                                    (change)="onFileSelected($event, control.name)"
+                                    style="display: none;"
+                                    [accept]="control.file_input_accept"
+                                  />
+                                  @if (dataForm.hasError('required', control.name) && dataForm.controls[control.name].touched) {
+                                    <div class="text-sm text-red-500">
+                                      <p>Este campo es requerido.</p>
+                                    </div>
+                                  }
+                                </div>
+                              </div>
+                            }
+                          }
+                          @case (FormControlType.TEXT) {
+                            <input
+                              [type]="control.type"
+                              [formControlName]="control.name"
+                              [mask]="control.input_mask"
+                              class="text-base w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
+                              autocomplete="off"
+                            />
+                          }
+
+                          @case (FormControlType.EMAIL) {
+                            <input
+                              [type]="control.type"
+                              [formControlName]="control.name"
+                              class="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
+                              autocomplete="off"
+                            />
+                          }
+
+                          @case (FormControlType.DATE) {
+                            <input
+                              [type]="control.type"
+                              [formControlName]="control.name"
+                              class="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
+                              autocomplete="off"
+                            />
+                          }
+
+                          @case (FormControlType.SELECT) {
+                            <select
+                              [formControlName]="control.name"
+                              class="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
+                              autocomplete="off"
+                            >
+                            @if (control.placeholder) {
+                              <option value="">{{control.placeholder}}</option>
+                            }
+                              <ng-container *ngFor="let option of control.select_options">
+                                <option [value]="option.value">{{option.label}}</option>
+                              </ng-container>
+                            </select>
+                          }
+
+                          @case (FormControlType.NUMBER) {
+                            <input
+                              [type]="control.type"
+                              [formControlName]="control.name"
+                              class="text-base w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
+                              autocomplete="off"
+                            />
+                          }
+                        }
+
+                        @if (!formSection.text_alert) {
+                          @if (dataForm.hasError('required', control.name) && dataForm.controls[control.name].touched) {
+                            <div class="text-sm text-red-500">
+                              <p>Este campo es requerido.</p>
+                            </div>
+                          }
+                          @if (dataForm.hasError('email', control.name) && dataForm.controls[control.name].touched) {
+                            <div class="text-sm text-red-500">
+                              <p>Ingrese un correo válido.</p>
+                            </div>
+                          }
+                        }
+                      </div>
+                    }
+                    </form>
+                  </div>
+                </li>
+            </ul>
+          </div>
         }
       </div>
     </div>
   }
-  <button
-    type="button"
-    class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
-    (click)="submit()"
-  >
-    Guardar
-  </button>
 
+  @if (!!serviceSelected) {
+
+    <div class="flex items-center">
+      <div class="checkbox-wrapper-19">
+        <input type="checkbox" checked id="terms" (change)="onTermsChecked($event, 'terms')"/>
+        <label for="terms" class="check-box"></label>
+      </div>
+      <label class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">
+        Aceptar los términos de
+        <a data-modal-target="default-modal" data-modal-toggle="default-modal" class="cursor-pointer text-blue-600 dark:text-blue-500 hover:underline">Aviso de privacidad</a>.
+      </label>
+    </div>
+    <div class="flex items-center">
+      <div class="checkbox-wrapper-19">
+        <input type="checkbox" id="date" (change)="onTermsChecked($event, 'date')"/>
+        <label for="date" class="check-box"></label>
+      </div>
+      <label for="date" class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">
+        Agendar Cita para asistir a Ventanilla Única.
+      </label>
+    </div>
+
+    <button
+      (click)="submit()"
+      type="button"
+      class="btn-primary"
+    >
+      Guardar
+    </button>
+
+    <button
+      (click)="resetForms()"
+      type="button"
+      class="ml-2 btn-light"
+    >
+      Limpiar formulario
+    </button>
+  }
+</div>
+<div id="default-modal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+  <div class="relative p-4 w-full max-w-2xl max-h-full">
+      <!-- Modal content -->
+      <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+          <!-- Modal header -->
+          <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
+              <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+                  Aviso de privacidad
+              </h3>
+              <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-hide="default-modal">
+                  <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                      <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                  </svg>
+                  <span class="sr-only">Close modal</span>
+              </button>
+          </div>
+          <!-- Modal body -->
+          <div class="p-4 md:p-5 space-y-4">
+            <h4><strong>AVISO DE PRIVACIDAD SIMPLIFICADO CON CONSENTIMIENTO</strong></h4>
+            <br>
+            <strong>Registro y Aprovechamiento en</strong>
+            <br>
+            <strong>Unidades de Manejo para la Conservación,</strong>
+            <br>
+            <strong>Manejo y Aprovechamiento de la Vida Silvestre.</strong>
+            <p>
+              <br>
+              La Subdirección de Vida Silvestre, de la Secretaría de Medio Ambiente del
+              Estado de Coahuila de Zaragoza que resguarda la información proporcionada por usted, utilizará los datos personales requeridos en su solicitud y
+              aquí recabados para mantener actualizada la base de datos perteneciente al sistema de Unidades de Manejo para la Conservación y Aprovechamiento
+              de la Vida Silvestre en el estado de Coahuila de Zaragoza y la expedición de oficios relativos a autorizaciones, modificaciones, expedición de
+              cintillos de cobro cinegético, oficios y comunicados relativos a la conservación, manejo y aprovechamiento de la vida silvestre y su información
+              será compartida con fines estadísticos, de información y de investigación con las dependencias e instituciones involucradas con la conservación
+              de la vida silvestre, sin incluir datos de nombre, domicilio y teléfono.
+            </p>
+            <p>
+              <br>
+              Usted cuenta con la posibilidad de ejercer los derechos de Acceso,
+              Rectificación, Cancelación y Oposición, una vez que haya otorgado su consentimiento para el tratamiento de los mismos, y se encuentren en poder
+              de esta dependencia pública. Asimismo, usted puede consultar nuestro aviso de privacidad integral en la página Web de la Secretaría de Medio
+              Ambiente del Estado de Coahuila de Zaragoza. (www.sma.gob.mx)
+            </p>
+            <p>
+              <br>
+              Con fundamento en el artículo 18 de la Ley de Protección de Datos Personales
+              en Posesión de Sujetos Obligados del Estado de Coahuila de Zaragoza, indico que en las condiciones descritas anteriormente SI OTORGO el
+              consentimiento a la Secretaría de Medio Ambiente del Estado de Coahuila de Zaragoza para el tratamiento de mis datos personales, en todo
+              tramite relativo a la conservación, manejo y aprovechamiento de la vida silvestre correspondiente al predio del cual soy titular, a partir
+              de la fecha para la presente temporada y subsecuentes, hasta que no emita mi posición en contrario
+            </p>
+          </div>
+      </div>
+  </div>
 </div>

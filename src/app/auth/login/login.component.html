@@ -1,105 +1,91 @@
-<!-- component -->
-<div class="bg-gray-100 flex justify-center items-center min-h-screen">
-  <div class="bg-white shadow-md rounded-lg overflow-hidden flex flex-col lg:flex-row max-w-4xl w-full mx-4 h-3/4 lg:h-auto m-5">
-    <!-- Right: Login Form -->
-    <div class="p-8 w-full lg:w-1/2 flex flex-col justify-center">
-      <div class=" w-full flex flex-col justify-center items-center">
-        <img class="text-center" src="assets/img/logo-sma.png" width="80%" alt="">
-      </div>
-      <h1 class="text-2xl font-semibold mb-4 text-center">Portal ecología</h1>
-      <form [formGroup]="loginForm" (ngSubmit)="onSubmitLoginForm()">
-        <h3 class="text-2xl ">Inicia sesión con tu cuenta</h3>
-        <!-- Username Input -->
-        <div class="mb-4">
-          <label for="username" class="block text-gray-600">Correo electrónico</label>
-          <input
-            type="email"
-            formControlName="email"
-            class="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
-            [class.border-red-500]="(
-              (loginForm.hasError('email', 'email') || loginForm.hasError('required', 'email')) && loginForm.controls['email'].touched
-            )"
-            autocomplete="off"
-            required
+<!-- source:https://codepen.io/owaiswiz/pen/jOPvEPB -->
+<div class="min-h-screen bg-gray-100 text-gray-900 flex justify-center items-center">
+  <div class="max-w-screen-xl m-0 sm:m-10 bg-white shadow sm:rounded-lg flex justify-center flex-1">
+      <div class="lg:w-1/2 xl:w-5/12 p-6 sm:p-12">
+        <div class=" w-full flex flex-col justify-center items-center">
+          <img class="text-center" src="assets/img/logo-sma.png" width="80%" alt="">
+        </div>
+          <div class="mt-12 flex flex-col items-center">
+            <h1 class="text-2xl xl:text-3xl font-extrabold">
+              Inicia sesión
+            </h1>
 
-          >
-            @if (
-              (loginForm.hasError('required', 'email')) && loginForm.controls['email'].touched
-            ) {
-              <div
-                class="text-sm text-red-500"
-              >
-                <p>Este campo es requerido.</p>
+            <form [formGroup]="loginForm" (ngSubmit)="onSubmitLoginForm()">
+              <div class="w-full flex-1 mt-8">
+                <div class="">
+                  <input
+                    type="email"
+                    id="email"
+                    formControlName="email"
+                    class="w-full px-8 py-4 rounded-lg font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
+                    placeholder="Correo electrónico"
+                    [class.border-red-500]="(
+                      (loginForm.hasError('email', 'email') || loginForm.hasError('required', 'email')) && loginForm.controls['email'].touched
+                    )"
+                  />
+                    @if (
+                      (loginForm.hasError('required', 'email')) && loginForm.controls['email'].touched
+                    ) {
+                      <span class="w-full text-sm text-red-500">Este campo es requerido.</span>
+                    }
+                    @if (
+                      (loginForm.hasError('email', 'email')) && loginForm.controls['email'].touched
+                    ) {
+                      <span class="w-full text-sm text-red-500">Ingrese un correo válido.</span>
+                    }
+                    <input
+                      type="password"
+                      formControlName="password"
+                      class="w-full px-8 py-4 rounded-lg font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white mt-5"
+                      placeholder="Contraseña"
+                      [class.border-red-500]="(
+                        loginForm.hasError('required', 'password') && loginForm.controls['password'].touched
+                      )"
+                    />
+                    @if (loginForm.hasError('required', 'password') && loginForm.controls['password'].touched) {
+                      <div
+                        class="text-sm text-red-500"
+                      >
+                        <p>Este campo es requerido.</p>
+                      </div>
+                    }
+                    <button
+                      class="disabled:bg-slate-400 mt-5 tracking-wide font-semibold bg-indigo-500 text-gray-100 w-full py-4 rounded-lg hover:bg-indigo-700 transition-all duration-300 ease-in-out flex items-center justify-center focus:shadow-outline focus:outline-none"
+                      [disabled]="loginForm.invalid"
+                    >
+                      <span class="ml-3">
+                          Ingresar
+                      </span>
+                    </button>
+                    <div class="text-center">
+                      <a
+                        class="mt-5 inline-block text-md text-blue-500 dark:text-blue-500 align-baseline hover:text-blue-800 cursor-pointer"
+                        (click)="showRecoverPasswordDialog = true"
+                      >
+                        ¿Olvidaste tu contraseña?
+                      </a>
+                    </div>
+                    <div class="mt-6 text-black text-center flex flex-row justify-center items-center w-full p-0 gap-x-4">
+                      <a>¿No tienes cuenta?</a>
+                      <button
+                        type="button"
+                        class="w-1/2 tracking-wide font-semibold bg-indigo-500 text-gray-100 py-2 rounded-lg hover:bg-indigo-700 transition-all duration-300 ease-in-out focus:shadow-outline focus:outline-none"
+                        (click)="showCreateAccountDialog = true"
+                      >
+                        Crear cuenta
+                      </button>
+                    </div>
+
+                </div>
               </div>
-            }
-            @if (
-              (loginForm.hasError('email', 'email')) && loginForm.controls['email'].touched
-            ) {
-              <div
-                class="text-sm text-red-500"
-              >
-                <p>Ingrese un correo válido.</p>
-              </div>
-            }
+            </form>
         </div>
-        <!-- Password Input -->
-        <div class="mb-4">
-          <label for="password" class="block text-gray-600">Contraseña</label>
-          <input
-            type="password"
-            formControlName="password"
-            class="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
-            [class.border-red-500]="(
-              loginForm.hasError('required', 'password') && loginForm.controls['password'].touched
-            )"
-            autocomplete="off"
-          >
-          @if (loginForm.hasError('required', 'password') && loginForm.controls['password'].touched) {
-            <div
-              class="text-sm text-red-500"
-            >
-              <p>Este campo es requerido.</p>
-            </div>
-          }
-        </div>
-        <!-- Login Button -->
-        <button
-          type="submit"
-          class="disabled:bg-slate-400  text-white font-semibold rounded-md py-2 px-4 w-full mb-3"
-          [class.bg-custom-gradient]="loginForm.valid"
-          [disabled]="loginForm.invalid"
-        >
-          Ingresar
-        </button>
-        <button
-          type="button"
-          class="transition duration-750 hover:bg-custom-hover hover:text-white border border-gray-500 text-black font-semibold rounded-md py-2 px-4 w-full"
-          (click)="showRecoverPasswordDialog = true"
-        >
-          ¿Olvidaste tu contraseña?
-        </button>
-      </form>
-      <!-- Sign up Link -->
-      <div class="mt-6 text-black text-center flex flex-row justify-evenly items-center w-full p-0 gap-x-4">
-        <a>¿No tienes cuenta?</a>
-        <button
-          type="button"
-          class="bg-custom-gradient text-white font-semibold rounded-md py-2 px-4 w-1/2"
-          (click)="showCreateAccountDialog = true"
-        >
-          Crear cuenta
-        </button>
       </div>
-    </div>
-    <!-- Left: Image -->
-    <div class="lg:w-1/2 lg:block bg-custom-gradient flex flex-col justify-start items-start p-12">
-      <div class="text-white px-3 py-4 p-md-5 mx-md-4">
-        <h2 class="text-2xl font-bold">Secretaría de Medio Ambiente</h2>
-        <h2 >
-          La Subdirección de Vida Silvestre, de la Secretaría de Medio Ambiente del Estado de Coahuila de Zaragoza , utilizará los datos personales requeridos en su solicitud y aquí recabados para mantener actualizada la base de datos perteneciente al sistema de Unidades de Manejo para la Conservación y Aprovechamiento de la Vida Silvestre en el estado y la expedición de oficios relativos a autorizaciones, modificaciones, expedición de cintillos de cobro cinegético, oficios relativos a la conservación, manejo y aprovechamiento de la vida silvestre.
-        </h2>
+      <div class="flex-1 bg-indigo-100 text-center hidden lg:flex">
+          <div class="m-12 xl:m-16 w-full bg-contain bg-center bg-no-repeat"
+              style="background-image: url('https://invence.com.mx/portal-sma/public/login_image.svg')">
+          </div>
       </div>
-    </div>
   </div>
 </div>
 

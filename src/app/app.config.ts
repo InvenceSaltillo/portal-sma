@@ -9,6 +9,7 @@ import { HttpClientModule, provideHttpClient, withFetch, withInterceptors } from
 import { provideToastr } from 'ngx-toastr';
 import { authInterceptor } from './auth.interceptor';
 import { NgxTippyModule } from 'ngx-tippy-wrapper';
+import { provideEnvironmentNgxMask } from 'ngx-mask';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -17,7 +18,7 @@ export const appConfig: ApplicationConfig = {
       withViewTransitions(),
     ),
     provideClientHydration(),
-    importProvidersFrom(NgxSpinnerModule.forRoot({ type: 'timer' })),
+    importProvidersFrom(NgxSpinnerModule.forRoot({ type: 'ball-scale' })),
     provideAnimations(),
     provideHttpClient(
       withFetch(),
@@ -30,5 +31,6 @@ export const appConfig: ApplicationConfig = {
       NgxTippyModule,
     ),
     provideToastr(),
+    provideEnvironmentNgxMask(),
   ]
 };
