@@ -2,6 +2,7 @@ import { ValidatorFn } from '@angular/forms';
 import { Popover } from './popover.interface';
 
 export interface FormControlConfig {
+  id?: string;
   name: string;
   label: string;
   type: FormControlType;
@@ -11,9 +12,12 @@ export interface FormControlConfig {
   select_options?: SelectInputTypeOptions[];
   popover?: Popover;
   placeholder?: string;
+  extra_title?: string;
   input_mask?: string;
   file_button_text?: string;
   file_input_accept?: string;
+  helper_text?: string;
+  is_search_input?: boolean;
   index?: number;
 }
 
@@ -31,6 +35,8 @@ export enum FormControlType {
   SELECT = 'select',
   DATE = 'date',
   FILE = 'file',
+  TEXTAREA = 'textarea',
+  GRID = 'grid',
 }
 
 export interface SelectInputTypeOptions {

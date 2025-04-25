@@ -83,27 +83,30 @@
           <div class="accordion-menu">
 
             @if(formSection.has_checkbox) {
-              <div class="flex items-center mb-4 ml-3">
-                <input
-                  id="checkbox- {{formSection.id}}"
-                  type="checkbox"
-                  [value]="formSection.id"
-                  (change)="onCheckboxChange($event, formSection.id)"
-                  class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                >
-                <label
-                  for="checkbox- {{formSection.id}}"
-                  class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
-                >
-                  {{formSection.checkbox_label}}
-                </label>
-              </div>
+              <form [formGroup]="enableSectionCheckboxForm!">
+                <div class="flex items-center mb-4 ml-3">
+                  <div class="checkbox-wrapper-19 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      id="checkbox-{{formSection.id}}"
+                      [value]="formSection.id"
+                      (change)="onCheckboxChange($event, formSection.id, 'checkbox')"
+                      formControlName="check"
+                    />
+                    <label for="checkbox-{{formSection.id}}" class="check-box"></label>
+                  </div>
+                  <label for="checkbox-{{formSection.id}}" class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300 cursor-pointer">
+                    {{formSection.checkbox_label}}
+                  </label>
+                </div>
+              </form>
             }
             <ul>
                 <li>
                     <input
                       type="checkbox"
                       [checked]="!formSection.has_checkbox ? !formSection.expanded : (selectedOption !== formSection.id)"
+                      (change)="onCheckboxChange($event, formSection.id, 'menu')"
                     >
                     <i class="arrow after:bg-indigo-500 before:bg-indigo-500"></i>
                     <div class="flex items-start space-x-4">
@@ -141,10 +144,12 @@
                     @for (control of formSection.form_controls; track $index) {
 
                       <div class="mb-4">
-                        <div class="flex items-center space-x-1">
-                          @if (!formSection.text_alert) {
-                            <label [for]="control.name" class="block text-black text-base">{{control.label}}</label>
-                          }
+                        @if (control.name ==='controlledSpecies') {
+                          <h3 class="text-xl font-bold">{{ control.extra_title }}</h3>
+                          <div class="flex items-center space-x-1">
+                            @if (!formSection.text_alert) {
+                              <label [for]="control.name" class="block text-black text-base">{{control.label}}</label>
+                            }
                             @if (control.popover && showPopovers) {
                               <app-popover-icon
                                 [position]="control.popover.position"
@@ -153,7 +158,22 @@
                                 [text]="control.popover.text"
                               ></app-popover-icon>
                             }
-                        </div>
+                          </div>
+                        } @else {
+                          <div class="flex items-center space-x-1">
+                            @if (!formSection.text_alert) {
+                              <label [for]="control.name" class="block text-black text-base">{{control.label}}</label>
+                            }
+                              @if (control.popover && showPopovers) {
+                                <app-popover-icon
+                                  [position]="control.popover.position"
+                                  [title]="control.popover.title"
+                                  [id]="control.popover.id"
+                                  [text]="control.popover.text"
+                                ></app-popover-icon>
+                              }
+                          </div>
+                        }
 
                         @switch (control.type) {
                           @case (FormControlType.FILE) {
@@ -175,18 +195,20 @@
 
                                   <button
                                     type="button"
-                                    (click)="openFileSelectors(control.index!)"
+                                    (click)="openFileInput(control.id!)"
                                     class="inline-flex items-center text-sm tracking-wide font-semibold bg-indigo-500 text-gray-100 py-2 px-5 rounded-lg hover:bg-indigo-700 transition-all duration-300 ease-in-out focus:shadow-outline focus:outline-none"
                                   >
-                                    <svg class="w-6 h-6 text-white dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                                      <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 17v-5h1.5a1.5 1.5 0 1 1 0 3H5m12 2v-5h2m-2 3h2M5 10V7.914a1 1 0 0 1 .293-.707l3.914-3.914A1 1 0 0 1 9.914 3H18a1 1 0 0 1 1 1v6M5 19v1a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-1M10 3v4a1 1 0 0 1-1 1H5m6 4v5h1.375A1.627 1.627 0 0 0 14 15.375v-1.75A1.627 1.627 0 0 0 12.375 12H11Z"/>
-                                    </svg>
+                                    @if (control.file_input_accept === '.pdf') {
+                                      <svg class="w-6 h-6 text-white dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 17v-5h1.5a1.5 1.5 0 1 1 0 3H5m12 2v-5h2m-2 3h2M5 10V7.914a1 1 0 0 1 .293-.707l3.914-3.914A1 1 0 0 1 9.914 3H18a1 1 0 0 1 1 1v6M5 19v1a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-1M10 3v4a1 1 0 0 1-1 1H5m6 4v5h1.375A1.627 1.627 0 0 0 14 15.375v-1.75A1.627 1.627 0 0 0 12.375 12H11Z"/>
+                                      </svg>
+                                    }
                                     {{control.file_button_text}}
                                   </button>
 
                                   <input
                                     type="file"
-                                    #fileInput
+                                    [id]="'fileInput' + control.id"
                                     (change)="onFileSelected($event, control.name)"
                                     style="display: none;"
                                     [accept]="control.file_input_accept"
@@ -201,13 +223,48 @@
                             }
                           }
                           @case (FormControlType.TEXT) {
-                            <input
-                              [type]="control.type"
+                            @if (control.is_search_input) {
+
+                              <div class="flex">
+                                <div class="relative w-full">
+                                    <input
+                                      type="search"
+                                      [formControlName]="control.name"
+                                      class="block p-2.5 w-full z-20 text-sm text-gray-900 bg-gray-50 rounded-lg border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:border-blue-500"
+                                      placeholder="Buscar"
+                                    />
+                                    <button
+                                      type="button"
+                                      (click)="search(control.name)"
+                                      class="absolute top-0 end-0 p-2.5 h-full text-sm font-medium text-white  bg-indigo-500 rounded-e-lg border border-blue-700 hover:bg-indigo-700 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 transition-all duration-300 ease-in-out"
+                                    >
+                                      <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
+                                      </svg>
+                                    </button>
+                                </div>
+                              </div>
+
+
+                            } @else {
+                              <input
+                                [type]="control.type"
+                                [formControlName]="control.name"
+                                [mask]="control.input_mask"
+                                class="text-base w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
+                                autocomplete="off"
+                              />
+                            }
+                          }
+
+                          @case (FormControlType.TEXTAREA) {
+                            <textarea
                               [formControlName]="control.name"
-                              [mask]="control.input_mask"
-                              class="text-base w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
-                              autocomplete="off"
-                            />
+                              rows="4"
+                              class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                              placeholder="">
+                            </textarea>
+
                           }
 
                           @case (FormControlType.EMAIL) {
@@ -229,18 +286,123 @@
                           }
 
                           @case (FormControlType.SELECT) {
-                            <select
-                              [formControlName]="control.name"
-                              class="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
-                              autocomplete="off"
-                            >
-                            @if (control.placeholder) {
-                              <option value="">{{control.placeholder}}</option>
+
+                            @if (control.name ==='controlledSpecies') {
+                              <div class="flex">
+                                <select
+                                  [formControlName]="control.name"
+                                  class="w-full border mr-3 border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
+                                  autocomplete="off"
+                                >
+                                  @if (control.placeholder) {
+                                    <option value="">{{control.placeholder}}</option>
+                                  }
+                                  @for (option of control.select_options; track $index) {
+                                    <option [value]="option.value">{{option.label}}</option>
+                                  }
+                                </select>
+                                <button
+                                  (click)="addSpecie(control.name)"
+                                  type="button"
+                                  class="btn-primary"
+                                >
+                                  Agregar
+                                </button>
+                              </div>
+
+                              @if (speciesSelected.length > 0) {
+                                <div class="relative overflow-x-auto mt-4">
+                                  <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                                      <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                                          <tr>
+                                              <th scope="col" class="px-6">
+                                                  Nombre común
+                                              </th>
+                                              <th scope="col" class="px-6">
+                                                  Nombre científico
+                                              </th>
+                                              <th scope="col" class="px-6">
+
+                                              </th>
+                                          </tr>
+                                      </thead>
+                                      <tbody>
+                                        @for (specie of speciesSelected; track $index) {
+                                          <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                                              <th scope="row" class="px-6 font-bold text-gray-900 whitespace-nowrap dark:text-white">
+                                                  {{specie.commonName}}
+                                              </th>
+                                              <td class="px-6 font-bold">
+                                                  {{specie.scientistName}}
+                                              </td>
+                                              <td class="px-6 flex justify-end p-2">
+                                                <button
+                                                  (click)="removeSpecie(specie.id)"
+                                                  type="button"
+                                                  class="text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center me-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800"
+                                                >
+                                                  <svg class="w-6 h-6 text-white dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 7h14m-9 3v8m4-8v8M10 3h4a1 1 0 0 1 1 1v3H9V4a1 1 0 0 1 1-1ZM6 7h12v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7Z"/>
+                                                  </svg>
+                                                  <span class="sr-only">Icon description</span>
+                                                </button>
+                                              </td>
+                                          </tr>
+                                        }
+                                      </tbody>
+                                  </table>
+                                </div>
+                              }
+
+                            } @else if (control.name ==='speciesUtilization') {
+                              <div class="flex">
+                                <select
+                                  [formControlName]="control.name"
+                                  class="w-full border mr-3 border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
+                                  autocomplete="off"
+                                >
+                                  @if (control.placeholder) {
+                                    <option value="">{{control.placeholder}}</option>
+                                  }
+                                  @for (option of control.select_options; track $index) {
+                                    <option [value]="option.value">{{option.label}}</option>
+                                  }
+                                </select>
+                              </div>
+                              <div class="mt-3">
+                                <button
+                                  type="button"
+                                  class="btn-primary"
+                                  (click)="addSpecie(control.name, formSection)"
+                                >
+                                  Agregar
+                                </button>
+                                <button
+                                  type="button"
+                                  class="btn-primary ml-2"
+                                  (click)="speciesSelectedButton.click()"
+                                  [disabled]="speciesSelected.length === 0"
+                                  [ngClass]="{'cursor-not-allowed': speciesSelected.length === 0}"
+                                >
+                                  Ver especies
+                                </button>
+                              </div>
+
+
+                            } @else {
+                              <select
+                                [formControlName]="control.name"
+                                class="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
+                                autocomplete="off"
+                              >
+                              @if (control.placeholder) {
+                                <option value="">{{control.placeholder}}</option>
+                              }
+                                <ng-container *ngFor="let option of control.select_options">
+                                  <option [value]="option.value">{{option.label}}</option>
+                                </ng-container>
+                              </select>
                             }
-                              <ng-container *ngFor="let option of control.select_options">
-                                <option [value]="option.value">{{option.label}}</option>
-                              </ng-container>
-                            </select>
                           }
 
                           @case (FormControlType.NUMBER) {
@@ -265,6 +427,15 @@
                             </div>
                           }
                         }
+
+                        @if (!!control.helper_text) {
+                          <p
+                            id="helper-text-explanation"
+                            class="mt-2 text-sm text-gray-500 dark:text-gray-400"
+                          >
+                            {{control.helper_text}}
+                          </p>
+                        }
                       </div>
                     }
                     </form>
@@ -286,7 +457,7 @@
       </div>
       <label class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">
         Aceptar los términos de
-        <a data-modal-target="default-modal" data-modal-toggle="default-modal" class="cursor-pointer text-blue-600 dark:text-blue-500 hover:underline">Aviso de privacidad</a>.
+        <a (click)="myButton.click()" class="cursor-pointer text-blue-600 dark:text-blue-500 hover:underline">Aviso de privacidad</a>.
       </label>
     </div>
     <div class="flex items-center">
@@ -316,6 +487,12 @@
     </button>
   }
 </div>
+
+
+<!-- Modal toggle -->
+<button hidden #myButton data-modal-target="default-modal" data-modal-toggle="default-modal" type="button">
+</button>
+
 <div id="default-modal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
   <div class="relative p-4 w-full max-w-2xl max-h-full">
       <!-- Modal content -->
@@ -368,5 +545,107 @@
             </p>
           </div>
       </div>
+  </div>
+</div>
+
+<button hidden #speciesSelectedButton data-modal-target="species-modal" data-modal-toggle="species-modal" type="button">
+</button>
+<div id="species-modal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+  <div class="relative p-4 w-full max-w-4xl max-h-full">
+    <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+      <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
+        <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+          Especies agregadas
+        </h3>
+        <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-hide="species-modal">
+          <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+          </svg>
+          <span class="sr-only">Close modal</span>
+        </button>
+      </div>
+      <div class="p-4 md:p-5 space-y-4">
+
+        @if (speciesSelected.length > 0) {
+          <div class="relative overflow-x-auto mt-4">
+            <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                    <tr>
+                        <th scope="col" class="px-6">
+                          Nombre común
+                        </th>
+                        <th scope="col" class="px-6">
+                          Nombre científico
+                        </th>
+                        <th scope="col" class="px-6">
+                          Descripción
+                        </th>
+                        <th scope="col" class="px-6">
+                          Sistema de marca
+                        </th>
+                        <th scope="col" class="px-6">
+                          Sexo
+                        </th>
+                        <th scope="col" class="px-6">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                  @for (specie of speciesSelected; track $index) {
+                    <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                      <th scope="row" class="px-6 font-bold text-gray-900 whitespace-nowrap dark:text-white">
+                          {{specie.commonName}}
+                      </th>
+                      <td class="px-6 font-bold">
+                          {{specie.scientistName}}
+                      </td>
+                      <td class="px-6 font-bold">
+                          {{specie.speciesUtilizationDescription}}
+                      </td>
+                      <td class="px-6 font-bold">
+                          {{specie.speciesMarkingDescription}}
+                      </td>
+                      <td class="px-6 font-bold">
+                          {{specie.specieGender}}
+                      </td>
+                      <td class="px-6 flex justify-end p-2">
+                        <button
+                          (click)="removeSpecie(specie.id)"
+                          type="button"
+                          class="text-white bg-indigo-700 hover:bg-indigo-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center me-2 dark:bg-indigo-600 dark:hover:bg-indigo-700 dark:focus:ring-red-800"
+                        >
+                          <svg class="w-6 h-6 text-white dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                            <path fill-rule="evenodd" d="M11.32 6.176H5c-1.105 0-2 .949-2 2.118v10.588C3 20.052 3.895 21 5 21h11c1.105 0 2-.948 2-2.118v-7.75l-3.914 4.144A2.46 2.46 0 0 1 12.81 16l-2.681.568c-1.75.37-3.292-1.263-2.942-3.115l.536-2.839c.097-.512.335-.983.684-1.352l2.914-3.086Z" clip-rule="evenodd"/>
+                            <path fill-rule="evenodd" d="M19.846 4.318a2.148 2.148 0 0 0-.437-.692 2.014 2.014 0 0 0-.654-.463 1.92 1.92 0 0 0-1.544 0 2.014 2.014 0 0 0-.654.463l-.546.578 2.852 3.02.546-.579a2.14 2.14 0 0 0 .437-.692 2.244 2.244 0 0 0 0-1.635ZM17.45 8.721 14.597 5.7 9.82 10.76a.54.54 0 0 0-.137.27l-.536 2.84c-.07.37.239.696.588.622l2.682-.567a.492.492 0 0 0 .255-.145l4.778-5.06Z" clip-rule="evenodd"/>
+                          </svg>
+                          <span class="sr-only">Icon description</span>
+                        </button>
+
+                        <button
+                          (click)="removeSpecie(specie.id)"
+                          type="button"
+                          class="text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center me-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800"
+                        >
+                          <svg class="w-6 h-6 text-white dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 7h14m-9 3v8m4-8v8M10 3h4a1 1 0 0 1 1 1v3H9V4a1 1 0 0 1 1-1ZM6 7h12v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7Z"/>
+                          </svg>
+                          <span class="sr-only">Icon description</span>
+                        </button>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          } @else {
+            <h3 class="text-center font-bold">No hay especies que mostrar</h3>
+          }
+      </div>
+      <div class="flex justify-end p-4 md:p-5 border-t border-gray-200 rounded-b dark:border-gray-600">
+        <button
+          data-modal-hide="species-modal"
+          type="button"
+          class="btn-primary">Cerrar</button>
+      </div>
+    </div>
   </div>
 </div>

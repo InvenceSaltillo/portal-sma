@@ -10,7 +10,7 @@ import { ServiceService } from '../../../services/service/service.service';
 import { Service } from '../../../interfaces/service.interface';
 import { ToastrService } from 'ngx-toastr';
 import { Router } from '@angular/router';
-import { Popover } from 'flowbite';
+import { Modal, ModalInterface, Popover } from 'flowbite';
 import { CommonModule } from '@angular/common';
 import { NgxTippyModule, NgxTippyProps } from 'ngx-tippy-wrapper';
 import { NgxSpinnerService } from 'ngx-spinner';
@@ -19,6 +19,7 @@ import { AppUtils } from '../../../app.utils';
 import { MiscService } from '../../../services/misc/misc.service';
 import { FormSection } from '../../../interfaces/form-section.interface';
 import { NgxMaskDirective } from 'ngx-mask';
+import { Specie } from '../../../interfaces/specie.interface';
 
 @Component({
   selector: 'app-request',
@@ -60,6 +61,7 @@ export default class RequestComponent implements OnInit {
   showAccordion = false;
   termsChecked = false;
   dateChecked = false;
+  enableSectionCheckboxForm?: FormGroup;
 
   public tippyPropsContent: NgxTippyProps = {
     placement: 'right',
@@ -68,6 +70,15 @@ export default class RequestComponent implements OnInit {
   selectedOption: string | null = null;
   files: File[] = [];
   showPopovers = true;
+  currentFileInputSelected?: HTMLInputElement;
+  speciesSelected: {
+    id: string,
+    commonName: string,
+    scientistName: string,
+    speciesUtilizationDescription?: string,
+    speciesMarkingDescription?: string,
+    specieGender?: string,
+  }[] = [];
 
   constructor(private cdr: ChangeDetectorRef) {
     effect(() => {
@@ -101,6 +112,10 @@ export default class RequestComponent implements OnInit {
       service: new FormControl('', [Validators.required,]),
     });
 
+    this.enableSectionCheckboxForm = this.formBuilder.group({
+      check: new FormControl(false),
+    });
+
     this.processForm.get('serviceType')?.valueChanges.subscribe(serviceTypeId => {
       if (!serviceTypeId) {
         return;
@@ -111,6 +126,8 @@ export default class RequestComponent implements OnInit {
 
     this.processForm.get('service')?.valueChanges.subscribe(serviceId => {
       if (!serviceId) {
+        console.log('DEBUG: no hay',);
+        this.serviceSelected = undefined;
         return;
       }
       this.dataForm.markAsPristine();
@@ -119,18 +136,98 @@ export default class RequestComponent implements OnInit {
     });
 
     setTimeout(() => {
-      this.processForm.get('serviceType')?.setValue('123e4567-st9b-12d3-a456-426614174000');
+      this.processForm.get('serviceType')?.setValue('123e4567-st9b-12d3-a456-426614174002');
       setTimeout(() => {
-        this.processForm.get('service')?.setValue('123e4567-s89b-12d3-a456-426614174000');
+        this.processForm.get('service')?.setValue('123e4567-s89b-12d3-a456-426614174007');
       }, 500);
     }, 1000);
 
   }
 
-  openFileSelectors(index: number) {
-    const fileInput = this.fileInputs.toArray()[index];
-    console.log('DEBUG: this.fileInputs', this.fileInputs.toArray());
-    fileInput.nativeElement.click();
+  search(controlName: string): void {
+    const value: string | null = this.dataForm.get(controlName)?.value;
+    console.log('DEBUG: search', value);
+
+    if (!!value) {
+    }
+  }
+
+  addSpecie(controlName: string, formSection?: FormSection): void {
+    const dynamicControl = this.dynamicControls.find(control => control.name === controlName);
+
+    if (!!dynamicControl) {
+      const formControlValue = this.dataForm.get(controlName)?.value;
+      if (!!formControlValue) {
+        const specie = dynamicControl.select_options?.find(option => option.value === formControlValue);
+        const commonName = specie?.label.split('-')[0].trim();
+        const scientistName = specie?.label.split('-')[1].trim();
+        const data: any = {
+          speciesUtilizationDescription: null,
+          speciesMarkingDescription: null,
+          specieGender: null,
+        };
+        console.log('DEBUG: addSpecie', commonName, scientistName);
+
+        let formValid = true;
+
+        if (!!formSection) {
+          formSection.form_controls.forEach(control => {
+            const controlValue = this.dataForm.get(control.name)?.value;
+            if (!controlValue) {
+              formValid = false;
+              this.toastr.info(`El campo ${control.label} no puede estar vacío`);
+              return;
+            }
+            data[control.name] = controlValue;
+          });
+        }
+
+        if (!formValid) {
+          return;
+        }
+
+        data['specieGender'] = data['specieGender'] == '1' ? 'Macho' : 'Hembra';
+        console.log('DEBUG: data', data);
+        if (!this.speciesSelected.find(specieObj => specieObj.id === specie?.value)) {
+          this.speciesSelected.push({
+            id: specie?.value!,
+            commonName: commonName!,
+            scientistName: scientistName!,
+            ...data,
+          });
+
+          this.toastr.success('Especie agregada');
+
+          if (!!formSection) {
+            this.dataForm.get('speciesMarkingDescription')?.reset();
+            this.dataForm.get('speciesUtilizationDescription')?.reset();
+            this.dataForm.get('speciesUtilization')?.setValue('');
+          }
+          console.log('DEBUG: this.speciesSelected', this.speciesSelected);
+        }
+      }
+    }
+  }
+
+  removeSpecie(specieId: string): void {
+    this.speciesSelected = this.speciesSelected.filter(specie => specie.id != specieId);
+  }
+
+  toggleModal(): void {
+
+    const $modalElement: HTMLElement | null = document.querySelector('#species-modal');
+    const modal: ModalInterface = new Modal($modalElement, undefined, {
+      id: 'species-modal',
+      override: true
+    });
+
+    console.log('DEBUG: modal.isVisible();', modal.isVisible());
+    modal.toggle();
+  }
+
+  openFileInput(id: string) {
+    this.currentFileInputSelected = document.getElementById('fileInput' + id) as HTMLInputElement;;
+    this.currentFileInputSelected?.click();
   }
 
   onFileSelected(event: any, controlName: string) {
@@ -140,6 +237,7 @@ export default class RequestComponent implements OnInit {
       this.dataForm.patchValue({
         [controlName]: file
       });
+      this.currentFileInputSelected!.value = '';
     }
   }
 
@@ -218,6 +316,7 @@ export default class RequestComponent implements OnInit {
       this.spinnerService.hide();
       this.serviceSelected = result;
       this.formSections = [];
+      this.speciesSelected = [];
       this.formSections = this.serviceSelected.form_sections;
       this.initializePopovers();
       this.showAccordion = true;
@@ -254,13 +353,17 @@ export default class RequestComponent implements OnInit {
   submit(): void {
     this.dataForm.markAllAsTouched();
     console.log('DEBUG: submit', this.dataForm.value);
-    console.log('DEBUG: formcontrols', this.dataForm.controls);
     if (!this.termsChecked) {
       this.toastr.warning(
         'Debe aceptar los términos de Aviso de privacidad',
       );
       return;
     }
+
+    if (this.dataForm.invalid) {
+      return;
+    }
+    console.log('DEBUG: VALIDDDD', );
   }
 
   buildFormGroup(controls: FormControlConfig[]): void {
@@ -292,13 +395,12 @@ export default class RequestComponent implements OnInit {
 
     });
     setTimeout(() => {
-      this.fillDataFake();
+    //   this.fillDataFake();
     }, 1000);
   }
 
   listenControlChanges(controlName: string): void {
 
-    console.log('DEBUG: value', controlName);
     this.dataForm.get(controlName)?.valueChanges.subscribe(value => {
       const newValue = value === 'null' ? undefined : value;
       if (newValue) {
@@ -318,9 +420,8 @@ export default class RequestComponent implements OnInit {
     });
   }
 
-  onCheckboxChange(event: any, formSectionId: string) {
+  onCheckboxChange(event: any, formSectionId: string, from: string) {
     const checked: boolean = event.target.checked;
-    console.log('DEBUG: change', checked, formSectionId);
 
     if (this.selectedOption === formSectionId) {
       this.selectedOption = null; // Desmarca el checkbox si se hace clic en el ya seleccionado
@@ -330,11 +431,20 @@ export default class RequestComponent implements OnInit {
 
     if (formSectionId === '123e4567-fs9b-12d3-a456-426614174007') {
       const formSection = this.formSections.find(section => section.id === '123e4567-fs9b-12d3-a456-426614174007');
-      console.log('DEBUG: formSection', formSection);
-      if (checked) {
-        formSection?.form_controls.forEach(control => this.addRequiredValidator(control.name));
+
+      if (from === 'menu') {
+        this.enableSectionCheckboxForm?.get('check')?.setValue(!checked);
+        if (this.enableSectionCheckboxForm?.get('check')?.value) {
+          formSection?.form_controls.forEach(control => this.addRequiredValidator(control.name));
+        } else {
+          formSection?.form_controls.forEach(control => this.removeValidators(control.name));
+        }
       } else {
-        formSection?.form_controls.forEach(control => this.removeValidators(control.name));
+        if (checked) {
+          formSection?.form_controls.forEach(control => this.addRequiredValidator(control.name));
+        } else {
+          formSection?.form_controls.forEach(control => this.removeValidators(control.name));
+        }
       }
 
     }
@@ -351,7 +461,6 @@ export default class RequestComponent implements OnInit {
   }
 
   getMunicipalitiesByState(stateId: string, suffix: string) {
-    console.log('DEBUG: suffix', suffix);
     this.spinnerService.show();
     this.miscService.getMunicipalitiesByState(stateId)!.subscribe(result => {
       this.spinnerService.hide();
