@@ -129,7 +129,6 @@ export class LoginComponent implements OnInit {
   }
 
   async onSubmitLoginForm() {
-    console.log('DEBUG: formvalue', this.loginForm.value);
     this.loginForm.markAllAsTouched();
     this.spinnerService.show();
 
