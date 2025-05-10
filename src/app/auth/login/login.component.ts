@@ -106,18 +106,26 @@ export class LoginComponent implements OnInit {
   public authService = inject(AuthService);
   public toastr = inject(ToastrService);
   public localStorageService = inject(LocalStorageService);
+  anio = '2025';
 
   ngOnInit() {
     this.loginForm = this.formBuilder.group({
       email: new FormControl(
-        'cesar.riojas@hotmail.com',
+        // 'cesar.riojas@hotmail.com',
+        '',
         [
           Validators.required,
           Validators.email,
         ]
       ),
-      password: new FormControl('HNvuiNQW', [Validators.required,]),
+      password: new FormControl(
+        // 'easZIhn1',
+        '',
+        [Validators.required,]
+      ),
     });
+
+    this.anio = new Date().getFullYear().toString();
   }
 
   async onSubmitLoginForm() {
