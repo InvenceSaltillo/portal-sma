@@ -135,12 +135,12 @@ export default class RequestComponent implements OnInit {
       this.getServiceById(serviceId);
     });
 
-    setTimeout(() => {
-      this.processForm.get('serviceType')?.setValue('123e4567-st9b-12d3-a456-426614174002');
-      setTimeout(() => {
-        this.processForm.get('service')?.setValue('123e4567-s89b-12d3-a456-426614174007');
-      }, 500);
-    }, 1000);
+    // setTimeout(() => {
+    //   this.processForm.get('serviceType')?.setValue('123e4567-st9b-12d3-a456-426614174002');
+    //   setTimeout(() => {
+    //     this.processForm.get('service')?.setValue('123e4567-s89b-12d3-a456-426614174007');
+    //   }, 500);
+    // }, 1000);
 
   }
 

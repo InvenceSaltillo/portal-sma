@@ -31,7 +31,9 @@
               "./node_modules/tippy.js/dist/tippy.css"
             ],
             "scripts": [],
-            "prerender": false
+            "prerender": false,
+            "baseHref": "/portal-sma/",
+            "deployUrl": "/portal-sma/"
           },
           "configurations": {
             "production": {
