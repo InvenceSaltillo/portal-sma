@@ -18,6 +18,8 @@
     "@angular/platform-browser": "^17.3.0",
     "@angular/platform-browser-dynamic": "^17.3.0",
     "@angular/router": "^17.3.0",
+    "@ng-select/ng-select": "^12.0.7",
+    "@supabase/supabase-js": "^2.52.1",
     "flowbite": "^2.4.1",
     "ngx-date-fns": "^11.0.0",
     "ngx-mask": "^18.0.0",

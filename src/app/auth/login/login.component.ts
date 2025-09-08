@@ -119,7 +119,7 @@ export class LoginComponent implements OnInit {
         ]
       ),
       password: new FormControl(
-        'easZIhn1',
+        '12345678',
         // '',
         [Validators.required,]
       ),
@@ -137,24 +137,31 @@ export class LoginComponent implements OnInit {
 
     let loginResponse;
 
-
     try {
-      loginResponse = await this.authService.login(email, password);
+      loginResponse = await this.authService.signIn(email, password);
+
     } catch (error: any) {
-      this.spinnerService.hide();
-      const apiError = error.error.message;
-      this.toastr.error(apiError, '¡Ups!');
+      this.spinnerService.hide();0
+
+      if (error.code === 'invalid_credentials') {
+        this.toastr.error('Credenciales inválidas', '¡Ups!');
+        return;
+
+      }
+      this.toastr.error(error.message, '¡Ups!');
       return;
+    } finally {
+      this.loginForm.reset();
+      this.spinnerService.hide();
     }
 
-    this.spinnerService.hide();
     this.toastr.success(
       `${loginResponse.user.name} ${loginResponse.user.last_names} `,
       'Bienvenid@',
     );
 
     this.localStorageService.setItem('user', JSON.stringify(loginResponse.user));
-    this.localStorageService.setItem('apiToken', loginResponse.token);
+    this.localStorageService.setItem('apiToken', loginResponse.session.access_token);
 
     this.router.navigateByUrl('dashboard');
   }

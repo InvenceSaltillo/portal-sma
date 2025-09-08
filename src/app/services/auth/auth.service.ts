@@ -5,11 +5,22 @@ import { LoginResponse, RegisterResponse } from '../../interfaces/auth.interface
 import { lastValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment.development';
 import { Router } from '@angular/router';
+import { AuthChangeEvent, AuthSession, createClient, Session, SupabaseClient, User } from '@supabase/supabase-js';
+
+
+export interface Profile {
+  id?: string
+  username: string
+  website: string
+  avatar_url: string
+}
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
+  private supabase: SupabaseClient;
+  _session: AuthSession | null = null;
   #state = signal<GlobalState<LoginResponse>>({
     loading: true,
   });
@@ -23,7 +34,77 @@ export class AuthService {
 
   authUrl = `${environment.apiUrl}auth`
 
-  constructor() { }
+  constructor() {
+    this.supabase = createClient(environment.supabaseUrl, environment.supabaseKey);
+  }
+
+
+  async getSession(): Promise<AuthSession | null> {
+    try {
+      const { data } = await this.supabase.auth.getSession();
+      this._session = data.session;
+      return this._session;
+    } catch (error) {
+      console.error('Error getting session:', error);
+      return null;
+    }
+  }
+
+
+  profile(user: User) {
+    return this.supabase
+      .from('profiles')
+      .select(`username, website, avatar_url`)
+      .eq('id', user.id)
+      .single()
+  }
+
+  authChanges(callback: (event: AuthChangeEvent, session: Session | null) => void) {
+    return this.supabase.auth.onAuthStateChange(callback)
+  }
+
+  async signIn(email: string, password: string) {
+    const { data, error } = await this.supabase.auth.signInWithPassword({ email, password });
+
+    if (error) throw error;
+
+    const userId = data.user?.id;
+    if (!userId) throw new Error('No se pudo obtener el UUID del usuario');
+
+    // Espera a que el token esté completamente listo
+    await new Promise(resolve => setTimeout(resolve, 100)); // 100-200ms
+
+    const { data: userData, error: userError } = await this.supabase
+      .from('users')
+      .select('*')
+      .eq('id', userId)
+      .single();
+
+    if (userError) throw userError;
+
+    return { session: data.session, user: userData };
+  }
+
+
+  signOut() {
+    return this.supabase.auth.signOut()
+  }
+
+  updateProfile(profile: Profile) {
+    const update = {
+      ...profile,
+      updated_at: new Date(),
+    }
+    return this.supabase.from('profiles').upsert(update)
+  }
+
+  downLoadImage(path: string) {
+    return this.supabase.storage.from('avatars').download(path)
+  }
+
+  uploadAvatar(filePath: string, file: File) {
+    return this.supabase.storage.from('avatars').upload(filePath, file)
+  }
 
   login(email: string, password: string): Promise<LoginResponse> {
     const response: Promise<LoginResponse> = lastValueFrom(

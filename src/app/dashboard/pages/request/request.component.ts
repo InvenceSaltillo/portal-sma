@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnInit, QueryList, ViewChildren, effect, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, QueryList, ViewChildren, WritableSignal, effect, inject, signal } from '@angular/core';
 import { TitleBarComponent } from '../../../shared/title-bar/title-bar.component';
 import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, ValidatorFn, Validators } from '@angular/forms';
 import { PopoverIconComponent } from '../../../shared/components/popover-icon/popover-icon.component';
@@ -20,6 +20,15 @@ import { MiscService } from '../../../services/misc/misc.service';
 import { FormSection } from '../../../interfaces/form-section.interface';
 import { NgxMaskDirective } from 'ngx-mask';
 import { Specie } from '../../../interfaces/specie.interface';
+import { User } from '../../../interfaces/user.interface';
+import { DynamicFormField } from '../../../interfaces/dynamic-form-field.interface';
+import { DynamicFormFieldComponent } from '../../../shared/components/dynamic-form-field/dynamic-form-field.component';
+import { TooltipComponent } from '../../../shared/components/tooltip/tooltip.component';
+import { SupabaseService } from '../../../services/supabase.service';
+import { GlobalState } from '../../../interfaces/global-state.interface';
+
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
 @Component({
   selector: 'app-request',
@@ -28,12 +37,9 @@ import { Specie } from '../../../interfaces/specie.interface';
     TitleBarComponent,
     ReactiveFormsModule,
     PopoverIconComponent,
-    RequestLocationFormComponent,
-    GeneralDataFormComponent,
-    IndividualEntityFormComponent,
     CommonModule,
     NgxTippyModule,
-    NgxMaskDirective
+    DynamicFormFieldComponent,
   ],
   templateUrl: './request.component.html',
   styleUrl: './request.component.css'
@@ -43,6 +49,7 @@ export default class RequestComponent implements OnInit {
 
   formBuilder = inject(FormBuilder);
   serviceTypeService = inject(ServiceTypeService);
+  supabaseService = inject(SupabaseService);
   serviceService = inject(ServiceService);
   toastr = inject(ToastrService);
   spinnerService = inject(NgxSpinnerService);
@@ -62,6 +69,7 @@ export default class RequestComponent implements OnInit {
   termsChecked = false;
   dateChecked = false;
   enableSectionCheckboxForm?: FormGroup;
+  clientId = '';
 
   public tippyPropsContent: NgxTippyProps = {
     placement: 'right',
@@ -79,6 +87,14 @@ export default class RequestComponent implements OnInit {
     speciesMarkingDescription?: string,
     specieGender?: string,
   }[] = [];
+
+  form: FormGroup = new FormGroup({});
+  formFields: DynamicFormField[] = [];
+  #state: WritableSignal<GlobalState<any>> = signal({
+    loading: false,
+    data: null,
+    error: null
+  });
 
   constructor(private cdr: ChangeDetectorRef) {
     effect(() => {
@@ -105,8 +121,19 @@ export default class RequestComponent implements OnInit {
     });
   }
 
-  ngOnInit() {
-    this.serviceTypeService.getAll();
+  async ngOnInit() {
+
+    this.spinnerService.show();
+    const userString = localStorage.getItem('user');
+
+    if (!userString) {
+      this.router.navigateByUrl('auth/login');
+      return;
+    }
+
+    const user: User = JSON.parse(userString);
+    this.clientId = user.client_id;
+    // const services = await this.serviceService.getByClientId(user.client_id);
     this.processForm = this.formBuilder.group({
       serviceType: new FormControl('', [Validators.required,]),
       service: new FormControl('', [Validators.required,]),
@@ -115,6 +142,9 @@ export default class RequestComponent implements OnInit {
     this.enableSectionCheckboxForm = this.formBuilder.group({
       check: new FormControl(false),
     });
+
+    await this.serviceTypeService.getByClientId(user.client_id);
+    // this.spinnerService.hide();
 
     this.processForm.get('serviceType')?.valueChanges.subscribe(serviceTypeId => {
       if (!serviceTypeId) {
@@ -130,6 +160,7 @@ export default class RequestComponent implements OnInit {
         this.serviceSelected = undefined;
         return;
       }
+      console.log('DEBUG: serviceId', serviceId);
       this.dataForm.markAsPristine();
       this.dataForm.markAsUntouched();
       this.getServiceById(serviceId);
@@ -166,7 +197,6 @@ export default class RequestComponent implements OnInit {
           speciesMarkingDescription: null,
           specieGender: null,
         };
-        console.log('DEBUG: addSpecie', commonName, scientistName);
 
         let formValid = true;
 
@@ -242,7 +272,9 @@ export default class RequestComponent implements OnInit {
   }
 
   getByServiceType(serviceTypeId: string) {
-    this.serviceService.getByServiceType(serviceTypeId);
+    this.spinnerService.show();
+    this.serviceService.getByServiceTypeAndClient(serviceTypeId, this.clientId);
+    this.spinnerService.hide();
   }
 
   fillDataFake(): void {
@@ -306,45 +338,163 @@ export default class RequestComponent implements OnInit {
     this.dataForm.get('signatureImage')?.setValue(file);
   }
 
-  getServiceById(serviceId: string) {
-    this.spinnerService.show();
+  async getServiceById(serviceId: string) {
     this.showPopovers = false;
-    Object.keys(this.dataForm.controls).forEach(key => {
-      this.dataForm.removeControl(key);
-    });
-    this.serviceService.getById(serviceId)!.subscribe(result => {
-      this.spinnerService.hide();
-      this.serviceSelected = result;
-      this.formSections = [];
-      this.speciesSelected = [];
-      this.formSections = this.serviceSelected.form_sections;
-      this.initializePopovers();
-      this.showAccordion = true;
 
-      console.log('DEBUG: this.serviceService', this.serviceSelected);
-      this.dynamicControls = [];
-      this.serviceSelected.form_sections.forEach(section => {
-        section.form_controls.forEach(control => {
-          this.dynamicControls.push(control);
+    const fields = await this.serviceService.getFormFieldsByService(serviceId);
+
+    this.formFields = fields;
+    this.form = this.buildDynamicForm(fields);
+    this.listenToDependentSelects();
+
+    console.log('DEBUG: form', this.form);
+  }
+
+  getSections() {
+    const uniqueSections: {
+      id: string;
+      title: string;
+      description?: string;
+      tooltip_title?: string;
+      tooltip_description?: string,
+      section_id?: string,
+    }[] = [];
+
+    const seen = new Set();
+    for (const field of this.formFields) {
+      if (!seen.has(field.section_id)) {
+        uniqueSections.push({
+          id: field.section_id,
+          title: field.section_title,
+          description: field.section_description,
+          tooltip_title: field.tooltip_title,
+          tooltip_description: field.tooltip_description
         });
-      });
-      this.showPopovers = true;
-      this.buildFormGroup(this.dynamicControls);
-    });
+        seen.add(field.section_id);
+      }
+    }
+
+    return uniqueSections;
   }
 
-  private initializePopovers() {
-    // Espera a que Angular haya renderizado los elementos en el DOM
-    // setTimeout(() => {
-    //   this.serviceSelected!.form_sections.forEach((_, index) => {
-    //     const popoverButton = document.getElementById(`popoverButton${index}`);
-    //     const popoverContent = document.getElementById(`popover${index}`);
-    //     if (popoverButton && popoverContent) {
-    //       new Popover(popoverButton, popoverContent);
-    //     }
-    //   });
-    // });
+  getFieldsBySection(sectionId: string) {
+    return this.formFields.filter(f => f.section_id === sectionId);
   }
+
+  listenToDependentSelects(): void {
+    AppUtils.listenToDependentSelects(
+      this.supabaseService.client,
+      this.form,
+      this.formFields,
+      (loading) => {
+        // actualizar señal local si quieres
+        this.#state.update(s => ({ ...s, loading }));
+
+        // controlar el spinner global
+        if (
+          loading ||
+          this.serviceService.loading() ||
+          this.miscService.loading()
+        ) {
+          this.spinnerService.show();
+        } else {
+          this.spinnerService.hide();
+        }
+      }
+    );
+  }
+
+
+  onSubmit() {
+
+    this.form.markAllAsTouched();
+    if (this.form.invalid) return;
+
+    // objeto anidado por sección
+    const payload = this.form.value;
+
+    console.log('DEBUG: payload', payload);
+
+    // si necesitas plano:
+    // const flat = this.flattenFormForApi(this.form.value);
+  }
+
+  // buildDynamicForm(fields: any[]): FormGroup {
+  //   const group: { [key: string]: FormControl } = {};
+
+  //   for (const field of fields) {
+  //     // Determinar valor inicial
+  //     const initialValue = field.default_value ?? '';
+
+  //     // Definir validaciones
+  //     const validators = [];
+  //     if (field.required) {
+  //       validators.push(Validators.required);
+  //     }
+
+  //     // Los campos tipo file se manejan como null inicialmente
+  //     if (field.type === 'file') {
+  //       group[field.name] = new FormControl(null, validators);
+  //     } else {
+  //       group[field.name] = new FormControl(initialValue, validators);
+  //     }
+  //   }
+
+  //   return new FormGroup(group);
+  // }
+
+  buildDynamicForm(fields: DynamicFormField[]): FormGroup {
+    const root = this.formBuilder.group({});
+    const sectionGroups = new Map<string, FormGroup>();
+
+    for (const f of fields) {
+      // crea el grupo por sección si no existe
+      if (!sectionGroups.has(f.section_id)) {
+        const sg = this.formBuilder.group({});
+        sectionGroups.set(f.section_id, sg);
+        root.addControl(f.section_id, sg);
+      }
+      const sg = sectionGroups.get(f.section_id)!;
+
+      // valor inicial y validadores
+      const initial = f.type === 'file' ? null : (f.default_value ?? '');
+
+      const validators = [];
+
+      if (f.required) validators.push(Validators.required);
+
+      if (f.name === 'email') {
+        validators.push(Validators.email);              // plus a tu pattern
+      }
+      if (f.pattern) {
+        // 👇 des-escapa \\ a \  (por si vino “doble” del JSON/SQL)
+        const normalizedPattern = f.pattern.replace(/\\\\/g, '\\');
+        try {
+          validators.push(Validators.pattern(new RegExp(normalizedPattern)));
+        } catch (e) {
+          console.warn('Regex inválido desde BD:', f.pattern, e);
+        }
+      }
+
+      // agrega el control dentro del grupo de su sección
+      sg.addControl(f.name, new FormControl(initial, validators));
+    }
+
+    return root;
+  }
+
+  getSectionGroup(sectionId: string): FormGroup {
+    return this.form.get(sectionId) as FormGroup;
+  }
+
+  getControl(sectionId: string, fieldName: string): FormControl {
+    return this.form.get([sectionId, fieldName]) as FormControl;
+  }
+
+  setFieldValue(sectionId: string, fieldName: string, value: any): void {
+    this.form.get([sectionId, fieldName])?.setValue(value);
+  }
+
 
   async onSubmitForm(): Promise<void> {
     console.log('DEBUG: processformvalue', this.processForm.value);
@@ -363,7 +513,7 @@ export default class RequestComponent implements OnInit {
     if (this.dataForm.invalid) {
       return;
     }
-    console.log('DEBUG: VALIDDDD', );
+    console.log('DEBUG: VALIDDDD',);
   }
 
   buildFormGroup(controls: FormControlConfig[]): void {
@@ -395,7 +545,7 @@ export default class RequestComponent implements OnInit {
 
     });
     setTimeout(() => {
-    //   this.fillDataFake();
+      //   this.fillDataFake();
     }, 1000);
   }
 

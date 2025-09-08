@@ -73,419 +73,47 @@
     </form>
   </div>
 
-
-  @for (formSection of serviceSelected?.form_sections; track $index) {
-    <div
-      class="text-3xl text-black relative p-3 border border-slate-100 mb-4 rounded-md shadow-md"
-    >
-      <div class="flex items-start space-x-4">
-        @if (formSection.is_active) {
-          <div class="accordion-menu">
-
-            @if(formSection.has_checkbox) {
-              <form [formGroup]="enableSectionCheckboxForm!">
-                <div class="flex items-center mb-4 ml-3">
-                  <div class="checkbox-wrapper-19 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      id="checkbox-{{formSection.id}}"
-                      [value]="formSection.id"
-                      (change)="onCheckboxChange($event, formSection.id, 'checkbox')"
-                      formControlName="check"
-                    />
-                    <label for="checkbox-{{formSection.id}}" class="check-box"></label>
-                  </div>
-                  <label for="checkbox-{{formSection.id}}" class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300 cursor-pointer">
-                    {{formSection.checkbox_label}}
-                  </label>
-                </div>
-              </form>
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-8">
+    <!-- Agrupar campos por sección -->
+    @for (section of getSections(); track section.id) {
+      <!-- ✅ ahora la sección trabaja sobre su nested FormGroup -->
+      <div
+        class="text-3xl text-black relative p-3 border border-slate-100 mb-4 rounded-md shadow-md"
+        [formGroupName]="section.id"
+        [attr.id]="'section-' + section.id"
+      >
+        <div class="mb-4">
+          <h2 class="text-lg font-bold text-gray-800 flex items-center">
+            @if (section.tooltip_title || section.tooltip_description) {
+              <app-popover-icon
+                [id]="'tooltip-' + section.id"
+                [title]="section.tooltip_title || ''"
+                [text]="section.tooltip_description || ''"
+                [position]="'top'">
+              </app-popover-icon>
             }
-            <ul>
-                <li>
-                    <input
-                      type="checkbox"
-                      [checked]="!formSection.has_checkbox ? !formSection.expanded : (selectedOption !== formSection.id)"
-                      (change)="onCheckboxChange($event, formSection.id, 'menu')"
-                    >
-                    <i class="arrow after:bg-indigo-500 before:bg-indigo-500"></i>
-                    <div class="flex items-start space-x-4">
-                      @if (formSection.popover_id) {
-                        <app-popover-icon
-                          [id]="formSection.popover?.id ?? ''"
-                          [title]="formSection.popover?.title ?? ''"
-                          [text]="formSection.popover?.text ?? ''"
-                          [position]="formSection.popover?.position ?? 'top'"
-                          [svgIconPath]="formSection.popover?.icon ?? ''"
-                          class="z-50"
-                        />
-                      }
-                      <h3 class="text-xl font-bold">{{formSection.name}}</h3>
+            {{ section.title }}
+          </h2>
+        </div>
 
-                  </div>
-                  <div class="flex flex-wrap mt-2 accordion-content">
-
-                    @if (!!formSection.text_alert) {
-                      <div class="w-full text-center p-4 mb-4 text-sm text-blue-800 rounded-lg bg-indigo-100 dark:bg-gray-800 dark:text-blue-400" role="alert">
-                        <span class="font-medium">{{formSection.text_alert}}</span>
-                      </div>
-                    }
-                    <form
-                      class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full"
-                      [formGroup]="dataForm"
-                      [ngClass]="{
-                        'lg:grid-cols-1': formSection.columns === 1,
-                        'lg:grid-cols-2': formSection.columns === 2,
-                        'lg:grid-cols-3': formSection.columns === 3,
-                        'lg:grid-cols-4': formSection.columns === 4,
-                        'lg:grid-cols-5': formSection.columns === 5
-                      }"
-                    >
-                    @for (control of formSection.form_controls; track $index) {
-
-                      <div class="mb-4">
-                        @if (control.name ==='controlledSpecies') {
-                          <h3 class="text-xl font-bold">{{ control.extra_title }}</h3>
-                          <div class="flex items-center space-x-1">
-                            @if (!formSection.text_alert) {
-                              <label [for]="control.name" class="block text-black text-base">{{control.label}}</label>
-                            }
-                            @if (control.popover && showPopovers) {
-                              <app-popover-icon
-                                [position]="control.popover.position"
-                                [title]="control.popover.title"
-                                [id]="control.popover.id"
-                                [text]="control.popover.text"
-                              ></app-popover-icon>
-                            }
-                          </div>
-                        } @else {
-                          <div class="flex items-center space-x-1">
-                            @if (!formSection.text_alert) {
-                              <label [for]="control.name" class="block text-black text-base">{{control.label}}</label>
-                            }
-                              @if (control.popover && showPopovers) {
-                                <app-popover-icon
-                                  [position]="control.popover.position"
-                                  [title]="control.popover.title"
-                                  [id]="control.popover.id"
-                                  [text]="control.popover.text"
-                                ></app-popover-icon>
-                              }
-                          </div>
-                        }
-
-                        @switch (control.type) {
-                          @case (FormControlType.FILE) {
-
-                            @if (!!formSection.text_alert) {
-                              <div
-                                class="text-black relative p-3 border border-slate-100 mb-4 rounded-md shadow-md"
-                              >
-                                <div class="text-center flex flex-col">
-                                  <label class="text-black text-base text-bold">{{control.label}}</label>
-                                  <label class="text-black text-sm">{{control.placeholder}}</label>
-                                </div>
-
-                                <div class="text-center mt-4 flex flex-col justify-center items-center">
-
-                                  @if (dataForm.get(control.name)?.value) {
-                                    Archivo seleccionado: <span class="text-bold">{{ dataForm.get(control.name)?.value?.name }}</span>
-                                  }
-
-                                  <button
-                                    type="button"
-                                    (click)="openFileInput(control.id!)"
-                                    class="inline-flex items-center text-sm tracking-wide font-semibold bg-indigo-500 text-gray-100 py-2 px-5 rounded-lg hover:bg-indigo-700 transition-all duration-300 ease-in-out focus:shadow-outline focus:outline-none"
-                                  >
-                                    @if (control.file_input_accept === '.pdf') {
-                                      <svg class="w-6 h-6 text-white dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 17v-5h1.5a1.5 1.5 0 1 1 0 3H5m12 2v-5h2m-2 3h2M5 10V7.914a1 1 0 0 1 .293-.707l3.914-3.914A1 1 0 0 1 9.914 3H18a1 1 0 0 1 1 1v6M5 19v1a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-1M10 3v4a1 1 0 0 1-1 1H5m6 4v5h1.375A1.627 1.627 0 0 0 14 15.375v-1.75A1.627 1.627 0 0 0 12.375 12H11Z"/>
-                                      </svg>
-                                    }
-                                    {{control.file_button_text}}
-                                  </button>
-
-                                  <input
-                                    type="file"
-                                    [id]="'fileInput' + control.id"
-                                    (change)="onFileSelected($event, control.name)"
-                                    style="display: none;"
-                                    [accept]="control.file_input_accept"
-                                  />
-                                  @if (dataForm.hasError('required', control.name) && dataForm.controls[control.name].touched) {
-                                    <div class="text-sm text-red-500">
-                                      <p>Este campo es requerido.</p>
-                                    </div>
-                                  }
-                                </div>
-                              </div>
-                            }
-                          }
-                          @case (FormControlType.TEXT) {
-                            @if (control.is_search_input) {
-
-                              <div class="flex">
-                                <div class="relative w-full">
-                                    <input
-                                      type="search"
-                                      [formControlName]="control.name"
-                                      class="block p-2.5 w-full z-20 text-sm text-gray-900 bg-gray-50 rounded-lg border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:border-blue-500"
-                                      placeholder="Buscar"
-                                    />
-                                    <button
-                                      type="button"
-                                      (click)="search(control.name)"
-                                      class="absolute top-0 end-0 p-2.5 h-full text-sm font-medium text-white  bg-indigo-500 rounded-e-lg border border-blue-700 hover:bg-indigo-700 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 transition-all duration-300 ease-in-out"
-                                    >
-                                      <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
-                                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
-                                      </svg>
-                                    </button>
-                                </div>
-                              </div>
-
-
-                            } @else {
-                              <input
-                                [type]="control.type"
-                                [formControlName]="control.name"
-                                [mask]="control.input_mask"
-                                class="text-base w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
-                                autocomplete="off"
-                              />
-                            }
-                          }
-
-                          @case (FormControlType.TEXTAREA) {
-                            <textarea
-                              [formControlName]="control.name"
-                              rows="4"
-                              class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                              placeholder="">
-                            </textarea>
-
-                          }
-
-                          @case (FormControlType.EMAIL) {
-                            <input
-                              [type]="control.type"
-                              [formControlName]="control.name"
-                              class="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
-                              autocomplete="off"
-                            />
-                          }
-
-                          @case (FormControlType.DATE) {
-                            <input
-                              [type]="control.type"
-                              [formControlName]="control.name"
-                              class="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
-                              autocomplete="off"
-                            />
-                          }
-
-                          @case (FormControlType.SELECT) {
-
-                            @if (control.name ==='controlledSpecies') {
-                              <div class="flex">
-                                <select
-                                  [formControlName]="control.name"
-                                  class="w-full border mr-3 border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
-                                  autocomplete="off"
-                                >
-                                  @if (control.placeholder) {
-                                    <option value="">{{control.placeholder}}</option>
-                                  }
-                                  @for (option of control.select_options; track $index) {
-                                    <option [value]="option.value">{{option.label}}</option>
-                                  }
-                                </select>
-                                <button
-                                  (click)="addSpecie(control.name)"
-                                  type="button"
-                                  class="btn-primary"
-                                >
-                                  Agregar
-                                </button>
-                              </div>
-
-                              @if (speciesSelected.length > 0) {
-                                <div class="relative overflow-x-auto mt-4">
-                                  <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-                                      <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-                                          <tr>
-                                              <th scope="col" class="px-6">
-                                                  Nombre común
-                                              </th>
-                                              <th scope="col" class="px-6">
-                                                  Nombre científico
-                                              </th>
-                                              <th scope="col" class="px-6">
-
-                                              </th>
-                                          </tr>
-                                      </thead>
-                                      <tbody>
-                                        @for (specie of speciesSelected; track $index) {
-                                          <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-                                              <th scope="row" class="px-6 font-bold text-gray-900 whitespace-nowrap dark:text-white">
-                                                  {{specie.commonName}}
-                                              </th>
-                                              <td class="px-6 font-bold">
-                                                  {{specie.scientistName}}
-                                              </td>
-                                              <td class="px-6 flex justify-end p-2">
-                                                <button
-                                                  (click)="removeSpecie(specie.id)"
-                                                  type="button"
-                                                  class="text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center me-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800"
-                                                >
-                                                  <svg class="w-6 h-6 text-white dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 7h14m-9 3v8m4-8v8M10 3h4a1 1 0 0 1 1 1v3H9V4a1 1 0 0 1 1-1ZM6 7h12v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7Z"/>
-                                                  </svg>
-                                                  <span class="sr-only">Icon description</span>
-                                                </button>
-                                              </td>
-                                          </tr>
-                                        }
-                                      </tbody>
-                                  </table>
-                                </div>
-                              }
-
-                            } @else if (control.name ==='speciesUtilization') {
-                              <div class="flex">
-                                <select
-                                  [formControlName]="control.name"
-                                  class="w-full border mr-3 border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
-                                  autocomplete="off"
-                                >
-                                  @if (control.placeholder) {
-                                    <option value="">{{control.placeholder}}</option>
-                                  }
-                                  @for (option of control.select_options; track $index) {
-                                    <option [value]="option.value">{{option.label}}</option>
-                                  }
-                                </select>
-                              </div>
-                              <div class="mt-3">
-                                <button
-                                  type="button"
-                                  class="btn-primary"
-                                  (click)="addSpecie(control.name, formSection)"
-                                >
-                                  Agregar
-                                </button>
-                                <button
-                                  type="button"
-                                  class="btn-primary ml-2"
-                                  (click)="speciesSelectedButton.click()"
-                                  [disabled]="speciesSelected.length === 0"
-                                  [ngClass]="{'cursor-not-allowed': speciesSelected.length === 0}"
-                                >
-                                  Ver especies
-                                </button>
-                              </div>
-
-
-                            } @else {
-                              <select
-                                [formControlName]="control.name"
-                                class="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
-                                autocomplete="off"
-                              >
-                              @if (control.placeholder) {
-                                <option value="">{{control.placeholder}}</option>
-                              }
-                                <ng-container *ngFor="let option of control.select_options">
-                                  <option [value]="option.value">{{option.label}}</option>
-                                </ng-container>
-                              </select>
-                            }
-                          }
-
-                          @case (FormControlType.NUMBER) {
-                            <input
-                              [type]="control.type"
-                              [formControlName]="control.name"
-                              class="text-base w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
-                              autocomplete="off"
-                            />
-                          }
-                        }
-
-                        @if (!formSection.text_alert) {
-                          @if (dataForm.hasError('required', control.name) && dataForm.controls[control.name].touched) {
-                            <div class="text-sm text-red-500">
-                              <p>Este campo es requerido.</p>
-                            </div>
-                          }
-                          @if (dataForm.hasError('email', control.name) && dataForm.controls[control.name].touched) {
-                            <div class="text-sm text-red-500">
-                              <p>Ingrese un correo válido.</p>
-                            </div>
-                          }
-                        }
-
-                        @if (!!control.helper_text) {
-                          <p
-                            id="helper-text-explanation"
-                            class="mt-2 text-sm text-gray-500 dark:text-gray-400"
-                          >
-                            {{control.helper_text}}
-                          </p>
-                        }
-                      </div>
-                    }
-                    </form>
-                  </div>
-                </li>
-            </ul>
-          </div>
-        }
+        <!-- Renderizar los campos de esta sección -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          @for (field of getFieldsBySection(section.id); track $index) {
+            <ng-container>
+              <!-- ✅ pasar el nested group de la sección -->
+              <app-dynamic-form-field
+                [field]="field"
+                [formGroup]="getSectionGroup(section.id)"
+                [appendToSelector]="'#section-' + section.id"
+              >
+              </app-dynamic-form-field>
+            </ng-container>
+          }
+        </div>
       </div>
-    </div>
-  }
+    }
+  </form>
 
-  @if (!!serviceSelected) {
-
-    <div class="flex items-center">
-      <div class="checkbox-wrapper-19">
-        <input type="checkbox" checked id="terms" (change)="onTermsChecked($event, 'terms')"/>
-        <label for="terms" class="check-box"></label>
-      </div>
-      <label class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">
-        Aceptar los términos de
-        <a (click)="myButton.click()" class="cursor-pointer text-blue-600 dark:text-blue-500 hover:underline">Aviso de privacidad</a>.
-      </label>
-    </div>
-    <div class="flex items-center">
-      <div class="checkbox-wrapper-19">
-        <input type="checkbox" id="date" (change)="onTermsChecked($event, 'date')"/>
-        <label for="date" class="check-box"></label>
-      </div>
-      <label for="date" class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">
-        Agendar Cita para asistir a Ventanilla Única.
-      </label>
-    </div>
-
-    <button
-      (click)="submit()"
-      type="button"
-      class="btn-primary"
-    >
-      Guardar
-    </button>
-
-    <button
-      (click)="resetForms()"
-      type="button"
-      class="ml-2 btn-light"
-    >
-      Limpiar formulario
-    </button>
-  }
 </div>
 
 

@@ -4,6 +4,7 @@ import { ServiceType } from '../../interfaces/service-type.interface';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { catchError, of } from 'rxjs';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 @Injectable({
   providedIn: 'root'
@@ -21,8 +22,25 @@ export class ServiceTypeService {
 
   private http = inject(HttpClient);
   serviceTypeUrl = `${environment.apiUrl}service-type`
+  private supabase: SupabaseClient;
 
-  constructor() { }
+  constructor() {
+    this.supabase = createClient(environment.supabaseUrl, environment.supabaseKey);
+  }
+
+  async getByClientId(clientId: string): Promise<void> {
+    const { data, error } = await this.supabase
+      .from('service_types')
+      .select('*')
+      .eq('client_id', clientId);
+
+    if (error) {
+      console.error('Error fetching service types:', error);
+      throw error;
+    }
+
+    this.#state.update((state) => ({ ...state, data })); // guardar data en el state
+  }
 
   getAll() {
     this.#state.set({ ...this.#state(), error: undefined });

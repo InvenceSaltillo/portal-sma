@@ -1,0 +1,117 @@
+<div [formGroup]="formGroup" class="w-full">
+
+  <div class="flex">
+    <label class="block text-black text-base">
+      @if (field.required) {
+        <span class="text-red-600 text-lg font-bold">*</span>
+      }
+      {{ field.label }}
+
+    </label>
+    @if (field.tooltip_title_field || field.tooltip_description_field) {
+      <app-popover-icon
+        [id]="'tooltip-' + field.name"
+        [title]="field.tooltip_title_field!"
+        [text]="field.tooltip_description_field ?? ''"
+        [position]="'top'">
+      </app-popover-icon>
+    }
+  </div>
+
+  @switch (field.type) {
+    @case ('text') {
+      <input
+        [formControlName]="field.name"
+        [type]="field.name === 'email' ? 'email' : 'text'"
+        class="mt-1 block w-full border rounded-md px-3 py-2"
+        [placeholder]="field.placeholder || ''"
+        [attr.inputmode]="
+          field.name === 'email' ? 'email' :
+          field.name === 'postal_code' ? 'numeric' :
+          field.name === 'area_code' ? 'numeric' :
+          field.name === 'phone' ? 'tel' :
+          field.name === 'mobile' ? 'tel' :
+          field.name === 'extension' ? 'numeric' :
+          null
+        "
+
+        [mask]="field.name === 'email' ? null :
+          (field.mask ||
+            (field.name === 'postal_code' ? '00000' :
+            field.name === 'area_code' ? '000' :
+            field.name === 'phone' || field.name === 'mobile' ? '(000) 000-0000' :
+            field.name === 'extension' ? '000000?' :
+            null)
+          )"
+        [dropSpecialCharacters]="field.name === 'email' ? true : field.drop_special"
+        autocomplete="email"
+        autocapitalize="none"
+        autocorrect="off"
+        spellcheck="false"
+        (blur)="normalizeOnBlur(field)"
+      />
+    }
+    @case ('date') {}
+    @case ('select') {
+      <ng-select
+        [items]="field.options!"
+        bindLabel="label"
+        bindValue="value"
+        [formControlName]="field.name"
+        [searchable]="true"
+        [clearable]="true"
+        [appendTo]="appendToSelector"
+        class="w-full text-base text-black bg-white border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500 placeholder-gray-400"
+        [ngClass]="{
+          'border-red-500': formGroup.get(field.name)?.invalid && formGroup.get(field.name)?.touched
+        }"
+      />
+    }
+    @case ('checkbox') {}
+    @case ('radio') {
+      <div class="flex gap-2 items-center mt-3">
+
+        @for (option of field.options; track $index) {
+          <label
+            class="flex"
+          >
+            <input
+              type="radio"
+              [formControlName]="field.name"
+              [value]="option.value"
+              class="form-radio h-5 w-5 text-blue-600"
+            />
+            <span class="ml-2 text-black text-base">{{ option.label }}</span>
+          </label>
+        }
+      </div>
+    }
+    @case ('file') {}
+  }
+
+</div>
+
+@if (control?.invalid && (control?.dirty || control?.touched)) {
+  <div class="mt-1 text-sm text-red-600">
+    @if (control?.errors?.['required']) {
+      <span>Este campo es obligatorio.</span>
+    }
+
+    @if (field.name === 'email') {
+      @if (control?.errors?.['email'] || control?.errors?.['pattern']) {
+        <span>{{ field.pattern_message || 'Correo electrónico no válido.' }}</span>
+      }
+    } @else {
+      @if (control?.errors?.['pattern']) {
+        <span>El formato no es válido.</span>
+      }
+    }
+
+    @if (control?.errors?.['minlength']) {
+      <span>Debe tener al menos {{ control?.errors?.['minlength']?.requiredLength }} caracteres.</span>
+    }
+    @if (control?.errors?.['maxlength']) {
+      <span>No debe exceder {{ control?.errors?.['maxlength']?.requiredLength }} caracteres.</span>
+    }
+  </div>
+}
