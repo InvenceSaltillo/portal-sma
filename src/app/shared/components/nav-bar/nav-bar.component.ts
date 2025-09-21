@@ -45,8 +45,32 @@ export class NavBarComponent implements OnInit {
   readonly appUtils = AppUtils;
   userFullName = '';
   authService = inject(AuthService);
+  private menuCloseTimer: any | null = null;
 
   constructor() { }
+
+  toggleMenu(): void {
+    this.showProfileMenu = !this.showProfileMenu;
+    if (this.showProfileMenu) this.cancelMenuClose();
+  }
+
+  onMenuAreaEnter(): void {
+    this.cancelMenuClose();
+  }
+
+  onMenuAreaLeave(): void {
+    // pequeño delay para no cerrar si el usuario vuelve rápido
+    this.menuCloseTimer = setTimeout(() => {
+      this.showProfileMenu = false;
+    }, 180);
+  }
+
+  private cancelMenuClose(): void {
+    if (this.menuCloseTimer) {
+      clearTimeout(this.menuCloseTimer);
+      this.menuCloseTimer = null;
+    }
+  }
 
   ngOnInit(): void {
     this.userFullName = AppUtils.getUserFullName(this.user());

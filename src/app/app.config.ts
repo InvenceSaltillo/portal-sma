@@ -33,7 +33,14 @@ export const appConfig: ApplicationConfig = {
       NgxTippyModule,
       NgSelectModule,
     ),
-    provideToastr(),
+    provideToastr({
+      timeOut: 3000,
+      positionClass: 'toast-top-right',
+      preventDuplicates: false,
+      progressBar: true,
+      closeButton: true,
+      enableHtml: true
+    }),
     provideEnvironmentNgxMask(),
   ]
 };

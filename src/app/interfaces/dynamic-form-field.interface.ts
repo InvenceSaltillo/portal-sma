@@ -20,8 +20,15 @@ export interface DynamicFormField {
   data_label_column?: string;
   mask?: string;
   drop_special: boolean;
+  section_is_collapsible: boolean;
+  file_allow_multiple: boolean;
+  file_max_mb?: number;
+  file_accept_mime: string[];
+  section_collapsed_by_default: boolean;
   pattern?: string;
   pattern_message?: string;
+  col_span: number;
+  section_grid_columns: number;
 
   options?: { value: string; label: string }[]; // solo aplica para select
 }

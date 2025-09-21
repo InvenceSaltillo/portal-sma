@@ -2,15 +2,11 @@ import { ChangeDetectorRef, Component, OnInit, QueryList, ViewChildren, Writable
 import { TitleBarComponent } from '../../../shared/title-bar/title-bar.component';
 import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, ValidatorFn, Validators } from '@angular/forms';
 import { PopoverIconComponent } from '../../../shared/components/popover-icon/popover-icon.component';
-import { RequestLocationFormComponent } from '../../../shared/components/forms/request-location-form/request-location-form.component';
-import { GeneralDataFormComponent } from '../../../shared/components/forms/general-data-form/general-data-form.component';
-import { IndividualEntityFormComponent } from '../../../shared/components/forms/individual-entity-form/individual-entity-form.component';
 import { ServiceTypeService } from '../../../services/service-type/service-type.service';
 import { ServiceService } from '../../../services/service/service.service';
 import { Service } from '../../../interfaces/service.interface';
 import { ToastrService } from 'ngx-toastr';
 import { Router } from '@angular/router';
-import { Modal, ModalInterface, Popover } from 'flowbite';
 import { CommonModule } from '@angular/common';
 import { NgxTippyModule, NgxTippyProps } from 'ngx-tippy-wrapper';
 import { NgxSpinnerService } from 'ngx-spinner';
@@ -18,15 +14,19 @@ import { FormControlConfig, FormControlType, SelectInputTypeOptions } from '../.
 import { AppUtils } from '../../../app.utils';
 import { MiscService } from '../../../services/misc/misc.service';
 import { FormSection } from '../../../interfaces/form-section.interface';
-import { NgxMaskDirective } from 'ngx-mask';
-import { Specie } from '../../../interfaces/specie.interface';
 import { User } from '../../../interfaces/user.interface';
 import { DynamicFormField } from '../../../interfaces/dynamic-form-field.interface';
 import { DynamicFormFieldComponent } from '../../../shared/components/dynamic-form-field/dynamic-form-field.component';
-import { TooltipComponent } from '../../../shared/components/tooltip/tooltip.component';
 import { SupabaseService } from '../../../services/supabase.service';
 import { GlobalState } from '../../../interfaces/global-state.interface';
-
+import { RequestService } from '../../../services/request/request.service';
+import { AccordionModule } from 'primeng/accordion';
+import { ButtonModule } from 'primeng/button';
+import { ToggleButtonModule } from 'primeng/togglebutton';
+import { TooltipModule } from 'primeng/tooltip';
+import { EmailService } from '../../../services/email/email.service';
+import { supabaseClient } from '../../../core/supabase.client';
+import { LocalStorageService } from '../../../services/local-storage/local-storage.service';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
@@ -40,6 +40,10 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
     CommonModule,
     NgxTippyModule,
     DynamicFormFieldComponent,
+    AccordionModule,
+    ButtonModule,
+    ToggleButtonModule,
+    TooltipModule,
   ],
   templateUrl: './request.component.html',
   styleUrl: './request.component.css'
@@ -55,6 +59,9 @@ export default class RequestComponent implements OnInit {
   spinnerService = inject(NgxSpinnerService);
   miscService = inject(MiscService);
   router = inject(Router);
+  requestService = inject(RequestService);
+  emailService = inject(EmailService);
+  localStorageService = inject(LocalStorageService);
 
   processForm!: FormGroup;
   dataForm: FormGroup = this.formBuilder.group({});
@@ -95,6 +102,30 @@ export default class RequestComponent implements OnInit {
     data: null,
     error: null
   });
+  readonly NOTIFY_SECTION_ID = '123e4567-e89b-12d3-a456-426614174007';
+
+  notificationsToggle = new FormControl(false);
+  sectionToggles: Record<string, FormControl> = {};
+  loading = true;
+
+  colsMap: Record<number, string> = {
+    1: 'md:grid-cols-1',
+    2: 'md:grid-cols-2',
+    3: 'md:grid-cols-3',
+    4: 'md:grid-cols-4',
+    5: 'md:grid-cols-5',
+    6: 'md:grid-cols-6',
+  };
+
+  spanMap: Record<number, string> = {
+    1: 'md:col-span-1',
+    2: 'md:col-span-2',
+    3: 'md:col-span-3',
+    4: 'md:col-span-4',
+    5: 'md:col-span-5',
+    6: 'md:col-span-6',
+    12: 'md:col-span-12',
+  };
 
   constructor(private cdr: ChangeDetectorRef) {
     effect(() => {
@@ -121,6 +152,14 @@ export default class RequestComponent implements OnInit {
     });
   }
 
+  getGridColsClass(cols?: number) {
+    return `grid grid-cols-1 gap-4 ${this.colsMap[cols ?? 3]}`;
+  }
+
+  getColSpanClass(span?: number) {
+    return this.spanMap[span ?? 1];
+  }
+
   async ngOnInit() {
 
     this.spinnerService.show();
@@ -144,8 +183,6 @@ export default class RequestComponent implements OnInit {
     });
 
     await this.serviceTypeService.getByClientId(user.client_id);
-    // this.spinnerService.hide();
-
     this.processForm.get('serviceType')?.valueChanges.subscribe(serviceTypeId => {
       if (!serviceTypeId) {
         return;
@@ -160,18 +197,21 @@ export default class RequestComponent implements OnInit {
         this.serviceSelected = undefined;
         return;
       }
-      console.log('DEBUG: serviceId', serviceId);
+      console.log('DEBUG: serviceId', this.serviceService.serviceSelected());
+      this.serviceSelected = this.serviceService.serviceSelected()?.find(service => service.id === serviceId);
+
       this.dataForm.markAsPristine();
       this.dataForm.markAsUntouched();
       this.getServiceById(serviceId);
     });
 
-    // setTimeout(() => {
-    //   this.processForm.get('serviceType')?.setValue('123e4567-st9b-12d3-a456-426614174002');
-    //   setTimeout(() => {
-    //     this.processForm.get('service')?.setValue('123e4567-s89b-12d3-a456-426614174007');
-    //   }, 500);
-    // }, 1000);
+    // Descomentar en produccion
+    setTimeout(() => {
+      this.processForm.get('serviceType')?.setValue('123e4567-e89b-12d3-a456-426614174000');
+      setTimeout(() => {
+        this.processForm.get('service')?.setValue('123e4567-e89b-42d3-a456-426614174000');
+      }, 500);
+    }, 1000);
 
   }
 
@@ -181,78 +221,6 @@ export default class RequestComponent implements OnInit {
 
     if (!!value) {
     }
-  }
-
-  addSpecie(controlName: string, formSection?: FormSection): void {
-    const dynamicControl = this.dynamicControls.find(control => control.name === controlName);
-
-    if (!!dynamicControl) {
-      const formControlValue = this.dataForm.get(controlName)?.value;
-      if (!!formControlValue) {
-        const specie = dynamicControl.select_options?.find(option => option.value === formControlValue);
-        const commonName = specie?.label.split('-')[0].trim();
-        const scientistName = specie?.label.split('-')[1].trim();
-        const data: any = {
-          speciesUtilizationDescription: null,
-          speciesMarkingDescription: null,
-          specieGender: null,
-        };
-
-        let formValid = true;
-
-        if (!!formSection) {
-          formSection.form_controls.forEach(control => {
-            const controlValue = this.dataForm.get(control.name)?.value;
-            if (!controlValue) {
-              formValid = false;
-              this.toastr.info(`El campo ${control.label} no puede estar vacío`);
-              return;
-            }
-            data[control.name] = controlValue;
-          });
-        }
-
-        if (!formValid) {
-          return;
-        }
-
-        data['specieGender'] = data['specieGender'] == '1' ? 'Macho' : 'Hembra';
-        console.log('DEBUG: data', data);
-        if (!this.speciesSelected.find(specieObj => specieObj.id === specie?.value)) {
-          this.speciesSelected.push({
-            id: specie?.value!,
-            commonName: commonName!,
-            scientistName: scientistName!,
-            ...data,
-          });
-
-          this.toastr.success('Especie agregada');
-
-          if (!!formSection) {
-            this.dataForm.get('speciesMarkingDescription')?.reset();
-            this.dataForm.get('speciesUtilizationDescription')?.reset();
-            this.dataForm.get('speciesUtilization')?.setValue('');
-          }
-          console.log('DEBUG: this.speciesSelected', this.speciesSelected);
-        }
-      }
-    }
-  }
-
-  removeSpecie(specieId: string): void {
-    this.speciesSelected = this.speciesSelected.filter(specie => specie.id != specieId);
-  }
-
-  toggleModal(): void {
-
-    const $modalElement: HTMLElement | null = document.querySelector('#species-modal');
-    const modal: ModalInterface = new Modal($modalElement, undefined, {
-      id: 'species-modal',
-      override: true
-    });
-
-    console.log('DEBUG: modal.isVisible();', modal.isVisible());
-    modal.toggle();
   }
 
   openFileInput(id: string) {
@@ -277,67 +245,6 @@ export default class RequestComponent implements OnInit {
     this.spinnerService.hide();
   }
 
-  fillDataFake(): void {
-    const file = new File(['contenido del archivo'], 'archivo.txt', {
-      type: 'text/plain',
-    });
-
-    this.termsChecked = true;
-
-    // this.dataForm.get('state')?.setValue('');
-    this.dataForm.get('municipality')?.setValue('5030');
-    this.dataForm.get('curp')?.setValue('RIMC840801HNLJRS00');
-    this.dataForm.get('rfc')?.setValue('RIMC84080169A');
-    this.dataForm.get('rupa')?.setValue('');
-    this.dataForm.get('names')?.setValue('Cesar');
-    this.dataForm.get('last_name_1')?.setValue('Riojas');
-    this.dataForm.get('last_name_2')?.setValue('Martinez');
-    this.dataForm.get('gender')?.setValue('1');
-    this.dataForm.get('legal_name')?.setValue('Cesar Riojas');
-    this.dataForm.get('names-2')?.setValue('Cesar');
-    this.dataForm.get('last_name_1-2')?.setValue('Riojas');
-    this.dataForm.get('last_name_2-2')?.setValue('Martinez');
-    this.dataForm.get('names-3')?.setValue('Cesar');
-    this.dataForm.get('last_name_1-3')?.setValue('Riojas');
-    this.dataForm.get('last_name_2-3')?.setValue('MArtinez');
-    this.dataForm.get('postal_code')?.setValue('25000');
-    this.dataForm.get('street')?.setValue('Acuña');
-    this.dataForm.get('street_number')?.setValue('431');
-    this.dataForm.get('interior_number')?.setValue('');
-    this.dataForm.get('neighborhood')?.setValue('Centro');
-    this.dataForm.get('town')?.setValue('Saltillo');
-    this.dataForm.get('state-2')?.setValue('5');
-    this.dataForm.get('municipality-2')?.setValue('530');
-    this.dataForm.get('area_code')?.setValue('844');
-    this.dataForm.get('phone')?.setValue('8806948');
-    this.dataForm.get('extension')?.setValue('');
-    this.dataForm.get('mobile')?.setValue('8448806948');
-    this.dataForm.get('email')?.setValue('cesar.riojas@hotmail.com');
-    this.dataForm.get('postal_code-2')?.setValue('25000');
-    this.dataForm.get('street-2')?.setValue('Acuña');
-    this.dataForm.get('street_number-2')?.setValue('431');
-    this.dataForm.get('interior_number-2')?.setValue('');
-    this.dataForm.get('neighborhood-2')?.setValue('Centro');
-    this.dataForm.get('town-2')?.setValue('Saltillo');
-    this.dataForm.get('state-3')?.setValue('5');
-    this.dataForm.get('municipality-3')?.setValue('5030');
-    this.dataForm.get('area_code-2')?.setValue('844');
-    this.dataForm.get('phone-2')?.setValue('8806948');
-    this.dataForm.get('extension-2')?.setValue('');
-    this.dataForm.get('mobile-2')?.setValue('8448806948');
-    this.dataForm.get('email-2')?.setValue('cesar.riojas@hotmail.com');
-    this.dataForm.get('request')?.setValue('first_time');
-    this.dataForm.get('temporarity')?.setValue('annual');
-    this.dataForm.get('nationality')?.setValue('mx');
-    this.dataForm.get('migration_quality')?.setValue('national');
-    this.dataForm.get('organization')?.setValue('organizacion');
-    this.dataForm.get('digitalPhotoAndSignature')?.setValue(file);
-    this.dataForm.get('paymentReceiptForFees')?.setValue(file);
-    this.dataForm.get('officialID')?.setValue(file);
-    this.dataForm.get('evaluationApprovalCertificate')?.setValue(file);
-    this.dataForm.get('signatureImage')?.setValue(file);
-  }
-
   async getServiceById(serviceId: string) {
     this.showPopovers = false;
 
@@ -347,34 +254,95 @@ export default class RequestComponent implements OnInit {
     this.form = this.buildDynamicForm(fields);
     this.listenToDependentSelects();
 
+    this.initSectionToggles();
+    for (const s of this.getSections()) {
+      if (s.is_collapsible) this.wireToggleForSection(s.id, this.sectionToggles[s.id]);
+    }
     console.log('DEBUG: form', this.form);
+
+    // Descomentar en produccion
+    this.fillFakeData();
   }
 
-  getSections() {
-    const uniqueSections: {
-      id: string;
-      title: string;
-      description?: string;
-      tooltip_title?: string;
-      tooltip_description?: string,
-      section_id?: string,
-    }[] = [];
+  initSectionToggles(): void {
+    for (const s of this.getSections()) {
+      if (!s.is_collapsible) continue;
+      const visible = !(s.collapsed_by_default ?? true); // visible = opuesto a collapsed_by_default
+      this.sectionToggles[s.id] = new FormControl(visible);
+    }
+  }
 
-    const seen = new Set();
-    for (const field of this.formFields) {
-      if (!seen.has(field.section_id)) {
-        uniqueSections.push({
-          id: field.section_id,
-          title: field.section_title,
-          description: field.section_description,
-          tooltip_title: field.tooltip_title,
-          tooltip_description: field.tooltip_description
-        });
-        seen.add(field.section_id);
+  wireToggleForSection(sectionId: string, toggle: FormControl): void {
+    this.setRequiredForSection(sectionId, !!toggle.value);        // estado inicial
+    toggle.valueChanges.subscribe(v => this.setRequiredForSection(sectionId, !!v));
+  }
+
+  setRequiredForSection(sectionId: string, enable: boolean): void {
+    const group = this.getSectionGroup(sectionId);
+    if (!group) return;
+    const fields = this.getFieldsBySection(sectionId);
+
+    for (const f of fields) {
+      const ctrl = group.get(f.name) as FormControl;
+      if (!ctrl) continue;
+
+      const validators: any[] = [];
+      if (enable && f.required) validators.push(Validators.required);
+      if (f.name === 'email') validators.push(Validators.email);
+      if (f.pattern) {
+        const normalized = f.pattern.replace(/\\\\/g, '\\');
+        try { validators.push(Validators.pattern(new RegExp(normalized))); } catch { }
       }
+      ctrl.setValidators(validators);
+      ctrl.updateValueAndValidity({ emitEvent: false });
+      if (!enable) ctrl.reset(null, { emitEvent: false }); // opcional
+    }
+  }
+
+  private buildValidatorsForField(field: DynamicFormField, forceRequired: boolean): ValidatorFn[] {
+    const v: ValidatorFn[] = [];
+
+    // required solo si la sección está visible
+    if (forceRequired && field.required) v.push(Validators.required);
+
+    // tu lógica adicional (igual a buildDynamicForm)
+    if (field.name === 'email') v.push(Validators.email);
+
+    if (field.pattern) {
+      const normalizedPattern = field.pattern.replace(/\\\\/g, '\\');
+      try { v.push(Validators.pattern(new RegExp(normalizedPattern))); }
+      catch (e) { console.warn('Regex inválido desde BD:', field.pattern, e); }
     }
 
-    return uniqueSections;
+    return v;
+  }
+
+
+  getSections() {
+    const unique: {
+      id: string; title: string; description?: string;
+      tooltip_title?: string; tooltip_description?: string;
+      is_collapsible?: boolean; collapsed_by_default?: boolean;
+      section_grid_columns: number;
+    }[] = [];
+
+    const seen = new Set<string>();
+    for (const f of this.formFields) {
+      if (!seen.has(f.section_id)) {
+        unique.push({
+          id: f.section_id,
+          title: f.section_title,
+          description: f.section_description,
+          tooltip_title: f.tooltip_title,
+          tooltip_description: f.tooltip_description,
+          section_grid_columns: f.section_grid_columns,
+          is_collapsible: !!(f as any).section_is_collapsible,
+          collapsed_by_default: !!(f as any).section_collapsed_by_default,
+        });
+        seen.add(f.section_id);
+      }
+    }
+    return unique;
   }
 
   getFieldsBySection(sectionId: string) {
@@ -405,43 +373,86 @@ export default class RequestComponent implements OnInit {
   }
 
 
-  onSubmit() {
+  async onSubmit() {
 
+    // try {
+    //   const resp = await this.emailService.sendEmail({ to: 'riojasmx@gmail.com' });
+    //   console.log('OK', resp);
+    // } catch (e) {
+    //   console.error('ERROR', e);
+    // }
     this.form.markAllAsTouched();
     if (this.form.invalid) return;
 
-    // objeto anidado por sección
     const payload = this.form.value;
 
     console.log('DEBUG: payload', payload);
 
-    // si necesitas plano:
-    // const flat = this.flattenFormForApi(this.form.value);
+    try {
+      // Mostrar loading con mensaje personalizado
+      this.spinnerService.show();
+
+      const requestResult = await this.requestService.submitRequest({
+        form: this.form,
+        formFields: this.formFields,
+        serviceId: this.processForm.get('service')?.value,
+        userId: this.getUserId()   // Usar el id del usuario, no el client_id
+      });
+
+      const { id: requestId, folio } = requestResult;
+
+      // Obtener información del usuario para el correo y mensaje
+      const { data: { user } } = await supabaseClient.auth.getUser();
+      const userEmail = user?.email || 'correo no disponible';
+
+      // Obtener nombre completo del usuario desde localStorage
+      const storedUser = this.localStorageService.getUser();
+      const userFullName = storedUser ? `${storedUser.name} ${storedUser.last_names}`.trim() : 'Usuario';
+
+      // Preparar datos mínimos para enviar al backend
+      const emailData = {
+        requestId: requestId,
+        userEmail: userEmail,
+        userFullName: userFullName
+      };
+
+      // Mostrar en consola lo que se va a enviar
+      console.log('=== DATOS PARA ENVÍO DE CORREO AL BACKEND ===');
+      console.log('Datos que se enviarán:', emailData);
+      console.log('==========================================');
+
+      // Enviar correo de confirmación al usuario (solo datos mínimos)
+      try {
+        if (user?.email) {
+          await this.emailService.sendEmail(emailData);
+        }
+      } catch (emailError) {
+        console.warn('Error al enviar correo de confirmación:', emailError);
+        // No mostramos error al usuario ya que el trámite se creó exitosamente
+      }
+
+      // Mensaje personalizado con folio y email del usuario
+      this.toastr.success(
+        `Trámite creado exitosamente.<br>
+         <strong>Folio:</strong> ${folio}<br>
+         Los datos del trámite han sido enviados a: <strong>${userEmail}</strong>`,
+        'Solicitud Enviada',
+        {
+          enableHtml: true,
+          timeOut: 8000, // Más tiempo para leer el mensaje completo
+          closeButton: true
+        }
+      );
+
+      // redirige si quieres
+      this.router.navigate(['/dashboard/home']);
+    } catch (err: any) {
+      console.error(err);
+      this.toastr.error(err?.message ?? 'No se pudo guardar la solicitud');
+    } finally {
+      this.spinnerService.hide();
+    }
   }
-
-  // buildDynamicForm(fields: any[]): FormGroup {
-  //   const group: { [key: string]: FormControl } = {};
-
-  //   for (const field of fields) {
-  //     // Determinar valor inicial
-  //     const initialValue = field.default_value ?? '';
-
-  //     // Definir validaciones
-  //     const validators = [];
-  //     if (field.required) {
-  //       validators.push(Validators.required);
-  //     }
-
-  //     // Los campos tipo file se manejan como null inicialmente
-  //     if (field.type === 'file') {
-  //       group[field.name] = new FormControl(null, validators);
-  //     } else {
-  //       group[field.name] = new FormControl(initialValue, validators);
-  //     }
-  //   }
-
-  //   return new FormGroup(group);
-  // }
 
   buildDynamicForm(fields: DynamicFormField[]): FormGroup {
     const root = this.formBuilder.group({});
@@ -480,6 +491,9 @@ export default class RequestComponent implements OnInit {
       sg.addControl(f.name, new FormControl(initial, validators));
     }
 
+    root.addControl('privacyAccepted', new FormControl(false, Validators.requiredTrue));
+    this.loading = false;
+
     return root;
   }
 
@@ -514,60 +528,6 @@ export default class RequestComponent implements OnInit {
       return;
     }
     console.log('DEBUG: VALIDDDD',);
-  }
-
-  buildFormGroup(controls: FormControlConfig[]): void {
-    // console.log('DEBUG: controls', controls.map(control => control.name));
-
-    controls.forEach(control => {
-      let initialValue;
-
-      if (control.type === FormControlType.DATE) {
-        const formattedDate = this.formatDateToISO(control.initialDate!);
-        initialValue = formattedDate;
-      } else if (control.type === FormControlType.SELECT) {
-        if (typeof control.select_options === 'string') {
-          control.select_options = JSON.parse(control.select_options)
-        }
-        initialValue = control.initial_value;
-      } else {
-        initialValue = control.initial_value;
-      }
-
-      this.dataForm.addControl(control.name, new FormControl(
-        initialValue,
-        AppUtils.getControlValidators(control.validators),
-      ));
-
-      if (control.name.includes('state')) {
-        this.listenControlChanges(control.name);
-      }
-
-    });
-    setTimeout(() => {
-      //   this.fillDataFake();
-    }, 1000);
-  }
-
-  listenControlChanges(controlName: string): void {
-
-    this.dataForm.get(controlName)?.valueChanges.subscribe(value => {
-      const newValue = value === 'null' ? undefined : value;
-      if (newValue) {
-        if (controlName.includes('state')) {
-          const suffix = controlName.split('-')[1];
-          this.getMunicipalitiesByState(value, suffix);
-        }
-        // switch (controlName) {
-        //   case 'state':
-        //     this.getMunicipalitiesByState(value);
-        //     break;
-
-        //   default:
-        //     break;
-        // }
-      }
-    });
   }
 
   onCheckboxChange(event: any, formSectionId: string, from: string) {
@@ -647,11 +607,164 @@ export default class RequestComponent implements OnInit {
     this.dataForm.reset();
   }
 
-  private formatDateToISO(date: Date): string {
-    const year = date.getFullYear();
-    const month = ('0' + (date.getMonth() + 1)).slice(-2);
-    const day = ('0' + date.getDate()).slice(-2);
-    return `${year}-${month}-${day}`;
+  // Pon esto dentro de tu RequestComponent
+
+  /** Utilidad para crear archivos fake con el MIME correcto */
+  private makeFakeFile(name: string, type: string, sizeKB = 16): File {
+    const blob = new Blob([new Uint8Array(sizeKB * 1024)], { type });
+    return new File([blob], name, { type });
+  }
+
+  /** Rellena el formulario anidado con data fake */
+  fillFakeData(): void {
+    // ---- Archivos fake ----
+    const fakePdf = this.makeFakeFile('documento.pdf', 'application/pdf', 40);
+    const fakePng = this.makeFakeFile('firma.png', 'image/png', 20);
+
+    // ---- Payload anidado (mapea 1:1 con tu estructura de form) ----
+    const values: any = {
+      '123e4567-e89b-12d3-a456-426614174000': {
+        state_id: '5',
+        municipality_id: '5030',
+      },
+      '11f64c89-feca-49a6-93aa-a9eeb85667c6': {
+        curp: 'RIMC840801HNLJRS00',
+        rfc: 'RIMC84080169A',
+        rupa: 'RUPA-000123',
+      },
+      '123e4567-e89b-12d3-a456-426614174002': {
+        first_name: 'César',
+        paternal_last_name: 'Riojas',
+        maternal_last_name: 'Martínez',
+        sex: 'male', // ajusta al valor que uses en BD ('M'/'F', '1'/'2', etc.)
+      },
+      '123e4567-e89b-12d3-a456-426614174003': {
+        legal_name: 'Cinegética del Norte S.A. de C.V.',
+      },
+      '123e4567-e89b-12d3-a456-426614174004': {
+        first_name: 'Jorge',
+        paternal_last_name: 'Pérez',
+        maternal_last_name: 'López',
+      },
+      '123e4567-e89b-12d3-a456-426614174005': {
+        first_name: 'Laura',
+        paternal_last_name: 'Gómez',
+        maternal_last_name: 'Hernández',
+      },
+      '123e4567-e89b-12d3-a456-426614174006': {
+        postal_code: '25000',
+        street: 'Acuña',
+        external_number: '431',
+        interior_number: '',
+        neighborhood: 'Centro',
+        town: 'Saltillo',
+        state: '5',
+        municipality: '5030',
+        area_code: '844',
+        phone: '8448806948',
+        extension: '',
+        mobile: '8448806948',
+        email: 'cesar.riojas@hotmail.com',
+      },
+      // '123e4567-e89b-12d3-a456-426614174007': {
+      //   postal_code: '25000',
+      //   street: 'Acuña',
+      //   external_number: '431',
+      //   interior_number: '',
+      //   neighborhood: 'Centro',
+      //   town: 'Saltillo',
+      //   state: '5',
+      //   municipality: '5030',
+      //   area_code: '844',
+      //   phone: '8448806948',
+      //   extension: '',
+      //   mobile: '8448806948',
+      //   email: 'cesar.riojas@hotmail.com',
+      // },
+      '123e4567-e89b-12d3-a456-426614174008': {
+        request: 'first_time',
+        temporarity: 'annual',
+        nationality: 'us',
+        migration_quality: 'national',
+        organization: 'Club Venados del Valle',
+      },
+      '123e4567-e89b-12d3-a456-426614174009': {
+        digitalPhotoAndSignature: fakePdf,
+        paymentReceiptForFees: fakePdf,
+        officialID: fakePdf,
+        evaluationApprovalCertificate: fakePdf,
+      },
+      '123e4567-e89b-12d3-a456-426614174010': {
+        signatureImage: fakePng,
+      },
+      privacyAccepted: true,
+    };
+
+    // ---- Patch general ----
+    this.form.patchValue(values);
+
+    // ---- Tip: si tienes selects dependientes (state -> municipality),
+    // setea primero 'state' y luego 'municipality' con un pequeño delay
+    const setStateAndMunicipality = (sectionId: string, stateCtrl: string, muniCtrl: string, s: string, m: string) => {
+      const g = this.getSectionGroup(sectionId);
+      g.get(stateCtrl)?.setValue(s);
+      // deja que se carguen opciones por el listener y luego setea municipio
+      setTimeout(() => g.get(muniCtrl)?.setValue(m), 150);
+    };
+
+    // Lugar de solicitud (usa state_id / municipality_id)
+    setStateAndMunicipality('123e4567-e89b-12d3-a456-426614174000', 'state_id', 'municipality_id', '5', '5030');
+
+    // Domicilio y Notificaciones (usa state / municipality)
+    setStateAndMunicipality('123e4567-e89b-12d3-a456-426614174006', 'state', 'municipality', '5', '5030');
+    setStateAndMunicipality('123e4567-e89b-12d3-a456-426614174007', 'state', 'municipality', '5', '5030');
+
+    // Marca como touched/dirty si quieres ver validaciones listas
+    this.form.markAsDirty();
+    this.form.markAllAsTouched();
+  }
+
+  private getUserId(): string {
+    const storedUser = this.localStorageService.getUser();
+    return storedUser?.id || '';
+  }
+
+  private getMunicipalityFromForm(): string {
+    // Buscar municipio en las diferentes secciones del formulario
+    const formValue = this.form.value;
+
+    // Intentar obtener de diferentes secciones posibles
+    for (const sectionId in formValue) {
+      const section = formValue[sectionId];
+      if (section) {
+        // Buscar por diferentes nombres de campo de municipio
+        if (section.municipality_id || section.municipality) {
+          const municipalityId = section.municipality_id || section.municipality;
+
+          // Buscar el nombre del municipio en los controles dinámicos
+          const municipalityControl = this.dynamicControls.find(control =>
+            control.name === 'municipality' || control.name === 'municipality_id'
+          );
+
+          if (municipalityControl?.select_options) {
+            const selectedOption = municipalityControl.select_options.find(option =>
+              option.value === municipalityId
+            );
+            if (selectedOption) {
+              return selectedOption.label.toUpperCase();
+            }
+          }
+        }
+
+        // Si hay un campo 'town' usar ese
+        if (section.town) {
+          return section.town.toUpperCase();
+        }
+      }
+    }
+
+    // Fallback por defecto
+    return "SALTILLO";
   }
 
 }

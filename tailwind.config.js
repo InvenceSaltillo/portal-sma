@@ -1,8 +1,15 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+  corePlugins: { preflight: false },
   content: [
     "./src/**/*.{html,js}",
     "./node_modules/flowbite/**/*.js"
+  ],
+  safelist: [
+    // grid cols
+    'md:grid-cols-1', 'md:grid-cols-2', 'md:grid-cols-3', 'md:grid-cols-4', 'md:grid-cols-5', 'md:grid-cols-6',
+    // col spans
+    'md:col-span-1', 'md:col-span-2', 'md:col-span-3', 'md:col-span-4', 'md:col-span-5', 'md:col-span-6', 'md:col-span-12',
   ],
   theme: {
     fontFamily: {

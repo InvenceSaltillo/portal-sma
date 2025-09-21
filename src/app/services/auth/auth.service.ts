@@ -6,6 +6,7 @@ import { lastValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment.development';
 import { Router } from '@angular/router';
 import { AuthChangeEvent, AuthSession, createClient, Session, SupabaseClient, User } from '@supabase/supabase-js';
+import { supabaseClient } from './../../core/supabase.client';
 
 
 export interface Profile {
@@ -19,7 +20,6 @@ export interface Profile {
   providedIn: 'root'
 })
 export class AuthService {
-  private supabase: SupabaseClient;
   _session: AuthSession | null = null;
   #state = signal<GlobalState<LoginResponse>>({
     loading: true,
@@ -34,14 +34,12 @@ export class AuthService {
 
   authUrl = `${environment.apiUrl}auth`
 
-  constructor() {
-    this.supabase = createClient(environment.supabaseUrl, environment.supabaseKey);
-  }
+  constructor() { }
 
 
   async getSession(): Promise<AuthSession | null> {
     try {
-      const { data } = await this.supabase.auth.getSession();
+      const { data } = await supabaseClient.auth.getSession();
       this._session = data.session;
       return this._session;
     } catch (error) {
@@ -52,7 +50,7 @@ export class AuthService {
 
 
   profile(user: User) {
-    return this.supabase
+    return supabaseClient
       .from('profiles')
       .select(`username, website, avatar_url`)
       .eq('id', user.id)
@@ -60,11 +58,11 @@ export class AuthService {
   }
 
   authChanges(callback: (event: AuthChangeEvent, session: Session | null) => void) {
-    return this.supabase.auth.onAuthStateChange(callback)
+    return supabaseClient.auth.onAuthStateChange(callback)
   }
 
   async signIn(email: string, password: string) {
-    const { data, error } = await this.supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
 
     if (error) throw error;
 
@@ -74,7 +72,7 @@ export class AuthService {
     // Espera a que el token esté completamente listo
     await new Promise(resolve => setTimeout(resolve, 100)); // 100-200ms
 
-    const { data: userData, error: userError } = await this.supabase
+    const { data: userData, error: userError } = await supabaseClient
       .from('users')
       .select('*')
       .eq('id', userId)
@@ -87,7 +85,7 @@ export class AuthService {
 
 
   signOut() {
-    return this.supabase.auth.signOut()
+    return supabaseClient.auth.signOut()
   }
 
   updateProfile(profile: Profile) {
@@ -95,15 +93,15 @@ export class AuthService {
       ...profile,
       updated_at: new Date(),
     }
-    return this.supabase.from('profiles').upsert(update)
+    return supabaseClient.from('profiles').upsert(update)
   }
 
   downLoadImage(path: string) {
-    return this.supabase.storage.from('avatars').download(path)
+    return supabaseClient.storage.from('avatars').download(path)
   }
 
   uploadAvatar(filePath: string, file: File) {
-    return this.supabase.storage.from('avatars').upload(filePath, file)
+    return supabaseClient.storage.from('avatars').upload(filePath, file)
   }
 
   login(email: string, password: string): Promise<LoginResponse> {

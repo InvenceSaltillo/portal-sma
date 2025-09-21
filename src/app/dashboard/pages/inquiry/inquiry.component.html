@@ -2,8 +2,181 @@
   [title]="'Consulta de seguimiento de Trámite'"
 />
 
-<div
-  class="text-3xl text-white relative p-3 overflow-hidden border  border-slate-100 rounded-md mt-4 mx-20 shadow-md"
->
-  <h1>Datos del Trámite</h1>
+<!-- Sección de búsqueda de trámite -->
+<div class="text-black relative p-4 border border-slate-100 rounded-md mt-4 mx-2 sm:mx-20 shadow-md bg-white">
+  <!-- Header con barra de color -->
+  <div class="flex items-center gap-2 mb-4">
+    <div class="w-1 h-6 bg-blue-600 rounded-full"></div>
+    <h2 class="text-xl font-bold text-gray-800">Datos del Trámite</h2>
+  </div>
+
+  <!-- Formulario de búsqueda -->
+  <form [formGroup]="inquiryForm" (ngSubmit)="onSearch()">
+    <div class="flex flex-col sm:flex-row gap-4 items-end">
+      <!-- Campo de entrada -->
+      <div class="flex-1">
+        <label for="registrationNumber" class="block text-sm font-medium text-gray-700 mb-2">
+          <span class="text-red-500">*</span> Número de ingreso del registro
+        </label>
+        <div class="relative group">
+          <input
+            type="text"
+            id="registrationNumber"
+            formControlName="registrationNumber"
+            class="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 placeholder-gray-400 group-hover:border-gray-400"
+            placeholder="Ej: SMA15441"
+            [class.border-red-400]="inquiryForm.get('registrationNumber')?.invalid && inquiryForm.get('registrationNumber')?.touched"
+            [class.border-green-400]="inquiryForm.get('registrationNumber')?.valid && inquiryForm.get('registrationNumber')?.touched"
+          />
+          <!-- Ícono de documento -->
+          <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+            <svg class="h-4 w-4 text-gray-400 group-focus-within:text-blue-500 transition-colors duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Mensaje de error -->
+        @if (inquiryForm.get('registrationNumber')?.invalid && inquiryForm.get('registrationNumber')?.touched) {
+          <div class="mt-1 flex items-center gap-1 text-red-500 text-sm">
+            <svg class="w-3 h-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+            </svg>
+            <span>Este campo es requerido</span>
+          </div>
+        }
+      </div>
+
+      <!-- Botones de acción -->
+      <div class="flex gap-2">
+        <!-- Botón Buscar -->
+        <button
+          type="submit"
+          [disabled]="isLoading"
+          class="btn-primary flex items-center gap-2"
+        >
+          @if (isLoading) {
+            <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+          } @else {
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+          }
+          Buscar
+        </button>
+
+        <!-- Botón Cancelar -->
+        <button
+          type="button"
+          (click)="onCancel()"
+          class="btn-light flex items-center gap-2"
+        >
+          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+          Cancelar
+        </button>
+
+      </div>
+    </div>
+  </form>
 </div>
+
+<!-- Sección de resultados (se muestra cuando hay resultados) -->
+@if (searchResult) {
+  <div class="text-3xl text-black relative p-4 border border-slate-100 rounded-md mt-4 mx-2 sm:mx-20 shadow-md bg-white">
+    <div class="flex items-center gap-2 mb-4">
+      <div class="w-1 h-6 bg-emerald-600 rounded-full"></div>
+      <h2 class="text-xl font-bold text-gray-800">Resultados encontrados</h2>
+      <div class="ml-auto">
+        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
+          <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+          </svg>
+          Trámite encontrado
+        </span>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="bg-gray-50 p-3 rounded border">
+        <label class="block text-sm font-medium text-gray-600 mb-1">Nombre del promovente</label>
+        <p class="text-gray-900 font-semibold">{{ searchResult.applicant_name }}</p>
+      </div>
+      <div class="bg-gray-50 p-3 rounded border">
+        <label class="block text-sm font-medium text-gray-600 mb-1">Trámite</label>
+        <p class="text-gray-900 font-semibold">{{ searchResult.service_name }}</p>
+      </div>
+      <div class="bg-gray-50 p-3 rounded border">
+        <label class="block text-sm font-medium text-gray-600 mb-1">Municipio, Estado</label>
+        <p class="text-gray-900 font-semibold">{{ searchResult.municipality }}, {{ searchResult.state }}</p>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Sección de timeline (se muestra cuando hay resultados) -->
+@if (searchResult) {
+  <div class="text-black relative p-4 border border-slate-100 rounded-md mt-4 mx-2 sm:mx-20 shadow-md bg-white">
+    <div class="flex items-center gap-2 mb-6">
+      <div class="w-1 h-6 bg-indigo-600 rounded-full"></div>
+      <h2 class="text-xl font-bold text-gray-800">Línea de tiempo del proceso del trámite</h2>
+    </div>
+
+    <div class="relative">
+      @for (item of searchResult.timeline; track item.id; let isLast = $last) {
+        <div class="relative flex items-start pb-8">
+          <!-- Línea vertical conectora -->
+          @if (!isLast) {
+            <div class="absolute left-4 top-8 w-0.5 h-full bg-gray-300"></div>
+          }
+
+          <!-- Icono del estado -->
+          <div class="relative z-10 flex items-center justify-center w-8 h-8 rounded-full {{ item.completed ? 'bg-emerald-500' : 'bg-gray-300' }}">
+            @if (item.completed) {
+              <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+              </svg>
+            } @else {
+              <div class="w-2 h-2 bg-white rounded-full"></div>
+            }
+          </div>
+
+          <!-- Contenido del estado -->
+          <div class="ml-6 flex-1">
+            <div class="bg-gray-50 p-4 rounded border">
+              <div class="flex items-center justify-between mb-2">
+                <h3 class="text-lg font-semibold text-gray-900">{{ item.status_name }}</h3>
+                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {{ item.completed ? 'bg-emerald-100 text-emerald-800' : 'bg-yellow-100 text-yellow-800' }}">
+                  @if (item.completed) {
+                    <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                    </svg>
+                    Completado
+                  } @else {
+                    <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>
+                    </svg>
+                    En proceso
+                  }
+                </span>
+              </div>
+              <p class="text-sm text-gray-600 mb-2 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                </svg>
+                {{ formatDate(item.created_at) }}
+              </p>
+              @if (item.description) {
+                <p class="text-sm text-gray-500">{{ item.description }}</p>
+              }
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+}

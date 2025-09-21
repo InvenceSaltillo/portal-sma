@@ -76,45 +76,114 @@
   <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-8">
     <!-- Agrupar campos por sección -->
     @for (section of getSections(); track section.id) {
-      <!-- ✅ ahora la sección trabaja sobre su nested FormGroup -->
+
+      <!-- Wrapper de la sección (ancla para dropdowns) -->
       <div
-        class="text-3xl text-black relative p-3 border border-slate-100 mb-4 rounded-md shadow-md"
+        class="relative text-3xl text-black p-3 border border-slate-100 mb-4 rounded-md shadow-md"
         [formGroupName]="section.id"
         [attr.id]="'section-' + section.id"
       >
-        <div class="mb-4">
-          <h2 class="text-lg font-bold text-gray-800 flex items-center">
-            @if (section.tooltip_title || section.tooltip_description) {
-              <app-popover-icon
-                [id]="'tooltip-' + section.id"
-                [title]="section.tooltip_title || ''"
-                [text]="section.tooltip_description || ''"
-                [position]="'top'">
-              </app-popover-icon>
-            }
-            {{ section.title }}
-          </h2>
-        </div>
-
-        <!-- Renderizar los campos de esta sección -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          @for (field of getFieldsBySection(section.id); track $index) {
-            <ng-container>
-              <!-- ✅ pasar el nested group de la sección -->
-              <app-dynamic-form-field
-                [field]="field"
-                [formGroup]="getSectionGroup(section.id)"
-                [appendToSelector]="'#section-' + section.id"
+        <!-- Header con switch (si es colapsable) + título + tooltip -->
+        <div class="mb-2 flex items-center gap-3">
+          @if (section.is_collapsible) {
+            <label class="inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                [formControl]="sectionToggles[section.id]"
+                class="sr-only peer"
               >
-              </app-dynamic-form-field>
-            </ng-container>
+              <div
+                class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800
+                      rounded-full peer dark:bg-gray-700
+                      peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full
+                      peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px]
+                      after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all
+                      dark:border-gray-600 peer-checked:bg-blue-600 dark:peer-checked:bg-blue-600">
+              </div>
+              <h2 class="text-lg font-bold ml-2">{{ section.title }}</h2>
+            </label>
+          } @else {
+            <h2 class="text-lg font-bold">{{ section.title }}</h2>
+          }
+
+          @if (section.tooltip_title || section.tooltip_description) {
+            <app-popover-icon
+              [id]="'tooltip-' + section.id"
+              [title]="section.tooltip_title || ''"
+              [text]="section.tooltip_description || ''"
+              [position]="'top'">
+            </app-popover-icon>
           }
         </div>
+
+        <!-- Cuerpo de la sección (solo visible si toggle ON o no colapsable) -->
+        @if (!section.is_collapsible || sectionToggles[section.id].value) {
+
+          <!-- Grid dinámico por sección -->
+          <div [ngClass]="getGridColsClass(section.section_grid_columns)">
+            @for (field of getFieldsBySection(section.id); track field.field_id) {
+              <!-- Span dinámico por campo -->
+              <div [ngClass]="[
+                getColSpanClass(field.col_span),
+                field.type === 'file' ? 'p-3 border border-slate-100 mb-4 rounded-md shadow-md' : ''
+              ]">
+                <app-dynamic-form-field
+                  [field]="field"
+                  [formGroup]="getSectionGroup(section.id)"
+                  [appendToSelector]="'#section-' + section.id">
+                </app-dynamic-form-field>
+              </div>
+            }
+          </div>
+
+        }
       </div>
+
     }
+
+    <!-- Aceptación de Aviso de Privacidad -->
+     @if (!loading) {
+       <div class="mt-8 rounded-md border border-slate-200 bg-slate-50 p-4">
+         <label class="inline-flex items-start gap-3">
+           <input
+             id="privacyAccepted"
+             type="checkbox"
+             formControlName="privacyAccepted"
+             class="mt-1 h-5 w-5 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+           />
+           <span class="text-[15px] text-slate-800">
+             Aceptar Términos de
+             <a
+               href="#"
+               class="text-blue-600 underline hover:text-blue-700"
+               (click)="myButton.click(); $event.preventDefault()"
+             >
+               Aviso de Privacidad
+             </a>
+           </span>
+         </label>
+
+         @if (form.get('privacyAccepted')?.invalid && (form.get('privacyAccepted')?.dirty || form.get('privacyAccepted')?.touched)) {
+           <p class="mt-2 text-sm text-red-600">Debes aceptar el Aviso de Privacidad.</p>
+         }
+       </div>
+
+       <span
+          pTooltip="Completa los campos obligatorios"
+          tooltipPosition="top"
+          [tooltipDisabled]="!form.invalid"
+        >
+          <button type="submit" class="btn-primary cursor-pointer" [disabled]="form.invalid">
+            Enviar
+          </button>
+        </span>
+     }
+
   </form>
 
+
 </div>
+<div class="mt-10"></div>
 
 
 <!-- Modal toggle -->
@@ -237,7 +306,6 @@
                       </td>
                       <td class="px-6 flex justify-end p-2">
                         <button
-                          (click)="removeSpecie(specie.id)"
                           type="button"
                           class="text-white bg-indigo-700 hover:bg-indigo-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center me-2 dark:bg-indigo-600 dark:hover:bg-indigo-700 dark:focus:ring-red-800"
                         >
@@ -249,7 +317,6 @@
                         </button>
 
                         <button
-                          (click)="removeSpecie(specie.id)"
                           type="button"
                           class="text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center me-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800"
                         >
