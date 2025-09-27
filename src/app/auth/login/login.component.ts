@@ -141,7 +141,7 @@ export class LoginComponent implements OnInit {
       loginResponse = await this.authService.signIn(email, password);
 
     } catch (error: any) {
-      this.spinnerService.hide();0
+      this.spinnerService.hide();
 
       if (error.code === 'invalid_credentials') {
         this.toastr.error('Credenciales inválidas', '¡Ups!');

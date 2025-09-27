@@ -87,4 +87,5 @@ export default class InquiryComponent implements OnInit {
       year: 'numeric'
     });
   }
+
 }

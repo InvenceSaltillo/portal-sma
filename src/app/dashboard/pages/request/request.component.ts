@@ -27,6 +27,7 @@ import { TooltipModule } from 'primeng/tooltip';
 import { EmailService } from '../../../services/email/email.service';
 import { supabaseClient } from '../../../core/supabase.client';
 import { LocalStorageService } from '../../../services/local-storage/local-storage.service';
+import { PdfService } from '../../../services/pdf/pdf.service';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
@@ -62,6 +63,7 @@ export default class RequestComponent implements OnInit {
   requestService = inject(RequestService);
   emailService = inject(EmailService);
   localStorageService = inject(LocalStorageService);
+  pdfService = inject(PdfService);
 
   processForm!: FormGroup;
   dataForm: FormGroup = this.formBuilder.group({});
@@ -432,17 +434,59 @@ export default class RequestComponent implements OnInit {
       }
 
       // Mensaje personalizado con folio y email del usuario
-      this.toastr.success(
-        `Trámite creado exitosamente.<br>
-         <strong>Folio:</strong> ${folio}<br>
-         Los datos del trámite han sido enviados a: <strong>${userEmail}</strong>`,
-        'Solicitud Enviada',
-        {
-          enableHtml: true,
-          timeOut: 8000, // Más tiempo para leer el mensaje completo
-          closeButton: true
+      // Generar PDF automáticamente
+      try {
+        console.log('Generando PDF para request:', requestId);
+        const pdfResult = await this.pdfService.generateLicensePDF(requestId);
+
+        if (pdfResult.success) {
+          console.log('PDF generado exitosamente:', pdfResult.pdf_url);
+
+          // Mostrar mensaje de éxito con opción de descargar PDF
+          this.toastr.success(
+            `Trámite creado exitosamente.<br>
+             <strong>Folio:</strong> ${folio}<br>
+             Los datos del trámite han sido enviados a: <strong>${userEmail}</strong><br>
+             <strong>PDF generado exitosamente</strong> -
+             <a href="${pdfResult.pdf_url}" target="_blank" style="color: #007bff; text-decoration: underline;">
+               Ver/Descargar PDF
+             </a>`,
+            'Solicitud Enviada',
+            {
+              enableHtml: true,
+              timeOut: 12000, // Más tiempo para ver el enlace
+              closeButton: true
+            }
+          );
+        } else {
+          throw new Error(pdfResult.error || 'Error al generar PDF');
         }
-      );
+      } catch (pdfError: any) {
+        console.error('Error generando PDF:', pdfError);
+
+        // Mostrar mensaje de éxito del trámite pero con advertencia del PDF
+        this.toastr.success(
+          `Trámite creado exitosamente.<br>
+           <strong>Folio:</strong> ${folio}<br>
+           Los datos del trámite han sido enviados a: <strong>${userEmail}</strong>`,
+          'Solicitud Enviada',
+          {
+            enableHtml: true,
+            timeOut: 8000,
+            closeButton: true
+          }
+        );
+
+        // Mostrar advertencia separada para el PDF
+        this.toastr.warning(
+          'El trámite se guardó correctamente, pero hubo un problema al generar el PDF. Puedes intentar generarlo más tarde.',
+          'PDF no generado',
+          {
+            timeOut: 8000,
+            closeButton: true
+          }
+        );
+      }
 
       // redirige si quieres
       this.router.navigate(['/dashboard/home']);

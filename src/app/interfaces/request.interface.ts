@@ -30,6 +30,7 @@ export interface RequestTimelineItem {
 
 export interface RequestInquiryResult {
   id: string;
+  folio: string;
   service_id: string;
   service_name: string;
   created_at: string;

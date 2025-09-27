@@ -45,6 +45,7 @@ export class RequestService {
         // Construir el objeto RequestInquiryResult con los datos de la RPC
         const result: RequestInquiryResult = {
           id: requestData.id,
+          folio: requestData.folio,
           service_id: requestData.service_id,
           service_name: requestData.service_name,
           created_at: requestData.created_at,

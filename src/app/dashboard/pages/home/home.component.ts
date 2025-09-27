@@ -19,6 +19,9 @@ import { RequestService } from '../../../services/request/request.service';
 import { RequestRowWithService } from '../../../interfaces/request.interface';
 import { FormsModule } from '@angular/forms';
 import { Menu } from 'primeng/menu';
+import { PdfService } from '../../../services/pdf/pdf.service';
+import { ToastrService } from 'ngx-toastr';
+import { environment } from '../../../../environments/environment';
 @Component({
   selector: 'app-home',
   standalone: true,
@@ -46,6 +49,8 @@ export default class HomeComponent implements OnInit {
   geolocationService = inject(GeolocationService);
   weatherService = inject(WeatherService);
   requestService = inject(RequestService);
+  pdfService = inject(PdfService);
+  toastr = inject(ToastrService);
   public localStorageService = inject(LocalStorageService);
   router = inject(Router);
   formattedDate = Date();
@@ -59,6 +64,7 @@ export default class HomeComponent implements OnInit {
   globalFilter = '';
   totalRecords = 0;
   skeletonRows = Array(5).fill(0); // 5 filas de skeleton
+  generatingPDF = signal<string | null>(null); // Track which folio is generating PDF
 
 
   constructor() {
@@ -111,19 +117,14 @@ export default class HomeComponent implements OnInit {
       command: () => this.onViewDetails(this.currentFolio)
     },
     {
-      label: 'Descargar PDF',
+      label: 'Solicitud del trámite',
       icon: 'pi pi-file-pdf',
       command: () => this.onDownloadPDF(this.currentFolio)
     },
     {
-      label: 'Compartir',
-      icon: 'pi pi-share-alt',
-      command: () => this.onShare(this.currentFolio)
-    },
-    {
-      label: 'Cancelar trámite',
-      icon: 'pi pi-times',
-      command: () => this.onCancel(this.currentFolio)
+      label: 'Constancia',
+      icon: 'pi pi-file-export',
+      command: () => this.onGenerateConstancia(this.currentFolio)
     }
   ];
 
@@ -131,7 +132,30 @@ export default class HomeComponent implements OnInit {
 
   showActionMenu(event: Event, folio: string) {
     this.currentFolio = folio;
+    this.updateActionMenu();
     this.actionMenu.toggle(event);
+  }
+
+  updateActionMenu() {
+    const isGeneratingPDF = this.generatingPDF() === this.currentFolio;
+
+    this.actionMenuItems = [
+      {
+        label: 'Ver detalles',
+        icon: 'pi pi-eye',
+        command: isGeneratingPDF ? () => {} : () => this.onViewDetails(this.currentFolio)
+      },
+      {
+        label: isGeneratingPDF ? 'Generando PDF...' : 'Solicitud del trámite',
+        icon: isGeneratingPDF ? 'pi pi-spin pi-spinner' : 'pi pi-file-pdf',
+        command: isGeneratingPDF ? () => {} : () => this.onDownloadPDF(this.currentFolio)
+      },
+      {
+        label: isGeneratingPDF ? 'Generando constancia...' : 'Constancia',
+        icon: isGeneratingPDF ? 'pi pi-spin pi-spinner' : 'pi pi-file-export',
+        command: isGeneratingPDF ? () => {} : () => this.onGenerateConstancia(this.currentFolio)
+      }
+    ];
   }
 
 
@@ -143,9 +167,57 @@ export default class HomeComponent implements OnInit {
     });
   }
 
-  onDownloadPDF(folio: string) {
-    console.log('Descargar PDF para:', folio);
-    // TODO: Implementar funcionalidad
+  async onDownloadPDF(folio: string) {
+    console.log('🔍 onDownloadPDF llamado para folio:', folio);
+    console.log('📊 Estado generatingPDF actual:', this.generatingPDF());
+    console.log('📋 Total requests disponibles:', this.myRequests().length);
+
+    // Prevenir múltiples llamadas simultáneas
+    if (this.generatingPDF()) {
+      console.log('⚠️ Ya hay un PDF generándose, ignorando llamada');
+      return;
+    }
+
+    try {
+      // Establecer estado de carga
+      this.generatingPDF.set(folio);
+      console.log('✅ Estado de carga establecido para:', folio);
+
+      // Buscar el request por folio para obtener el request_id
+      const request = this.myRequests().find(r => r.folio === folio);
+      console.log('🔍 Request encontrado:', request);
+
+      if (!request) {
+        console.log('❌ No se encontró request para folio:', folio);
+        this.toastr.error('No se encontró el trámite solicitado', 'Error');
+        return;
+      }
+
+      // Mostrar toast de inicio
+      this.toastr.info('Generando PDF, por favor espera...', 'Procesando');
+      console.log('📞 Llamando a pdfService.generateLicensePDF con ID:', request.id);
+
+      // Llamar a la Edge Function para generar el PDF
+      const result = await this.pdfService.generateLicensePDF(request.id);
+      console.log('📄 Resultado de generateLicensePDF:', result);
+
+      if (result.success && result.pdf_url) {
+        // Abrir el PDF en una nueva pestaña
+        console.log('🌐 Abriendo PDF en nueva pestaña:', result.pdf_url);
+        window.open(result.pdf_url, '_blank');
+        this.toastr.success('PDF generado exitosamente', 'Éxito');
+      } else {
+        console.log('❌ Error en la generación del PDF:', result.error);
+        this.toastr.error(result.error || 'No se pudo generar el PDF', 'Error');
+      }
+    } catch (error: any) {
+      console.error('💥 Error generando PDF:', error);
+      this.toastr.error(error.message || 'Error al generar el PDF', 'Error');
+    } finally {
+      // Limpiar estado de carga
+      this.generatingPDF.set(null);
+      console.log('🧹 Estado de carga limpiado');
+    }
   }
 
   onShare(folio: string) {
@@ -156,6 +228,68 @@ export default class HomeComponent implements OnInit {
   onCancel(folio: string) {
     console.log('Cancelar trámite:', folio);
     // TODO: Implementar funcionalidad
+  }
+
+  async onGenerateConstancia(folio: string) {
+    console.log('🔍 onGenerateConstancia llamado para folio:', folio);
+    console.log('📊 Estado generatingPDF actual:', this.generatingPDF());
+    console.log('📋 Total requests disponibles:', this.myRequests().length);
+
+    // Prevenir múltiples llamadas simultáneas
+    if (this.generatingPDF()) {
+      console.log('⚠️ Ya hay un PDF generándose, ignorando llamada');
+      return;
+    }
+
+    try {
+      // Establecer estado de carga
+      this.generatingPDF.set(folio);
+      console.log('✅ Estado de carga establecido para:', folio);
+
+      // Buscar el request por folio para obtener el request_id
+      const request = this.myRequests().find(r => r.folio === folio);
+      console.log('🔍 Request encontrado:', request);
+
+      if (!request) {
+        console.log('❌ No se encontró request para folio:', folio);
+        this.toastr.error('No se encontró el trámite solicitado', 'Error');
+        return;
+      }
+
+      // Mostrar toast de inicio
+      this.toastr.info('Generando constancia, por favor espera...', 'Procesando');
+      console.log('📞 Llamando a generateReceiptCertificate con ID:', request.id);
+
+      // Llamar a la Edge Function para generar la constancia
+      const response = await fetch(`${environment.supabaseUrl}/functions/v1/generate-receipt-certificate`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${environment.supabaseKey}`,
+        },
+        body: JSON.stringify({ request_id: request.id })
+      });
+
+      const result = await response.json();
+      console.log('📄 Resultado de generateReceiptCertificate:', result);
+
+      if (result.success && result.pdf_url) {
+        // Abrir el PDF en una nueva pestaña
+        console.log('🌐 Abriendo constancia en nueva pestaña:', result.pdf_url);
+        window.open(result.pdf_url, '_blank');
+        this.toastr.success('Constancia generada exitosamente', 'Éxito');
+      } else {
+        console.log('❌ Error en la generación de la constancia:', result.error);
+        this.toastr.error(result.error || 'No se pudo generar la constancia', 'Error');
+      }
+    } catch (error: any) {
+      console.error('💥 Error generando constancia:', error);
+      this.toastr.error(error.message || 'Error al generar la constancia', 'Error');
+    } finally {
+      // Limpiar estado de carga
+      this.generatingPDF.set(null);
+      console.log('🧹 Estado de carga limpiado');
+    }
   }
 
 
