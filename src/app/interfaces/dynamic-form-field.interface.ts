@@ -31,4 +31,36 @@ export interface DynamicFormField {
   section_grid_columns: number;
 
   options?: { value: string; label: string }[]; // solo aplica para select
+  extra_config?: DynamicExtraConfig;
+}
+
+export interface SuffixButtonConfig {
+  icon?: string;          // ej. 'pi pi-search' o 'hero-magnifying-glass'
+  label?: string;         // texto accesible
+  action: string;         // ej. 'searchUma' (lo usas en el switch del contenedor)
+  tooltip?: string;       // ayuda opcional
+}
+
+export interface DynamicExtraConfig {
+  suffixButton?: SuffixButtonConfig; // 👈 botón al final del input (la lupa)
+  clearOnSelect?: boolean;           // banderas extra que quieras
+  fetchConfig?: FetchConfig;
+  addButton?: AddButtonConfig;
+  [key: string]: any;
+  renderSpeciesTable?: boolean;
+  renderSpeciesTableAfterFields?: boolean;
+}
+
+export interface FetchConfig {
+  url?: string;
+  method?: string;
+  queryKey?: string;
+  valueKey?: string;
+  labelTemplate?: string;
+}
+
+export interface AddButtonConfig {
+  icon?: string;
+  label?: string;
+  action?: string;
 }

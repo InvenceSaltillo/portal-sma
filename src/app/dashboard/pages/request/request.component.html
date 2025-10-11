@@ -130,11 +130,90 @@
                 <app-dynamic-form-field
                   [field]="field"
                   [formGroup]="getSectionGroup(section.id)"
-                  [appendToSelector]="'#section-' + section.id">
+                  [appendToSelector]="'#section-' + section.id"
+                  (action)="onFieldAction($event)"
+                >
                 </app-dynamic-form-field>
+
+                <!-- Tabla de especies agregadas (fuera del grid para ancho completo) -->
+                @if (hasSpeciesTable(section.id) && field.type === 'select' && field.name === 'species' && !renderSpeciesTableAgferFields(section.id)) {
+                  <div class="mt-4">
+                    <div class="text-sm font-semibold text-gray-700 mb-2">Especies agregadas</div>
+                    @if (getSpeciesList(section.id).length > 0) {
+                      <div class="relative overflow-x-auto rounded-md border">
+                        <table class="w-full text-sm text-left text-gray-600">
+                          <thead class="bg-gray-100 text-gray-700">
+                            <tr>
+                              <th class="px-4 py-2">Especie</th>
+                              <th class="px-4 py-2 text-right">Acciones</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            @for (row of getSpeciesList(section.id).controls; track $index) {
+                              <tr class="border-t">
+                                <td class="px-4 py-2">{{ row.value.label }}</td>
+                                <td class="px-4 py-2 text-right">
+                                  <button
+                                    type="button"
+                                    class="px-3 py-1 rounded-md bg-red-600 hover:bg-red-700 text-white"
+                                    (click)="removeSpeciesFromList(section.id, $index)"
+                                  >
+                                    Quitar
+                                  </button>
+                                </td>
+                              </tr>
+                            }
+                          </tbody>
+                        </table>
+                      </div>
+                    } @else {
+                      <div class="text-sm text-gray-500 italic">No hay especies agregadas.</div>
+                    }
+                  </div>
+                }
+              </div>
+            }
+
+            @if (hasSpeciesTable(section.id) && renderSpeciesTableAgferFields(section.id)) {
+              <div class="mt-4 md:col-span-4">
+                <div class="text-sm font-semibold text-gray-700 mb-2">Especies agregadas</div>
+                @if (getSpeciesList(section.id).length > 0) {
+                  <div class="relative overflow-x-auto rounded-md border">
+                    <table class="w-full text-sm text-left text-gray-600">
+                      <thead class="bg-gray-100 text-gray-700">
+                        <tr>
+                          <th class="px-4 py-2">Especie</th>
+                          <th class="px-4 py-2 text-right">Descripción</th>
+                          <th class="px-4 py-2 text-right">Sistema de Marca</th>
+                          <th class="px-4 py-2 text-right">Acciones</th>
+                          <th class="px-4 py-2 text-right">Sexo</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @for (row of getSpeciesList(section.id).controls; track $index) {
+                          <tr class="border-t">
+                            <td class="px-4 py-2">{{ row.value.label }}</td>
+                            <td class="px-4 py-2 text-right">
+                              <button
+                                type="button"
+                                class="px-3 py-1 rounded-md bg-red-600 hover:bg-red-700 text-white"
+                                (click)="removeSpeciesFromList(section.id, $index)"
+                              >
+                                Quitar
+                              </button>
+                            </td>
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  </div>
+                } @else {
+                  <div class="text-sm text-gray-500 italic">No hay especies agregadas.</div>
+                }
               </div>
             }
           </div>
+
 
         }
       </div>
@@ -173,7 +252,7 @@
           tooltipPosition="top"
           [tooltipDisabled]="!form.invalid"
         >
-          <button type="submit" class="btn-primary cursor-pointer" [disabled]="form.invalid">
+          <button type="submit" class="btn-primary cursor-pointer" >
             Enviar
           </button>
         </span>

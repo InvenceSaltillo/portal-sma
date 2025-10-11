@@ -74,7 +74,10 @@ export class AuthService {
 
     const { data: userData, error: userError } = await supabaseClient
       .from('users')
-      .select('*')
+      .select(`
+        *,
+        client:clients(*)
+      `)
       .eq('id', userId)
       .single();
 

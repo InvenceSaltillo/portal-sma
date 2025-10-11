@@ -1,6 +1,6 @@
 import { ChangeDetectorRef, Component, OnInit, QueryList, ViewChildren, WritableSignal, effect, inject, signal } from '@angular/core';
 import { TitleBarComponent } from '../../../shared/title-bar/title-bar.component';
-import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, ValidatorFn, Validators } from '@angular/forms';
+import { FormArray, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, ValidatorFn, Validators } from '@angular/forms';
 import { PopoverIconComponent } from '../../../shared/components/popover-icon/popover-icon.component';
 import { ServiceTypeService } from '../../../services/service-type/service-type.service';
 import { ServiceService } from '../../../services/service/service.service';
@@ -209,9 +209,9 @@ export default class RequestComponent implements OnInit {
 
     // Descomentar en produccion
     setTimeout(() => {
-      this.processForm.get('serviceType')?.setValue('123e4567-e89b-12d3-a456-426614174000');
+      this.processForm.get('serviceType')?.setValue('123e4567-e89b-12d3-a456-426614174002');
       setTimeout(() => {
-        this.processForm.get('service')?.setValue('123e4567-e89b-42d3-a456-426614174000');
+        this.processForm.get('service')?.setValue('123e4567-e89b-42d3-a456-426614174007');
       }, 500);
     }, 1000);
 
@@ -384,7 +384,14 @@ export default class RequestComponent implements OnInit {
     //   console.error('ERROR', e);
     // }
     this.form.markAllAsTouched();
-    if (this.form.invalid) return;
+
+    // Imprimir en consola los controles inválidos
+    if (this.form.invalid) {
+      console.log('=== CONTROLES INVÁLIDOS ===');
+      this.logInvalidControls(this.form);
+      console.log('===========================');
+      return;
+    }
 
     const payload = this.form.value;
 
@@ -508,6 +515,13 @@ export default class RequestComponent implements OnInit {
         const sg = this.formBuilder.group({});
         sectionGroups.set(f.section_id, sg);
         root.addControl(f.section_id, sg);
+
+        // 👇 si la sección debe tener tabla de especies, agrega el FormArray
+        const anyFieldInSection = fields.find(x => x.section_id === f.section_id && x.extra_config?.renderSpeciesTable);
+        if (anyFieldInSection) {
+          sg.addControl('species_list', new FormArray([])); // {id,label} por elemento
+        }
+
       }
       const sg = sectionGroups.get(f.section_id)!;
 
@@ -601,6 +615,89 @@ export default class RequestComponent implements OnInit {
         }
       }
 
+    }
+  }
+
+  onFieldAction(evt: { action: string; field: DynamicFormField }) {
+    switch (evt.action) {
+      case 'searchUma':
+        this.searchUma(evt.field);
+        break;
+      case 'addSpecies':
+        this.addSpeciesToList(evt.field); break;
+      default:
+        console.warn('Acción no soportada', evt);
+    }
+  }
+
+  addSpeciesToList(field: DynamicFormField) {
+    const sg = this.getSectionGroup(field.section_id);
+    const selectedValue = sg.get(field.name)?.value;
+
+    const option = (field.options || []).find(o => o.value === selectedValue);
+    if (!option || !selectedValue) {
+      this.toastr.info('Seleccione una especie para agregar.');
+      return;
+    }
+
+    const list = sg.get('species_list') as FormArray;
+    const already = list.value?.some((it: any) => it.id === selectedValue);
+    if (already) {
+      this.toastr.info('La especie ya está en la lista.');
+      return;
+    }
+
+    list.push(this.formBuilder.group({
+      id: [selectedValue],
+      label: [option.label]
+    }));
+
+    // Limpia el select
+    sg.get(field.name)?.setValue('');
+  }
+
+  removeSpeciesFromList(sectionId: string, index: number) {
+    const list = (this.getSectionGroup(sectionId).get('species_list') as FormArray);
+    list.removeAt(index);
+  }
+
+  getSpeciesList(sectionId: string): FormArray {
+    return this.getSectionGroup(sectionId).get('species_list') as FormArray;
+  }
+
+
+  async searchUma(field: DynamicFormField) {
+    const sectionId = field.section_id;
+    const key = this.getSectionGroup(sectionId).get(field.name)?.value?.trim();
+    if (!key) {
+      this.toastr.info('Ingrese una clave de registro para buscar.');
+      return;
+    }
+
+    try {
+      this.spinnerService.show();
+      // ejemplo de búsqueda en una tabla o vista `uma_registry`
+      const { data, error } = await this.supabaseService.client
+        .from('uma_registry')
+        .select('*')
+        .ilike('key', key); // o .eq('key', key)
+
+      if (error) throw error;
+
+      if (!data?.length) {
+        this.toastr.warning('No se encontraron registros con esa clave.');
+        return;
+      }
+
+      // aquí puedes abrir modal, autocompletar otros campos, etc.
+      this.toastr.success(`Se encontraron ${data.length} resultado(s).`);
+      // ejemplo: setear algún campo si lo deseas…
+      // this.getSectionGroup(sectionId).get('otra_prop')?.setValue(data[0].nombre);
+    } catch (e: any) {
+      console.error(e);
+      this.toastr.error('Error realizando la búsqueda de UMA.');
+    } finally {
+      this.spinnerService.hide();
     }
   }
 
@@ -773,6 +870,102 @@ export default class RequestComponent implements OnInit {
     return storedUser?.id || '';
   }
 
+  /**
+   * Imprime en consola todos los controles inválidos del formulario
+   */
+  private logInvalidControls(formGroup: FormGroup, parentPath: string = ''): void {
+    Object.keys(formGroup.controls).forEach(key => {
+      const control = formGroup.get(key);
+      const currentPath = parentPath ? `${parentPath}.${key}` : key;
+
+      if (control instanceof FormGroup) {
+        // Si es un FormGroup (sección), revisar recursivamente
+        if (control.invalid) {
+          console.log(`📁 Sección inválida: ${currentPath}`);
+          this.logInvalidControls(control, currentPath);
+        }
+      } else if (control instanceof FormControl) {
+        // Si es un FormControl (campo), verificar si es inválido
+        if (control.invalid) {
+          const fieldInfo = this.getFieldInfo(key, currentPath);
+          const errors = this.getControlErrors(control);
+
+          console.log(`❌ Campo inválido: ${currentPath}`, {
+            campo: fieldInfo.name,
+            seccion: fieldInfo.section,
+            valor: control.value,
+            errores: errors,
+            touched: control.touched,
+            dirty: control.dirty
+          });
+        }
+      }
+    });
+  }
+
+  /**
+   * Obtiene información del campo basándose en su nombre y path
+   */
+  private getFieldInfo(fieldName: string, fullPath: string): { name: string, section: string } {
+    // Buscar información del campo en formFields
+    const field = this.formFields.find(f => f.name === fieldName);
+
+    if (field) {
+      const section = this.getSections().find(s => s.id === field.section_id);
+      return {
+        name: field.label || field.name,
+        section: section?.title || 'Sección desconocida'
+      };
+    }
+
+    // Para campos especiales como privacyAccepted
+    if (fieldName === 'privacyAccepted') {
+      return {
+        name: 'Aviso de Privacidad',
+        section: 'Términos y Condiciones'
+      };
+    }
+
+    // Fallback
+    return {
+      name: fieldName,
+      section: 'Sección desconocida'
+    };
+  }
+
+  /**
+   * Obtiene los errores de validación de un control
+   */
+  private getControlErrors(control: FormControl): any {
+    if (!control.errors) return null;
+
+    const errorMessages: any = {};
+
+    Object.keys(control.errors).forEach(key => {
+      switch (key) {
+        case 'required':
+          errorMessages[key] = 'Este campo es requerido';
+          break;
+        case 'email':
+          errorMessages[key] = 'Formato de email inválido';
+          break;
+        case 'pattern':
+          errorMessages[key] = 'El formato no es válido';
+          break;
+        case 'minlength':
+          errorMessages[key] = `Mínimo ${control.errors?.[key].requiredLength} caracteres`;
+          break;
+        case 'maxlength':
+          errorMessages[key] = `Máximo ${control.errors?.[key].requiredLength} caracteres`;
+          break;
+        default:
+          errorMessages[key] = control.errors?.[key];
+      }
+    });
+
+    return errorMessages;
+  }
+
   private getMunicipalityFromForm(): string {
     // Buscar municipio en las diferentes secciones del formulario
     const formValue = this.form.value;
@@ -809,6 +1002,16 @@ export default class RequestComponent implements OnInit {
 
     // Fallback por defecto
     return "SALTILLO";
+  }
+
+  hasSpeciesTable(sectionId: string): boolean {
+    const fields = this.getFieldsBySection(sectionId);
+    return fields.some(field => field.extra_config?.renderSpeciesTable === true);
+  }
+
+  renderSpeciesTableAgferFields(sectionId: string): boolean {
+    const fields = this.getFieldsBySection(sectionId);
+    return fields.some(field => field.extra_config?.renderSpeciesTableAfterFields === true);
   }
 
 }

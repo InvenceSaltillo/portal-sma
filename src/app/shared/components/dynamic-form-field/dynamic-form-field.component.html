@@ -20,41 +20,58 @@
 
   @switch (field.type) {
     @case ('text') {
-      <input
-        [formControlName]="field.name"
-        [type]="field.name === 'email' ? 'email' : 'text'"
-        class="mt-1 block w-full border rounded-md px-3 py-2"
-        [placeholder]="field.placeholder || ''"
-        [attr.inputmode]="
-          field.name === 'email' ? 'email' :
-          field.name === 'postal_code' ? 'numeric' :
-          field.name === 'area_code' ? 'numeric' :
-          field.name === 'phone' ? 'tel' :
-          field.name === 'mobile' ? 'tel' :
-          field.name === 'extension' ? 'numeric' :
-          null
-        "
+      <div class="mt-1 flex w-full">
+        <input
+          [formControlName]="field.name"
+          [type]="field.name === 'email' ? 'email' : 'text'"
+          class="flex-1 border rounded-l-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          [placeholder]="field.placeholder || ''"
+          [attr.inputmode]="
+            field.name === 'email' ? 'email' :
+            field.name === 'postal_code' ? 'numeric' :
+            field.name === 'area_code' ? 'numeric' :
+            field.name === 'phone' ? 'tel' :
+            field.name === 'mobile' ? 'tel' :
+            field.name === 'extension' ? 'numeric' : null
+          "
+          [mask]="field.name === 'email' ? null :
+            (field.mask ||
+              (field.name === 'postal_code' ? '00000' :
+              field.name === 'area_code' ? '000' :
+              field.name === 'phone' || field.name === 'mobile' ? '(000) 000-0000' :
+              field.name === 'extension' ? '000000?' : null)
+            )"
+          [dropSpecialCharacters]="field.name === 'email' ? true : field.drop_special"
+          autocomplete="off"
+          autocapitalize="none"
+          autocorrect="off"
+          spellcheck="false"
+          (blur)="normalizeOnBlur(field)"
+          (keyup.enter)="field.extra_config?.suffixButton && handleSuffixAction(field)"
+        />
 
-        [mask]="field.name === 'email' ? null :
-          (field.mask ||
-            (field.name === 'postal_code' ? '00000' :
-            field.name === 'area_code' ? '000' :
-            field.name === 'phone' || field.name === 'mobile' ? '(000) 000-0000' :
-            field.name === 'extension' ? '000000?' :
-            null)
-          )"
-        [dropSpecialCharacters]="field.name === 'email' ? true : field.drop_special"
-        autocomplete="email"
-        autocapitalize="none"
-        autocorrect="off"
-        spellcheck="false"
-        (blur)="normalizeOnBlur(field)"
-      />
+        @if (field.extra_config && field.extra_config.suffixButton) {
+          <button
+            type="button"
+            class="px-3 min-w-[44px] border border-l-0 rounded-r-md bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center"
+            pTooltip="{{ field.extra_config.suffixButton.tooltip || field.extra_config.suffixButton.label }}"
+            (click)="handleSuffixAction(field)"
+            [attr.aria-label]="field.extra_config.suffixButton.label || 'Buscar'"
+          >
+            @if (field.extra_config.suffixButton.icon) {
+              <i [class]="field.extra_config.suffixButton.icon"></i>
+            } @else {
+              <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M12.9 14.32a8 8 0 1 1 1.414-1.414l3.39 3.39a1 1 0 0 1-1.414 1.414l-3.39-3.39ZM14 8a6 6 0 1 0-12 0 6 6 0 0 0 12 0Z" clip-rule="evenodd"/></svg>
+            }
+          </button>
+        }
+      </div>
     }
+
     @case ('date') {}
     @case ('select') {
       <ng-select
-        [items]="field.options!"
+        [items]="field.options || []"
         bindLabel="label"
         bindValue="value"
         [formControlName]="field.name"
@@ -66,12 +83,22 @@
           'border-red-500': formGroup.get(field.name)?.invalid && formGroup.get(field.name)?.touched
         }"
       />
+
+      @if (field.extra_config?.addButton) {
+        <button
+          type="button"
+          class="btn-primary mt-2"
+          (click)="handleSuffixAction(field)">
+          <i [class]="field.extra_config?.addButton?.icon"></i>
+          {{ field.extra_config?.addButton?.label || 'Agregar' }}
+        </button>
+      }
     }
     @case ('checkbox') {}
     @case ('radio') {
       <div class="flex gap-2 items-center mt-3">
 
-        @for (option of field.options; track $index) {
+        @for (option of (field.options || []); track $index) {
           <label
             class="flex"
           >
@@ -157,7 +184,7 @@
           #fileInput
           type="file"
           class="sr-only"
-          [attr.accept]="(field.file_accept_mime.length ? field.file_accept_mime.join(',') : 'application/pdf')"
+          [attr.accept]="(field.file_accept_mime && field.file_accept_mime.length ? field.file_accept_mime.join(',') : 'application/pdf')"
           [multiple]="field.file_allow_multiple || null"
           (change)="onFileSelected($event, field)"
         />
