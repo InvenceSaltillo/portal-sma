@@ -10,7 +10,7 @@ import { NgxSpinnerService } from 'ngx-spinner';
 /**
  * Componente para el trámite: REGISTRO O RENOVACIÓN DE UNIDADES DE MANEJO (UMA)
  * SEMARNAT-08-022
- * 
+ *
  * Este es un ejemplo de componente de trámite con formulario fijo.
  * Cada trámite tendrá su propio componente con campos específicos.
  */
@@ -40,7 +40,7 @@ export class RegistroRenovacionUmaComponent implements OnInit {
   ngOnInit() {
     // Obtener serviceId de los query params
     this.serviceId = this.route.snapshot.queryParamMap.get('serviceId');
-    
+
     if (!this.serviceId) {
       this.toastr.error('No se especificó el trámite', 'Error');
       this.router.navigate(['/dashboard/request']);
@@ -54,16 +54,16 @@ export class RegistroRenovacionUmaComponent implements OnInit {
       superficie_total: ['', [Validators.required, Validators.min(0)]],
       ubicacion: ['', Validators.required],
       municipio: ['', Validators.required],
-      
+
       // Datos del solicitante
       nombre_solicitante: ['', Validators.required],
       rfc: ['', Validators.pattern(/^[A-ZÑ&]{3,4}\d{6}[A-Z0-9]{3}$/)],
       telefono: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
-      
+
       // Especies
       especies: this.formBuilder.array([]),
-      
+
       // Aceptación de privacidad
       privacyAccepted: [false, Validators.requiredTrue]
     });

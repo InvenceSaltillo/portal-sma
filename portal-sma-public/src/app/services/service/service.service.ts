@@ -79,7 +79,7 @@ export class ServiceService {
       this.#state.update((state) => ({ ...state, error, loading: false }));
       throw error;
     }
-    
+
     // Código antiguo con Supabase (deprecado)
     /*try {
       const { data, error } = await this.supabase

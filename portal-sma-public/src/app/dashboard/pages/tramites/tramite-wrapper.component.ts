@@ -24,7 +24,7 @@ export class TramiteWrapperComponent implements OnInit {
 
   async ngOnInit() {
     const serviceId = this.route.snapshot.paramMap.get('serviceId');
-    
+
     if (!serviceId) {
       this.router.navigate(['/dashboard/request']);
       return;

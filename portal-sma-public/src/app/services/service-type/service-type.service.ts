@@ -35,26 +35,26 @@ export class ServiceTypeService {
       const data = await firstValueFrom(
         this.http.get<any[]>(`${this.serviceTypeUrl}?client_id=${clientId}`)
       );
-      
+
       this.#state.update((state) => ({ ...state, data, loading: false }));
     } catch (error) {
       console.error('Error fetching service types:', error);
       this.#state.update((state) => ({ ...state, error, loading: false }));
       throw error;
     }
-    
+
     // Código antiguo con Supabase (deprecado)
     /*const { data, error } = await this.supabase
       .from('service_types')
       .select('*')
-      .eq('client_id', clientId);*/
+      .eq('client_id', clientId);
 
     if (error) {
       console.error('Error fetching service types:', error);
       throw error;
     }
 
-    this.#state.update((state) => ({ ...state, data })); // guardar data en el state
+    this.#state.update((state) => ({ ...state, data }));*/
   }
 
   getAll() {

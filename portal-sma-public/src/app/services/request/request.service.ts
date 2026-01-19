@@ -74,11 +74,11 @@ export class RequestService {
 
   async submitRequest(args: {
     form: FormGroup;
-    formFields: DynamicFormField[];
+    formFields?: DynamicFormField[]; // Opcional para componentes nuevos
     serviceId: string;
     userId: string;
   }): Promise<{ id: string; folio: string }> {
-    const { form, formFields, serviceId, userId } = args;
+    const { form, formFields = [], serviceId, userId } = args;
 
     // Debug: Verificar usuario autenticado
     const { data: { user } } = await supabaseClient.auth.getUser();
@@ -120,8 +120,22 @@ export class RequestService {
     // Obtener client_id desde los datos del usuario
     const clientId = this.getClientIdFromUser();
 
-    const filesMeta = await this.uploadAllFiles({ form, formFields, userId: authenticatedUserId, requestId, clientId });
-    const valuesPayload = this.buildValuesPayload({ form, formFields });
+    // Si hay formFields, usar el método antiguo (formularios dinámicos)
+    // Si no hay formFields, construir payload desde el form directamente
+    let filesMeta: FileMeta[] = [];
+    let valuesPayload: Array<{ field_id: string; value: string | null }> = [];
+
+    if (formFields.length > 0) {
+      // Método antiguo: formularios dinámicos
+      filesMeta = await this.uploadAllFiles({ form, formFields, userId: authenticatedUserId, requestId, clientId });
+      valuesPayload = this.buildValuesPayload({ form, formFields });
+    } else {
+      // Método nuevo: formularios fijos
+      // TODO: Implementar lógica para extraer valores del form directamente
+      // Por ahora, solo guardamos archivos si existen
+      filesMeta = await this.uploadAllFilesFromForm({ form, userId: authenticatedUserId, requestId, clientId });
+      valuesPayload = this.buildValuesPayloadFromForm({ form });
+    }
 
     const { error: saveErr } = await supabaseClient.rpc('save_request_data', {
       p_request_id: requestId,
@@ -220,6 +234,87 @@ export class RequestService {
     // localiza el grupo por sección y luego el control por name
     const section = form.get(field.section_id) as FormGroup | null;
     return section?.get(field.name) ?? null;
+  }
+
+  /** Método nuevo: subir archivos desde formulario fijo */
+  private async uploadAllFilesFromForm(args: {
+    form: FormGroup;
+    userId: string;
+    requestId: string;
+    clientId?: string;
+  }): Promise<FileMeta[]> {
+    const { form, userId, requestId, clientId } = args;
+    const metas: FileMeta[] = [];
+    const safeClientId = clientId || 'default-client';
+    const baseDir = `${safeClientId}/users/${userId}/requests/${requestId}/documents`;
+
+    // Buscar todos los controles que sean File
+    for (const controlName of Object.keys(form.controls)) {
+      const control = form.get(controlName);
+      if (!control) continue;
+
+      const value = control.value;
+      if (!value) continue;
+
+      // Si el valor es un File o File[]
+      const files: File[] = Array.isArray(value) 
+        ? value.filter((v: any) => v instanceof File)
+        : (value instanceof File ? [value] : []);
+
+      for (const file of files) {
+        const safeName = this.toSafeFileName(file.name);
+        const unique = `${Date.now()}-${cryptoRandom(6)}-${safeName}`;
+        const path = `${baseDir}/${unique}`;
+
+        const { error } = await supabaseClient.storage
+          .from(this.BUCKET_NAME)
+          .upload(path, file, { upsert: false, cacheControl: '3600' });
+
+        if (error) throw error;
+
+        metas.push({
+          field_id: controlName, // Usar el nombre del control como field_id
+          path,
+          filename: file.name,
+          mime_type: file.type,
+          size: file.size
+        });
+      }
+    }
+
+    return metas;
+  }
+
+  /** Método nuevo: construir payload desde formulario fijo */
+  private buildValuesPayloadFromForm(args: {
+    form: FormGroup;
+  }): Array<{ field_id: string; value: string | null }> {
+    const { form } = args;
+    const items: Array<{ field_id: string; value: string | null }> = [];
+
+    // Recorrer todos los controles del formulario
+    for (const controlName of Object.keys(form.controls)) {
+      const control = form.get(controlName);
+      if (!control) continue;
+
+      // Saltar campos especiales
+      if (controlName === 'privacyAccepted') continue;
+      if (controlName === 'especies' || controlName.includes('species')) continue; // Manejar especies por separado
+
+      const raw = control.value;
+      const value =
+        raw === undefined || raw === null
+          ? null
+          : typeof raw === 'string'
+            ? raw
+            : typeof raw === 'object'
+              ? JSON.stringify(raw)
+              : String(raw);
+
+      items.push({ field_id: controlName, value });
+    }
+
+    return items;
   }
 
   private toSafeFileName(name: string): string {
