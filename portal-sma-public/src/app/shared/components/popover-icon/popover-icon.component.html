@@ -1,0 +1,24 @@
+<div
+  [ngxTippy]="tooltipTemplate"
+  [tippyName]="id()"
+  [tippyContext]="{ data: data}"
+  [tippyProps]="tippyPropsContent"
+  class="mx-auto flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-indigo-100 sm:mx-0 sm:h-8 sm:w-8 cursor-pointer"
+>
+  <svg class="h-6 w-6 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" >
+    <path stroke-linecap="round" stroke-linejoin="round" [attr.d]="svgIconPath()" />
+  </svg>
+</div>
+
+<ng-template
+  #tooltipTemplate
+  let-name
+  let-data="data"
+>
+  <div class="px-3 py-2 bg-gray-100 border-b border-gray-200 rounded-t-lg dark:border-gray-600 dark:bg-gray-700">
+    <h3 class="font-semibold text-gray-900 dark:text-white">{{data.title}}</h3>
+  </div>
+  <div class="px-3 py-2 text-sm text-gray-500 transition-opacity duration-300 bg-white border border-gray-200 rounded-b-lg shadow-sm">
+      <p>{{data.text}}</p>
+  </div>
+</ng-template>

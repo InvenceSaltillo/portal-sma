@@ -1,0 +1,102 @@
+<div
+  class="text-3xl text-black relative p-3 border border-slate-100 mb-4 rounded-md shadow-md"
+>
+  <div class="flex items-center space-x-4">
+    <h3 class="text-xl font-bold">Datos generales</h3>
+  </div>
+
+  <form [formGroup]="generalDataForm" (ngSubmit)="onSubmitForm()">
+    <div class="flex space-x-4 mt-2">
+      <div class="w-1/3">
+        <div class="flex items-center space-x-1">
+          <label for="curp" class="block text-gray-700 text-lg">
+            <span
+              class="text-red-600 text-lg font-bold"
+            >
+              {{generalDataForm.controls['curp'].hasValidator(Validators.required) ? '*' : ''}}
+            </span>
+            CURP:
+          </label>
+          <app-popover-icon
+            [position]="'right'"
+            [title]="'3. CURP'"
+            [id]="'curp'"
+            [text]="'Para el caso de personas físicas, anote la Clave Única de Registro de Población del Solicitante.'"
+          />
+        </div>
+        <input
+          type="text"
+          formControlName="curp"
+          class="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
+          autocomplete="off"
+        >
+        @if (
+          (generalDataForm.hasError('required', 'curp')) && generalDataForm.controls['curp'].touched
+        ) {
+          <div
+            class="text-sm text-red-500"
+          >
+            <p>Este campo es requerido.</p>
+          </div>
+        }
+      </div>
+      <div class="w-1/3">
+        <div class="flex items-center space-x-1">
+          <label for="rfc" class="block text-gray-700 text-lg">
+            <span
+              class="text-red-600 text-lg font-bold"
+            >
+              {{generalDataForm.controls['rfc'].hasValidator(Validators.required) ? '*' : ''}}
+            </span>
+             RFC:
+          </label>
+          <app-popover-icon
+            [position]="'right'"
+            [title]="'4. RFC'"
+            [id]="'rfc'"
+            [text]="'Anote el Registro Federal de Contribuyentes (RFC) del solicitante.'"
+          />
+        </div>
+        <input
+          type="text"
+          formControlName="rfc"
+          class="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
+          autocomplete="off"
+        >
+        @if (
+          (generalDataForm.hasError('required', 'rfc')) && generalDataForm.controls['rfc'].touched
+        ) {
+          <div
+            class="text-sm text-red-500"
+          >
+            <p>Este campo es requerido.</p>
+          </div>
+        }
+      </div>
+      <div class="w-1/3">
+        <div class="flex items-center space-x-1">
+          <label for="rupa" class="block text-gray-700 text-lg">
+            <span
+              class="text-red-600 text-lg font-bold"
+            >
+              {{generalDataForm.controls['rupa'].hasValidator(Validators.required) ? '*' : ''}}
+            </span>
+             RUPA:
+          </label>
+          <app-popover-icon
+            [position]="'right'"
+            [title]="'5. RUPA'"
+            [id]="'rupa'"
+            [text]="'Anote el Registro Único de Personas Acreditadas (RUPA), dato opcional sólo para personas que cuenten con este registro no deberán de presentar la documentación para acreditar personalidad.'"
+          />
+        </div>
+        <input
+          type="text"
+          formControlName="rupa"
+          class="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
+          autocomplete="off"
+        >
+      </div>
+    </div>
+  </form>
+</div>

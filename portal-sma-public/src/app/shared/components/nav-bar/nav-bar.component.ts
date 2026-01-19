@@ -1,0 +1,83 @@
+import { LocalStorageService } from './../../../services/local-storage/local-storage.service';
+import { trigger, state, style, transition, animate } from '@angular/animations';
+import { Component, OnInit, inject, input } from '@angular/core';
+import { RouterModule } from '@angular/router';
+import { TooltipComponent } from '../tooltip/tooltip.component';
+import { User } from '../../../interfaces/user.interface';
+import { ToastrService } from 'ngx-toastr';
+import { AppUtils } from '../../../app.utils';
+import { AuthService } from '../../../services/auth/auth.service';
+
+@Component({
+  selector: 'app-nav-bar',
+  standalone: true,
+  imports: [RouterModule, TooltipComponent],
+  templateUrl: './nav-bar.component.html',
+  styleUrl: './nav-bar.component.css',
+  animations: [
+    trigger('showOrHide', [
+      state(
+        'true',
+        style({
+          opacity: 1,
+          visibility: 'visible'
+        })
+      ),
+      state(
+        'false',
+        style({
+          opacity: 0,
+          visibility: 'hidden'
+        })
+      ),
+      transition('true => false', [
+        animate('.75s ease'),
+      ]),
+      transition('false => true', [
+        animate('.75s ease'),
+      ]),
+    ])
+  ],
+})
+export class NavBarComponent implements OnInit {
+  showProfileMenu = false;
+  user = input.required<User>();
+  readonly appUtils = AppUtils;
+  userFullName = '';
+  authService = inject(AuthService);
+  private menuCloseTimer: any | null = null;
+
+  constructor() { }
+
+  toggleMenu(): void {
+    this.showProfileMenu = !this.showProfileMenu;
+    if (this.showProfileMenu) this.cancelMenuClose();
+  }
+
+  onMenuAreaEnter(): void {
+    this.cancelMenuClose();
+  }
+
+  onMenuAreaLeave(): void {
+    // pequeño delay para no cerrar si el usuario vuelve rápido
+    this.menuCloseTimer = setTimeout(() => {
+      this.showProfileMenu = false;
+    }, 180);
+  }
+
+  private cancelMenuClose(): void {
+    if (this.menuCloseTimer) {
+      clearTimeout(this.menuCloseTimer);
+      this.menuCloseTimer = null;
+    }
+  }
+
+  ngOnInit(): void {
+    this.userFullName = AppUtils.getUserFullName(this.user());
+  }
+
+  logout(): void {
+    this.authService.logout();
+  }
+
+}

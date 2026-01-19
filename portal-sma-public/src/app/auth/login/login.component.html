@@ -1,0 +1,121 @@
+<!-- source:https://codepen.io/owaiswiz/pen/jOPvEPB -->
+<div class="min-h-screen bg-gray-100 text-gray-900 flex flex-col justify-between bg-[url('https://invence.com.mx/portal-sma/public/bg.jpg')] bg-cover bg-center">
+
+  <div class="flex-grow flex justify-center items-center">
+    <div class="max-w-screen-xl m-0 sm:m-10 bg-transparent shadow sm:rounded-lg flex justify-center ">
+      <div class="lg:w-1/2 xl:w-5/12 p-6 sm:p-12 bg-white shadow sm:rounded-lg ">
+        <div class=" w-full flex flex-col justify-center items-center">
+          <img class="text-center" src="assets/img/logo-sma.png" width="80%" alt="">
+        </div>
+        <div class="mt-12 flex flex-col items-center">
+          <h1 class="text-2xl xl:text-3xl font-extrabold">
+            Inicia sesión
+          </h1>
+
+          <form [formGroup]="loginForm" (ngSubmit)="onSubmitLoginForm()">
+            <div class="w-full flex-1 mt-8">
+              <div class="">
+                <input
+                  type="email"
+                  id="email"
+                  formControlName="email"
+                  class="w-full px-8 py-4 rounded-lg font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
+                  placeholder="Correo electrónico"
+                  [class.border-red-500]="(
+                    (loginForm.hasError('email', 'email') || loginForm.hasError('required', 'email')) && loginForm.controls['email'].touched
+                  )"
+                />
+                  @if (
+                    (loginForm.hasError('required', 'email')) && loginForm.controls['email'].touched
+                  ) {
+                    <span class="w-full text-sm text-red-500">Este campo es requerido.</span>
+                  }
+                  @if (
+                    (loginForm.hasError('email', 'email')) && loginForm.controls['email'].touched
+                  ) {
+                    <span class="w-full text-sm text-red-500">Ingrese un correo válido.</span>
+                  }
+                  <input
+                    type="password"
+                    formControlName="password"
+                    class="w-full px-8 py-4 rounded-lg font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white mt-5"
+                    placeholder="Contraseña"
+                    [class.border-red-500]="(
+                      loginForm.hasError('required', 'password') && loginForm.controls['password'].touched
+                    )"
+                  />
+                  @if (loginForm.hasError('required', 'password') && loginForm.controls['password'].touched) {
+                    <div
+                      class="text-sm text-red-500"
+                    >
+                      <p>Este campo es requerido.</p>
+                    </div>
+                  }
+                  <button
+                    class="disabled:bg-slate-400 mt-5 tracking-wide font-semibold bg-indigo-500 text-gray-100 w-full py-4 rounded-lg hover:bg-indigo-700 transition-all duration-300 ease-in-out flex items-center justify-center focus:shadow-outline focus:outline-none"
+                    [disabled]="loginForm.invalid"
+                  >
+                    <span class="ml-3">
+                        Ingresar
+                    </span>
+                  </button>
+                  <div class="text-center">
+                    <a
+                      class="mt-5 inline-block text-md text-blue-500 dark:text-blue-500 align-baseline hover:text-blue-800 cursor-pointer"
+                      (click)="showRecoverPasswordDialog = true"
+                    >
+                      ¿Olvidaste tu contraseña?
+                    </a>
+                  </div>
+                  <div class="mt-6 text-black text-center flex flex-row justify-center items-center w-full p-0 gap-x-4">
+                    <a>¿No tienes cuenta?</a>
+                    <button
+                      type="button"
+                      class="w-1/2 tracking-wide font-semibold bg-indigo-500 text-gray-100 py-2 rounded-lg hover:bg-indigo-700 transition-all duration-300 ease-in-out focus:shadow-outline focus:outline-none"
+                      (click)="showCreateAccountDialog = true"
+                    >
+                      Crear cuenta
+                    </button>
+                  </div>
+
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+      <!-- <div class="flex-1 bg-indigo-100 text-center hidden lg:flex">
+        <div class="m-12 xl:m-16 w-full bg-contain bg-center bg-no-repeat"
+            style="background-image: url('https://invence.com.mx/portal-sma/public/login_image.svg')">
+        </div>
+      </div> -->
+    </div>
+  </div>
+
+  <footer class="text-center p-4 bg-white bg-opacity-50">
+    <p class="text-sm">
+      La Subdirección de Vida Silvestre, de la Secretaría de Medio Ambiente del Estado de Coahuila de Zaragoza , utilizará los datos personales requeridos en su solicitud y aquí recabados para mantener actualizada la base de datos perteneciente al sistema de Unidades de Manejo para la Conservación y Aprovechamiento de la Vida Silvestre en el estado y la expedición de oficios relativos a autorizaciones, modificaciones, expedición de cintillos de cobro cinegético, oficios relativos a la conservación, manejo y aprovechamiento de la vida silvestre.
+    </p>
+    <p class="text-sm font-bold">
+      © {{anio}} INVENCE S.A de C.V. Todos los derechos reservados.
+    </p>
+  </footer>
+
+</div>
+
+@if (showRecoverPasswordDialog) {
+  <app-custom-dialog
+    [dialogConfig]="recoverPasswordDialogConfig"
+    [controls]="recoverPasswordDialogControls"
+    (onClickCancelButton)="showRecoverPasswordDialog = false"
+    (onClickConfirmButton)="onSubmitRecoverPasswordForm($event)"
+  />
+}
+
+@if (showCreateAccountDialog) {
+  <app-custom-dialog
+    [dialogConfig]="registerDialogConfig"
+    [controls]="registerDialogControls"
+    (onClickCancelButton)="showCreateAccountDialog = false"
+    (onClickConfirmButton)="onSubmitRegisterForm($event)"
+  />
+}
