@@ -17,6 +17,11 @@ export const routes: Routes = [
         loadComponent: () => import('./dashboard/pages/request/request.component'),
       },
       {
+        path: 'tramites/:serviceId',
+        title: 'Trámite',
+        loadComponent: () => import('./dashboard/pages/tramites/tramite-wrapper.component'),
+      },
+      {
         path: 'inquiry',
         title: 'Consulta tu trámite',
         loadComponent: () => import('./dashboard/pages/inquiry/inquiry.component'),

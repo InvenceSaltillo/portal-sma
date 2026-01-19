@@ -211,7 +211,7 @@ export default class RequestComponent implements OnInit {
       this.getByServiceType(serviceTypeId);
     });
 
-    this.processForm.get('service')?.valueChanges.subscribe(serviceId => {
+    this.processForm.get('service')?.valueChanges.subscribe(async (serviceId) => {
       if (!serviceId) {
         console.log('DEBUG: no hay',);
         this.serviceSelected = undefined;
@@ -220,6 +220,16 @@ export default class RequestComponent implements OnInit {
       console.log('DEBUG: serviceId', this.serviceService.serviceSelected());
       this.serviceSelected = this.serviceService.serviceSelected()?.find(service => service.id === serviceId);
 
+      // Verificar si tiene componente específico y redirigir
+      const { hasSpecificComponent } = await import('../../../config/service-to-component.map');
+      if (hasSpecificComponent(serviceId)) {
+        this.router.navigate(['/dashboard/tramites', serviceId], {
+          queryParams: { serviceId }
+        });
+        return;
+      }
+
+      // Si no tiene componente específico, usar formulario dinámico (temporal)
       this.dataForm.markAsPristine();
       this.dataForm.markAsUntouched();
       this.getServiceById(serviceId);

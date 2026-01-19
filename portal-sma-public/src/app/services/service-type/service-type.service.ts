@@ -3,7 +3,7 @@ import { GlobalState } from '../../interfaces/global-state.interface';
 import { ServiceType } from '../../interfaces/service-type.interface';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
-import { catchError, of } from 'rxjs';
+import { catchError, of, firstValueFrom } from 'rxjs';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 @Injectable({
@@ -21,7 +21,7 @@ export class ServiceTypeService {
   public error = computed(() => this.#state().error);
 
   private http = inject(HttpClient);
-  serviceTypeUrl = `${environment.apiUrl}service-type`
+  serviceTypeUrl = `${environment.apiUrl}/service-types`
   private supabase: SupabaseClient;
 
   constructor() {
@@ -29,10 +29,25 @@ export class ServiceTypeService {
   }
 
   async getByClientId(clientId: string): Promise<void> {
-    const { data, error } = await this.supabase
+    // Usar nueva API
+    try {
+      this.#state.update((state) => ({ ...state, loading: true }));
+      const data = await firstValueFrom(
+        this.http.get<any[]>(`${this.serviceTypeUrl}?client_id=${clientId}`)
+      );
+      
+      this.#state.update((state) => ({ ...state, data, loading: false }));
+    } catch (error) {
+      console.error('Error fetching service types:', error);
+      this.#state.update((state) => ({ ...state, error, loading: false }));
+      throw error;
+    }
+    
+    // Código antiguo con Supabase (deprecado)
+    /*const { data, error } = await this.supabase
       .from('service_types')
       .select('*')
-      .eq('client_id', clientId);
+      .eq('client_id', clientId);*/
 
     if (error) {
       console.error('Error fetching service types:', error);

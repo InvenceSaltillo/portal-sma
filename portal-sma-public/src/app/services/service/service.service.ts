@@ -4,7 +4,7 @@ import { ServiceType } from '../../interfaces/service-type.interface';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { Service } from '../../interfaces/service.interface';
-import { catchError, map, of } from 'rxjs';
+import { catchError, map, of, firstValueFrom } from 'rxjs';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 @Injectable({
@@ -22,7 +22,7 @@ export class ServiceService {
   public error = computed(() => this.#state().error);
 
   private http = inject(HttpClient);
-  serviceUrl = `${environment.apiUrl}service`
+  serviceUrl = `${environment.apiUrl}/services`
   private supabase: SupabaseClient;
 
   constructor() {
@@ -68,6 +68,20 @@ export class ServiceService {
     this.#state.update((state) => ({ ...state, loading: true }));
 
     try {
+      // Usar nueva API
+      const data = await firstValueFrom(
+        this.http.get<any[]>(`${this.serviceUrl}/by-type/${serviceTypeId}?client_id=${clientId}`)
+      );
+
+      this.#state.update((state) => ({ ...state, data, loading: false }));
+    } catch (error) {
+      console.error('Error fetching services:', error);
+      this.#state.update((state) => ({ ...state, error, loading: false }));
+      throw error;
+    }
+    
+    // Código antiguo con Supabase (deprecado)
+    /*try {
       const { data, error } = await this.supabase
         .from('services')
         .select('*')
@@ -82,7 +96,7 @@ export class ServiceService {
       this.#state.update((state) => ({ ...state, data }));
     } finally {
       this.#state.update((state) => ({ ...state, loading: false }));
-    }
+    }*/
   }
 
   getAll() {
@@ -115,7 +129,8 @@ export class ServiceService {
   getByServiceType(serviceTypeId: string) {
     this.#state.set({ ...this.#state(), loading: true, error: undefined });
     try {
-      this.http.get<Service[]>(`${this.serviceUrl}/service-type/${serviceTypeId}`)
+      // Usar nueva API
+      this.http.get<Service[]>(`${this.serviceUrl}/by-type/${serviceTypeId}`)
         .pipe(
           catchError(error => {
             this.#state.set({

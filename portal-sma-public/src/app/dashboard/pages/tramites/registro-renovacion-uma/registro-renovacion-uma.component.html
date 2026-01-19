@@ -1,0 +1,185 @@
+<app-title-bar
+  [title]="'Registro o Renovación de Unidades de Manejo (UMA)'"
+  [subTitle]="'SEMARNAT-08-022'"
+/>
+
+<div class="text-3xl text-black relative p-3 border border-slate-100 rounded-md mt-4 mx-2 sm:mx-20 shadow-md">
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-6">
+    
+    <!-- Sección: Datos del Predio -->
+    <div class="p-3 border border-slate-100 mb-4 rounded-md shadow-md">
+      <h2 class="text-lg font-bold mb-4">Datos del Predio</h2>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-gray-700 text-lg mb-2">
+            <span class="text-red-600 text-lg font-bold">*</span> Nombre del Predio:
+          </label>
+          <input
+            type="text"
+            formControlName="nombre_predio"
+            class="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
+            placeholder="Ingrese el nombre del predio"
+          />
+          @if (form.get('nombre_predio')?.invalid && form.get('nombre_predio')?.touched) {
+            <p class="text-sm text-red-500 mt-1">Este campo es requerido</p>
+          }
+        </div>
+
+        <div>
+          <label class="block text-gray-700 text-lg mb-2">
+            <span class="text-red-600 text-lg font-bold">*</span> Superficie Total (hectáreas):
+          </label>
+          <input
+            type="number"
+            formControlName="superficie_total"
+            class="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
+            placeholder="0.00"
+            min="0"
+            step="0.01"
+          />
+          @if (form.get('superficie_total')?.invalid && form.get('superficie_total')?.touched) {
+            <p class="text-sm text-red-500 mt-1">Este campo es requerido</p>
+          }
+        </div>
+
+        <div>
+          <label class="block text-gray-700 text-lg mb-2">
+            <span class="text-red-600 text-lg font-bold">*</span> Ubicación:
+          </label>
+          <input
+            type="text"
+            formControlName="ubicacion"
+            class="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
+            placeholder="Dirección del predio"
+          />
+          @if (form.get('ubicacion')?.invalid && form.get('ubicacion')?.touched) {
+            <p class="text-sm text-red-500 mt-1">Este campo es requerido</p>
+          }
+        </div>
+
+        <div>
+          <label class="block text-gray-700 text-lg mb-2">
+            <span class="text-red-600 text-lg font-bold">*</span> Municipio:
+          </label>
+          <input
+            type="text"
+            formControlName="municipio"
+            class="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
+            placeholder="Nombre del municipio"
+          />
+          @if (form.get('municipio')?.invalid && form.get('municipio')?.touched) {
+            <p class="text-sm text-red-500 mt-1">Este campo es requerido</p>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Sección: Datos del Solicitante -->
+    <div class="p-3 border border-slate-100 mb-4 rounded-md shadow-md">
+      <h2 class="text-lg font-bold mb-4">Datos del Solicitante</h2>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-gray-700 text-lg mb-2">
+            <span class="text-red-600 text-lg font-bold">*</span> Nombre Completo:
+          </label>
+          <input
+            type="text"
+            formControlName="nombre_solicitante"
+            class="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
+            placeholder="Nombre completo del solicitante"
+          />
+          @if (form.get('nombre_solicitante')?.invalid && form.get('nombre_solicitante')?.touched) {
+            <p class="text-sm text-red-500 mt-1">Este campo es requerido</p>
+          }
+        </div>
+
+        <div>
+          <label class="block text-gray-700 text-lg mb-2">RFC:</label>
+          <input
+            type="text"
+            formControlName="rfc"
+            class="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
+            placeholder="RFC (opcional)"
+            maxlength="13"
+          />
+          @if (form.get('rfc')?.invalid && form.get('rfc')?.touched) {
+            <p class="text-sm text-red-500 mt-1">RFC inválido</p>
+          }
+        </div>
+
+        <div>
+          <label class="block text-gray-700 text-lg mb-2">
+            <span class="text-red-600 text-lg font-bold">*</span> Teléfono:
+          </label>
+          <input
+            type="tel"
+            formControlName="telefono"
+            class="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
+            placeholder="Teléfono de contacto"
+          />
+          @if (form.get('telefono')?.invalid && form.get('telefono')?.touched) {
+            <p class="text-sm text-red-500 mt-1">Este campo es requerido</p>
+          }
+        </div>
+
+        <div>
+          <label class="block text-gray-700 text-lg mb-2">
+            <span class="text-red-600 text-lg font-bold">*</span> Correo Electrónico:
+          </label>
+          <input
+            type="email"
+            formControlName="email"
+            class="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
+            placeholder="correo@ejemplo.com"
+          />
+          @if (form.get('email')?.invalid && form.get('email')?.touched) {
+            <p class="text-sm text-red-500 mt-1">
+              @if (form.get('email')?.hasError('required')) {
+                Este campo es requerido
+              } @else if (form.get('email')?.hasError('email')) {
+                Correo electrónico inválido
+              }
+            </p>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Aceptación de Aviso de Privacidad -->
+    <div class="mt-8 rounded-md border border-slate-200 bg-slate-50 p-4">
+      <label class="inline-flex items-start gap-3">
+        <input
+          type="checkbox"
+          formControlName="privacyAccepted"
+          class="mt-1 h-5 w-5 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+        />
+        <span class="text-[15px] text-slate-800">
+          Aceptar Términos de
+          <a href="#" class="text-blue-600 underline hover:text-blue-700">
+            Aviso de Privacidad
+          </a>
+        </span>
+      </label>
+      @if (form.get('privacyAccepted')?.invalid && form.get('privacyAccepted')?.touched) {
+        <p class="mt-2 text-sm text-red-600">Debes aceptar el Aviso de Privacidad</p>
+      }
+    </div>
+
+    <!-- Botón de envío -->
+    <div class="flex justify-end mt-6">
+      <button
+        type="submit"
+        [disabled]="loading || form.invalid"
+        class="btn-primary cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        @if (loading) {
+          <span>Enviando...</span>
+        } @else {
+          <span>Enviar Trámite</span>
+        }
+      </button>
+    </div>
+  </form>
+</div>
