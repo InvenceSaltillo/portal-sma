@@ -62,6 +62,7 @@ if (!process.env.SUPABASE_URL || !process.env.SUPABASE_ANON_KEY) {
 }
 
 // Exportar las variables para uso directo si es necesario
-export { supabaseUrl, supabaseAnonKey };
+export const supabaseUrl = process.env.SUPABASE_URL;
+export const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
 
 export default true;
