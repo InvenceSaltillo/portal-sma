@@ -257,7 +257,7 @@ export class RequestService {
       if (!value) continue;
 
       // Si el valor es un File o File[]
-      const files: File[] = Array.isArray(value) 
+      const files: File[] = Array.isArray(value)
         ? value.filter((v: any) => v instanceof File)
         : (value instanceof File ? [value] : []);
 

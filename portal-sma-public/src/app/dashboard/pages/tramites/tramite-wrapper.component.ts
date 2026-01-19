@@ -18,7 +18,7 @@ import { getComponentNameForService, hasSpecificComponent } from '../../../confi
     </div>
   `
 })
-export class TramiteWrapperComponent implements OnInit {
+export default class TramiteWrapperComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
 

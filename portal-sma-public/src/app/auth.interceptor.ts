@@ -7,7 +7,7 @@ import { supabaseClient } from './core/supabase.client';
 export function authInterceptor(req: HttpRequest<unknown>, next: HttpHandlerFn) {
   // Verificar si es una petición a nuestra nueva API
   const isApiRequest = req.url.includes('localhost:3000') || req.url.includes('/api/');
-  
+
   if (!isApiRequest) {
     // Si no es una petición a nuestra API, continuar sin modificar
     return next(req);
@@ -16,15 +16,15 @@ export function authInterceptor(req: HttpRequest<unknown>, next: HttpHandlerFn) 
   // Obtener token de Supabase
   // Primero intentar desde localStorage (apiToken)
   let authToken = localStorage.getItem('apiToken');
-  
+
   // Si no hay apiToken, intentar obtenerlo de la sesión de Supabase
   if (!authToken) {
     // Buscar en localStorage la clave de Supabase
     // Supabase guarda la sesión con una clave específica
-    const supabaseKey = Object.keys(localStorage).find(key => 
+    const supabaseKey = Object.keys(localStorage).find(key =>
       key.startsWith('sb-') && key.endsWith('-auth-token')
     );
-    
+
     if (supabaseKey) {
       try {
         const sessionData = localStorage.getItem(supabaseKey);
