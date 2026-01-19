@@ -30,6 +30,18 @@ import { LocalStorageService } from '../../../services/local-storage/local-stora
 import { PdfService } from '../../../services/pdf/pdf.service';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+type SexValue = 'male' | 'female' | 'unsexed';
+
+interface SpeciesRow {
+  speciesId: string;
+  speciesLabel: string;        // “Común - Científico”
+  commonName?: string;
+  scientificName?: string;
+  description: string;
+  markingSystem: string;
+  sex: SexValue;
+}
+
 
 @Component({
   selector: 'app-request',
@@ -129,6 +141,8 @@ export default class RequestComponent implements OnInit {
     12: 'md:col-span-12',
   };
 
+  speciesRows: Record<string, SpeciesRow[]> = {};
+
   constructor(private cdr: ChangeDetectorRef) {
     effect(() => {
       if (
@@ -156,6 +170,10 @@ export default class RequestComponent implements OnInit {
 
   getGridColsClass(cols?: number) {
     return `grid grid-cols-1 gap-4 ${this.colsMap[cols ?? 3]}`;
+  }
+
+  private findField(sectionId: string, name: string) {
+    return this.formFields.find(f => f.section_id === sectionId && f.name === name);
   }
 
   getColSpanClass(span?: number) {
@@ -624,7 +642,11 @@ export default class RequestComponent implements OnInit {
         this.searchUma(evt.field);
         break;
       case 'addSpecies':
-        this.addSpeciesToList(evt.field); break;
+        this.addSpeciesToList(evt.field);
+        break;
+      case 'addSpeciesAfterField':
+        this.onAddSpeciesRow(evt.field.section_id);
+        break;
       default:
         console.warn('Acción no soportada', evt);
     }
@@ -656,9 +678,62 @@ export default class RequestComponent implements OnInit {
     sg.get(field.name)?.setValue('');
   }
 
+  onAddSpeciesRow(sectionId: string) {
+    const sg = this.getSectionGroup(sectionId);         // FormGroup anidado de esa sección
+    const speciesCtrl = sg.get('species');
+    const descCtrl = sg.get('description');
+    const markCtrl = sg.get('marking_system');
+    const sexCtrl = sg.get('sex');
+
+    // Validar requeridos
+    speciesCtrl?.markAsTouched();
+    descCtrl?.markAsTouched();
+    markCtrl?.markAsTouched();
+    sexCtrl?.markAsTouched();
+
+    if (sg.invalid) return;
+
+    const speciesId: string = speciesCtrl?.value;
+    const description: string = descCtrl?.value?.trim() ?? '';
+    const markingSystem: string = markCtrl?.value?.trim() ?? '';
+    const sex: SexValue = sexCtrl?.value ?? 'unsexed';
+
+    // Buscar label y (opcional) separar nombres
+    const speciesField = this.findField(sectionId, 'species');
+    const opt = speciesField?.options?.find(o => o.value === speciesId);
+    const speciesLabel = opt?.label ?? '';
+    // si tu label viene "Común - Científico"
+    const [commonName, scientificName] = speciesLabel.split(' - ').map(s => s?.trim());
+
+    // Inicializa contenedor si no existe
+    if (!this.speciesRows[sectionId]) this.speciesRows[sectionId] = [];
+
+    // Agrega fila
+    this.speciesRows[sectionId].push({
+      speciesId,
+      speciesLabel,
+      commonName,
+      scientificName,
+      description,
+      markingSystem,
+      sex
+    });
+
+    // Limpia campos (si así lo quieres)
+    speciesCtrl?.setValue('');
+    descCtrl?.reset('');
+    markCtrl?.reset('');
+    sexCtrl?.setValue('unsexed');         // o null
+  }
+
   removeSpeciesFromList(sectionId: string, index: number) {
     const list = (this.getSectionGroup(sectionId).get('species_list') as FormArray);
     list.removeAt(index);
+  }
+
+  removeSpeciesRow(sectionId: string, index: number) {
+    if (!this.speciesRows[sectionId]) return;
+    this.speciesRows[sectionId].splice(index, 1);
   }
 
   getSpeciesList(sectionId: string): FormArray {
@@ -1009,7 +1084,7 @@ export default class RequestComponent implements OnInit {
     return fields.some(field => field.extra_config?.renderSpeciesTable === true);
   }
 
-  renderSpeciesTableAgferFields(sectionId: string): boolean {
+  renderSpeciesTableAferFields(sectionId: string): boolean {
     const fields = this.getFieldsBySection(sectionId);
     return fields.some(field => field.extra_config?.renderSpeciesTableAfterFields === true);
   }
