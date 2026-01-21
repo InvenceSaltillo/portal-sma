@@ -1,0 +1,245 @@
+<div class="p-3 border border-slate-100 mb-4 rounded-md shadow-md bg-white" [formGroup]="group">
+  <div class="flex items-center gap-2 mb-3">
+    <input
+      type="checkbox"
+      [formControlName]="checkboxControlName"
+      class="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded cursor-pointer"
+    />
+    <h2 class="text-lg font-bold">Notificaciones - Domicilio y medios de contacto</h2>
+    <app-popover-icon
+      [position]="'top'"
+      [title]="'Notificaciones - Domicilio y medios de contacto'"
+      [id]="'notification-address-contact-section'"
+      [text]="'Información de domicilio y medios de contacto para notificaciones.'"
+    />
+  </div>
+
+  @if (isExpanded) {
+    <!-- Primera fila: 5 columnas (C.P., Calle, No. Ext., No. Int., Colonia) -->
+    <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-4">
+      <!-- C.P. -->
+      <div>
+        <label class="block text-gray-700 text-lg mb-1">
+          <span class="text-red-600 text-lg font-bold">*</span> C.P.:
+        </label>
+        <input
+          type="text"
+          [formControlName]="postalCodeControlName"
+          class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          [class.border-red-500]="postalCodeControl?.invalid && postalCodeControl?.touched"
+        />
+        @if (postalCodeControl?.invalid && postalCodeControl?.touched) {
+          <p class="text-sm text-red-500 mt-1">Este campo es requerido.</p>
+        }
+      </div>
+
+      <!-- Calle -->
+      <div>
+        <label class="block text-gray-700 text-lg mb-1">
+          <span class="text-red-600 text-lg font-bold">*</span> Calle:
+        </label>
+        <input
+          type="text"
+          [formControlName]="streetControlName"
+          class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          [class.border-red-500]="streetControl?.invalid && streetControl?.touched"
+        />
+        @if (streetControl?.invalid && streetControl?.touched) {
+          <p class="text-sm text-red-500 mt-1">Este campo es requerido.</p>
+        }
+      </div>
+
+      <!-- No. Ext. -->
+      <div>
+        <label class="block text-gray-700 text-lg mb-1">
+          <span class="text-red-600 text-lg font-bold">*</span> No. Ext.:
+        </label>
+        <input
+          type="text"
+          [formControlName]="externalNumberControlName"
+          class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          [class.border-red-500]="externalNumberControl?.invalid && externalNumberControl?.touched"
+        />
+        @if (externalNumberControl?.invalid && externalNumberControl?.touched) {
+          <p class="text-sm text-red-500 mt-1">Este campo es requerido.</p>
+        }
+      </div>
+
+      <!-- No. Int. -->
+      <div>
+        <label class="block text-gray-700 text-lg mb-1">
+          <span class="text-red-600 text-lg font-bold">*</span> No. Int.:
+        </label>
+        <input
+          type="text"
+          [formControlName]="internalNumberControlName"
+          class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          [class.border-red-500]="internalNumberControl?.invalid && internalNumberControl?.touched"
+        />
+        @if (internalNumberControl?.invalid && internalNumberControl?.touched) {
+          <p class="text-sm text-red-500 mt-1">Este campo es requerido.</p>
+        }
+      </div>
+
+      <!-- Colonia -->
+      <div>
+        <label class="block text-gray-700 text-lg mb-1">
+          <span class="text-red-600 text-lg font-bold">*</span> Colonia:
+        </label>
+        <input
+          type="text"
+          [formControlName]="neighborhoodControlName"
+          class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          [class.border-red-500]="neighborhoodControl?.invalid && neighborhoodControl?.touched"
+        />
+        @if (neighborhoodControl?.invalid && neighborhoodControl?.touched) {
+          <p class="text-sm text-red-500 mt-1">Este campo es requerido.</p>
+        }
+      </div>
+    </div>
+
+    <!-- Segunda fila: 3 columnas (Población, Estado, Municipio) -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+      <!-- Población -->
+      <div>
+        <label class="block text-gray-700 text-lg mb-1">
+          <span class="text-red-600 text-lg font-bold">*</span> Población:
+        </label>
+        <input
+          type="text"
+          [formControlName]="cityControlName"
+          class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          [class.border-red-500]="cityControl?.invalid && cityControl?.touched"
+        />
+        @if (cityControl?.invalid && cityControl?.touched) {
+          <p class="text-sm text-red-500 mt-1">Este campo es requerido.</p>
+        }
+      </div>
+
+      <!-- Estado -->
+      <div>
+        <label class="block text-gray-700 text-lg mb-1">
+          <span class="text-red-600 text-lg font-bold">*</span> Estado:
+        </label>
+        <ng-select
+          [formControlName]="stateControlName"
+          [items]="stateOptions"
+          bindValue="value"
+          bindLabel="label"
+          [clearable]="false"
+          [searchable]="true"
+          class="custom-ng-select"
+          [class.border-red-500]="stateControl?.invalid && stateControl?.touched"
+        >
+        </ng-select>
+        @if (stateControl?.invalid && stateControl?.touched) {
+          <p class="text-sm text-red-500 mt-1">Este campo es requerido.</p>
+        }
+      </div>
+
+      <!-- Municipio o Delegación -->
+      <div>
+        <label class="block text-gray-700 text-lg mb-1">
+          <span class="text-red-600 text-lg font-bold">*</span> Municipio o Delegación:
+        </label>
+        <ng-select
+          [formControlName]="municipalityControlName"
+          [items]="municipalityOptions"
+          bindValue="value"
+          bindLabel="label"
+          [clearable]="false"
+          [searchable]="true"
+          class="custom-ng-select"
+          [class.border-red-500]="municipalityControl?.invalid && municipalityControl?.touched"
+        >
+        </ng-select>
+        @if (municipalityControl?.invalid && municipalityControl?.touched) {
+          <p class="text-sm text-red-500 mt-1">Este campo es requerido.</p>
+        }
+      </div>
+    </div>
+
+    <!-- Tercera fila: 4 columnas (Clave lada, Teléfono, Extensión, Teléfono móvil) -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+      <!-- Clave lada -->
+      <div>
+        <label class="block text-gray-700 text-lg mb-1">
+          <span class="text-red-600 text-lg font-bold">*</span> Clave lada:
+        </label>
+        <input
+          type="text"
+          [formControlName]="areaCodeControlName"
+          class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          [class.border-red-500]="areaCodeControl?.invalid && areaCodeControl?.touched"
+        />
+        @if (areaCodeControl?.invalid && areaCodeControl?.touched) {
+          <p class="text-sm text-red-500 mt-1">Este campo es requerido.</p>
+        }
+      </div>
+
+      <!-- Teléfono -->
+      <div>
+        <label class="block text-gray-700 text-lg mb-1">
+          <span class="text-red-600 text-lg font-bold">*</span> Teléfono:
+        </label>
+        <input
+          type="text"
+          [formControlName]="phoneControlName"
+          class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          [class.border-red-500]="phoneControl?.invalid && phoneControl?.touched"
+        />
+        @if (phoneControl?.invalid && phoneControl?.touched) {
+          <p class="text-sm text-red-500 mt-1">Este campo es requerido.</p>
+        }
+      </div>
+
+      <!-- Extensión -->
+      <div>
+        <label class="block text-gray-700 text-lg mb-1">
+          <span class="text-red-600 text-lg font-bold">*</span> Extensión:
+        </label>
+        <input
+          type="text"
+          [formControlName]="extensionControlName"
+          class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          [class.border-red-500]="extensionControl?.invalid && extensionControl?.touched"
+        />
+        @if (extensionControl?.invalid && extensionControl?.touched) {
+          <p class="text-sm text-red-500 mt-1">Este campo es requerido.</p>
+        }
+      </div>
+
+      <!-- Teléfono móvil -->
+      <div>
+        <label class="block text-gray-700 text-lg mb-1">
+          <span class="text-red-600 text-lg font-bold">*</span> Teléfono móvil:
+        </label>
+        <input
+          type="text"
+          [formControlName]="mobilePhoneControlName"
+          class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          [class.border-red-500]="mobilePhoneControl?.invalid && mobilePhoneControl?.touched"
+        />
+        @if (mobilePhoneControl?.invalid && mobilePhoneControl?.touched) {
+          <p class="text-sm text-red-500 mt-1">Este campo es requerido.</p>
+        }
+      </div>
+    </div>
+
+    <!-- Cuarta fila: ancho completo (Correo electrónico) -->
+    <div class="mb-4">
+      <label class="block text-gray-700 text-lg mb-1">
+        <span class="text-red-600 text-lg font-bold">*</span> Correo electrónico:
+      </label>
+      <input
+        type="email"
+        [formControlName]="emailControlName"
+        class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        [class.border-red-500]="emailControl?.invalid && emailControl?.touched"
+      />
+      @if (emailControl?.invalid && emailControl?.touched) {
+        <p class="text-sm text-red-500 mt-1">Este campo es requerido.</p>
+      }
+    </div>
+  }
+</div>

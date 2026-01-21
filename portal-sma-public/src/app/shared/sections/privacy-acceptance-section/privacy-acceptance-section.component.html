@@ -1,0 +1,102 @@
+<div [formGroup]="group" class="mt-8 rounded-md border border-slate-200 bg-slate-50 p-4">
+  <label class="inline-flex items-center gap-3">
+    <input
+      type="checkbox"
+      [formControlName]="controlName"
+      class="h-5 w-5 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+    />
+    <span class="text-[15px] text-slate-800">
+      Aceptar Términos de
+      <a
+        href="#"
+        class="text-blue-600 underline hover:text-blue-700"
+        (click)="openPrivacyModal(); $event.preventDefault()"
+      >
+        Aviso de Privacidad
+      </a>
+    </span>
+  </label>
+
+  @if (control?.invalid && (control?.dirty || control?.touched)) {
+    <p class="mt-2 text-sm text-red-600">Debes aceptar el Aviso de Privacidad.</p>
+  }
+</div>
+
+<!-- Modal toggle button (oculto) -->
+<button
+  hidden
+  #modalToggleButton
+  data-modal-target="privacy-modal"
+  data-modal-toggle="privacy-modal"
+  type="button"
+></button>
+
+<!-- Modal del Aviso de Privacidad -->
+<div
+  id="privacy-modal"
+  tabindex="-1"
+  aria-hidden="true"
+  class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-[9999] justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full"
+>
+  <!-- Backdrop -->
+  <div class="fixed inset-0 bg-gray-900 bg-opacity-50 z-[9998]"></div>
+
+  <div class="relative p-4 w-full max-w-2xl max-h-full z-[9999]">
+    <!-- Modal content -->
+    <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+      <!-- Modal header -->
+      <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
+        <h3 class="text-xl font-semibold text-gray-900 dark:text-white">Aviso de privacidad</h3>
+        <button
+          type="button"
+          class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
+          data-modal-hide="privacy-modal"
+        >
+          <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+            <path
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"
+            />
+          </svg>
+          <span class="sr-only">Close modal</span>
+        </button>
+      </div>
+      <!-- Modal body -->
+      <div class="p-4 md:p-5 space-y-4 max-h-[70vh] overflow-y-auto">
+        <h4 class="text-sm font-bold">AVISO DE PRIVACIDAD SIMPLIFICADO CON CONSENTIMIENTO</h4>
+        <p class="text-sm">
+          <strong>Registro y Aprovechamiento en</strong><br />
+          <strong>Unidades de Manejo para la Conservación,</strong><br />
+          <strong>Manejo y Aprovechamiento de la Vida Silvestre.</strong>
+        </p>
+        <p class="text-sm">
+          La Subdirección de Vida Silvestre, de la Secretaría de Medio Ambiente del Estado de Coahuila de Zaragoza que
+          resguarda la información proporcionada por usted, utilizará los datos personales requeridos en su solicitud y
+          aquí recabados para mantener actualizada la base de datos perteneciente al sistema de Unidades de Manejo para
+          la Conservación y Aprovechamiento de la Vida Silvestre en el estado de Coahuila de Zaragoza y la expedición
+          de oficios relativos a autorizaciones, modificaciones, expedición de cintillos de cobro cinegético, oficios y
+          comunicados relativos a la conservación, manejo y aprovechamiento de la vida silvestre y su información será
+          compartida con fines estadísticos, de información y de investigación con las dependencias e instituciones
+          involucradas con la conservación de la vida silvestre, sin incluir datos de nombre, domicilio y teléfono.
+        </p>
+        <p class="text-sm">
+          Usted cuenta con la posibilidad de ejercer los derechos de Acceso, Rectificación, Cancelación y Oposición,
+          una vez que haya otorgado su consentimiento para el tratamiento de los mismos, y se encuentren en poder de esta
+          dependencia pública. Asimismo, usted puede consultar nuestro aviso de privacidad integral en la página Web de
+          la Secretaría de Medio Ambiente del Estado de Coahuila de Zaragoza. (www.sma.gob.mx)
+        </p>
+        <p class="text-sm">
+          Con fundamento en el artículo 18 de la Ley de Protección de Datos Personales en Posesión de Sujetos Obligados
+          del Estado de Coahuila de Zaragoza, indico que en las condiciones descritas anteriormente SI OTORGO el
+          consentimiento a la Secretaría de Medio Ambiente del Estado de Coahuila de Zaragoza para el tratamiento de mis
+          datos personales, en todo tramite relativo a la conservación, manejo y aprovechamiento de la vida silvestre
+          correspondiente al predio del cual soy titular, a partir de la fecha para la presente temporada y subsecuentes,
+          hasta que no emita mi posición en contrario
+        </p>
+      </div>
+    </div>
+  </div>
+</div>

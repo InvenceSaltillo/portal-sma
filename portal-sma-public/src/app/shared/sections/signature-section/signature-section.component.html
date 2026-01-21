@@ -1,0 +1,35 @@
+<div class="p-3 border border-slate-100 mb-4 rounded-md shadow-md bg-white" [formGroup]="group">
+  <div class="flex items-center gap-2 mb-3">
+    <h2 class="text-lg font-bold">FIRMA</h2>
+    <app-popover-icon
+      [position]="'top'"
+      [title]="'Firma'"
+      [id]="'signature-section'"
+      [text]="'Debe subir la firma en formato jpg, png para realizar la solicitud de Trámite.'"
+    />
+  </div>
+
+  <!-- Banner informativo -->
+  <div class="bg-blue-50 border border-blue-200 rounded-md p-3 mb-4 flex items-start gap-2">
+    <svg class="h-5 w-5 text-blue-600 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+    </svg>
+    <p class="text-sm text-blue-800">
+      Debe subir la firma en formato <span class="font-semibold">jpg, png</span> para realizar la solicitud de Trámite.
+      <svg class="inline-block h-4 w-4 ml-1" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16c0 1.1.9 2 2 2h12a2 2 0 0 0 2-2V8l-6-6Z"/>
+      </svg>
+    </p>
+  </div>
+
+  <!-- Lista de firmas -->
+  @for (signature of signatures; track signature.controlName) {
+    <app-signature-item
+      [group]="group"
+      [controlName]="signature.controlName"
+      [title]="signature.title || 'Foto de la Firma'"
+      [description]="signature.description || 'Esta firma es la que aparecerá en la Solicitud de Trámite.'"
+      [maxSizeMB]="maxSizeMB"
+    />
+  }
+</div>

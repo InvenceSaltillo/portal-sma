@@ -14,6 +14,7 @@ import servicesRoutes from './routes/services.js';
 import serviceTypesRoutes from './routes/service-types.js';
 import requestsRoutes from './routes/requests.js';
 import speciesRoutes from './routes/species.js';
+import storageRoutes from './routes/storage.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -53,6 +54,7 @@ app.use('/api/services', servicesRoutes);
 app.use('/api/service-types', serviceTypesRoutes);
 app.use('/api/requests', requestsRoutes);
 app.use('/api/species', speciesRoutes);
+app.use('/api/storage', storageRoutes);
 
 // 404 handler
 app.use(notFound);

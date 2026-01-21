@@ -31,37 +31,33 @@ export class ServiceService {
 
   async getFormFieldsByService(serviceId: string): Promise<any[]> {
     this.#state.update((state) => ({ ...state, loading: true }));
-    const { data, error } = await this.supabase
-      .rpc('get_form_fields_by_service', { p_service_id: serviceId });
-
-    if (error) {
-      console.error('Error fetching form fields:', error);
-      throw error;
-    }
-
     try {
-      const parsed = typeof data === 'string' ? JSON.parse(data) : data;
-      return parsed;
-    } catch (e) {
-      console.warn('No se pudo parsear la respuesta de la función:', e);
-      return [];
-    } finally {
+      const data = await firstValueFrom(
+        this.http.get<any[]>(`${this.serviceUrl}/${serviceId}/form-fields`)
+      );
+
       this.#state.update((state) => ({ ...state, loading: false }));
+      return Array.isArray(data) ? data : [];
+    } catch (error) {
+      console.error('Error fetching form fields:', error);
+      this.#state.update((state) => ({ ...state, loading: false }));
+      throw error;
     }
   }
 
   async getByClientId(clientId: string): Promise<void> {
-    const { data, error } = await this.supabase
-      .from('services')
-      .select('*')
-      .eq('client_id', clientId);
+    try {
+      this.#state.update((state) => ({ ...state, loading: true }));
+      const data = await firstValueFrom(
+        this.http.get<any[]>(`${this.serviceUrl}?client_id=${clientId}`)
+      );
 
-    if (error) {
-      console.error('Error fetching service:', error);
+      this.#state.update((state) => ({ ...state, data, loading: false }));
+    } catch (error) {
+      console.error('Error fetching services:', error);
+      this.#state.update((state) => ({ ...state, error, loading: false }));
       throw error;
     }
-
-    this.#state.update((state) => ({ ...state, data })); // guardar data en el state
   }
 
   async getByServiceTypeAndClient(serviceTypeId: string, clientId: string): Promise<void> {

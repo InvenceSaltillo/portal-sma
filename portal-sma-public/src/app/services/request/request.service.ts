@@ -1,8 +1,10 @@
-import { Injectable } from '@angular/core';
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { Injectable, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { FormGroup } from '@angular/forms';
 import { DynamicFormField } from '../../interfaces/dynamic-form-field.interface';
 import { RequestRowWithService, RequestInquiryResult } from '../../interfaces/request.interface';
+import { environment } from '../../../environments/environment';
+import { firstValueFrom } from 'rxjs';
 import { supabaseClient } from './../../core/supabase.client';
 
 type FileMeta = {
@@ -15,61 +17,37 @@ type FileMeta = {
 
 @Injectable({ providedIn: 'root' })
 export class RequestService {
-  private readonly BUCKET_NAME = 'clients'; // <-- usando el bucket clients que sí existe
+  private readonly BUCKET_NAME = 'clients';
+  private http = inject(HttpClient);
+  private requestUrl = `${environment.apiUrl}/requests`;
 
   constructor() { }
 
-
   async listMyRequests(limit = 20, offset = 0) {
-    const { data, error } = await supabaseClient.rpc('list_my_requests', {
-      p_limit: limit,
-      p_offset: offset
-    });
-    if (error) throw error;
-    return data as RequestRowWithService[];
+    try {
+      const data = await firstValueFrom(
+        this.http.get<RequestRowWithService[]>(`${this.requestUrl}?limit=${limit}&offset=${offset}`)
+      );
+      return data;
+    } catch (error) {
+      console.error('Error fetching requests:', error);
+      throw error;
+    }
   }
 
   async getRequestByFolio(folio: string) {
-    const { data, error } = await supabaseClient.rpc('get_request_with_values', {
-      p_folio: folio
-    });
-    if (error) throw error;
-
-    // La RPC retorna un array, necesitamos el primer elemento
-    if (!data || !Array.isArray(data) || data.length === 0) {
-      return null;
+    try {
+      const data = await firstValueFrom(
+        this.http.get<RequestInquiryResult>(`${this.requestUrl}/by-folio/${folio}`)
+      );
+      return data;
+    } catch (error: any) {
+      if (error.status === 404) {
+        return null;
+      }
+      console.error('Error fetching request by folio:', error);
+      throw error;
     }
-
-    const requestData = data[0];
-
-        // Construir el objeto RequestInquiryResult con los datos de la RPC
-        const result: RequestInquiryResult = {
-          id: requestData.id,
-          folio: requestData.folio,
-          service_id: requestData.service_id,
-          service_name: requestData.service_name,
-          created_at: requestData.created_at,
-          privacy_accepted: requestData.privacy_accepted,
-          status_id: requestData.status_id,
-          status_code: requestData.status_code,
-          status_name: requestData.status_name,
-          applicant_name: requestData.applicant_name || 'N/A',
-          municipality: requestData.municipality_name || 'N/A',
-          state: requestData.state_name || 'N/A',
-          timeline: [
-            {
-              id: requestData.status_id,
-              status_id: requestData.status_id,
-              status_name: requestData.status_name,
-              status_code: requestData.status_code,
-              created_at: requestData.created_at,
-              description: `Estado actual: ${requestData.status_name}`,
-              completed: true
-            }
-          ]
-        };
-
-    return result;
   }
 
   async submitRequest(args: {
@@ -104,18 +82,15 @@ export class RequestService {
       throw new Error('Usuario no autenticado');
     }
 
-    const { data, error: createErr } = await supabaseClient
-      .rpc('create_request', {
-        p_service_id: serviceId,
-        p_privacy_accepted: privacyAccepted,
-      });
+    // Crear solicitud usando la API
+    const createResponse = await firstValueFrom(
+      this.http.post<{ id: string; folio: string }>(`${this.requestUrl}`, {
+        service_id: serviceId,
+        privacy_accepted: privacyAccepted
+      })
+    );
 
-    if (createErr) throw createErr;
-
-    const row = Array.isArray(data) ? data[0] : (data as unknown as CreateRequestRow | null);
-    if (!row) throw new Error('create_request no retornó datos');
-
-    const { id: requestId, folio } = row;
+    const { id: requestId, folio } = createResponse;
 
     // Obtener client_id desde los datos del usuario
     const clientId = this.getClientIdFromUser();
@@ -137,12 +112,13 @@ export class RequestService {
       valuesPayload = this.buildValuesPayloadFromForm({ form });
     }
 
-    const { error: saveErr } = await supabaseClient.rpc('save_request_data', {
-      p_request_id: requestId,
-      p_values: valuesPayload,
-      p_files: filesMeta,
-    });
-    if (saveErr) throw saveErr;
+    // Guardar datos usando la API
+    await firstValueFrom(
+      this.http.post(`${this.requestUrl}/${requestId}/data`, {
+        values: valuesPayload,
+        files: filesMeta
+      })
+    );
 
     return { id: requestId, folio };
   }

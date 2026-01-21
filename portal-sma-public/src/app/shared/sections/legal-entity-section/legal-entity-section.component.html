@@ -1,0 +1,26 @@
+<div class="p-3 border border-slate-100 mb-4 rounded-md shadow-md bg-white" [formGroup]="group">
+  <div class="flex items-center gap-2 mb-3">
+    <h2 class="text-lg font-bold">Persona moral</h2>
+    <app-popover-icon
+      [position]="'top'"
+      [title]="'Persona moral'"
+      [id]="'legal-entity-section'"
+      [text]="'Información de la persona moral.'"
+    />
+  </div>
+
+  <div>
+    <label class="block text-gray-700 text-lg mb-1">
+      <span class="text-red-600 text-sm font-bold">*</span> Denominación o razón social:
+    </label>
+    <input
+      type="text"
+      [formControlName]="businessNameControlName"
+      class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+      [class.border-red-500]="businessNameControl?.invalid && businessNameControl?.touched"
+    />
+    @if (businessNameControl?.invalid && businessNameControl?.touched) {
+      <p class="text-sm text-red-500 mt-1">Este campo es requerido.</p>
+    }
+  </div>
+</div>

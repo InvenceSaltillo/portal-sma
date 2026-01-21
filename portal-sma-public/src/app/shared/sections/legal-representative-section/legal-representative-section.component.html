@@ -1,0 +1,61 @@
+<div class="p-3 border border-slate-100 mb-4 rounded-md shadow-md bg-white" [formGroup]="group">
+  <div class="flex items-center gap-2 mb-3">
+    <h2 class="text-lg font-bold">Representante legal</h2>
+    <app-popover-icon
+      [position]="'top'"
+      [title]="'Representante legal'"
+      [id]="'legal-representative-section'"
+      [text]="'Información del representante legal.'"
+    />
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <!-- Nombre -->
+    <div>
+      <label class="block text-gray-700 text-lg mb-1">
+        <span class="text-red-600 text-lg font-bold">*</span> Nombre:
+      </label>
+      <input
+        type="text"
+        [formControlName]="nameControlName"
+        class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        [class.border-red-500]="nameControl?.invalid && nameControl?.touched"
+      />
+      @if (nameControl?.invalid && nameControl?.touched) {
+        <p class="text-sm text-red-500 mt-1">Este campo es requerido.</p>
+      }
+    </div>
+
+    <!-- Apellido Paterno -->
+    <div>
+      <label class="block text-gray-700 text-lg mb-1">
+        <span class="text-red-600 text-lg font-bold">*</span> Apellido Paterno:
+      </label>
+      <input
+        type="text"
+        [formControlName]="paternalLastNameControlName"
+        class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        [class.border-red-500]="paternalLastNameControl?.invalid && paternalLastNameControl?.touched"
+      />
+      @if (paternalLastNameControl?.invalid && paternalLastNameControl?.touched) {
+        <p class="text-sm text-red-500 mt-1">Este campo es requerido.</p>
+      }
+    </div>
+
+    <!-- Apellido Materno -->
+    <div>
+      <label class="block text-gray-700 text-lg mb-1">
+        <span class="text-red-600 text-lg font-bold">*</span> Apellido Materno:
+      </label>
+      <input
+        type="text"
+        [formControlName]="maternalLastNameControlName"
+        class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        [class.border-red-500]="maternalLastNameControl?.invalid && maternalLastNameControl?.touched"
+      />
+      @if (maternalLastNameControl?.invalid && maternalLastNameControl?.touched) {
+        <p class="text-sm text-red-500 mt-1">Este campo es requerido.</p>
+      }
+    </div>
+  </div>
+</div>

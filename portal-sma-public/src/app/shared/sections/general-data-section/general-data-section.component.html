@@ -1,0 +1,81 @@
+<div class="p-3 border border-slate-100 mb-4 rounded-md shadow-md bg-white" [formGroup]="group">
+  <div class="flex items-center gap-2 mb-3">
+    <h2 class="text-lg font-bold">Datos generales</h2>
+    <app-popover-icon
+      [position]="'top'"
+      [title]="'Datos generales'"
+      [id]="'general-data-section'"
+      [text]="'Ingresa tu CURP, RFC y RUPA (opcional).'"
+    />
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <!-- CURP -->
+    <div>
+      <div class="flex items-start gap-2 mb-1">
+        <label class="block text-gray-700 text-lg">
+          <span class="text-red-600 text-lg font-bold">*</span> CURP:
+        </label>
+        <app-popover-icon
+          [position]="'top'"
+          [title]="'CURP'"
+          [id]="'curp-tooltip'"
+          [text]="'Ingresa tu Clave Única de Registro de Población.'"
+        />
+      </div>
+      <input
+        type="text"
+        [formControlName]="curpControlName"
+        class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        [class.border-red-500]="curpControl?.invalid && curpControl?.touched"
+      />
+      @if (curpControl?.invalid && curpControl?.touched) {
+        <p class="text-sm text-red-500 mt-1">Este campo es requerido.</p>
+      }
+    </div>
+
+    <!-- RFC -->
+    <div>
+      <div class="flex items-start gap-2 mb-1">
+        <label class="block text-gray-700 text-lg">
+          <span class="text-red-600 text-lg font-bold">*</span> RFC:
+        </label>
+        <app-popover-icon
+          [position]="'top'"
+          [title]="'RFC'"
+          [id]="'rfc-tooltip'"
+          [text]="'Ingresa tu Registro Federal de Contribuyentes.'"
+        />
+      </div>
+      <input
+        type="text"
+        [formControlName]="rfcControlName"
+        class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        [class.border-red-500]="rfcControl?.invalid && rfcControl?.touched"
+      />
+      @if (rfcControl?.invalid && rfcControl?.touched) {
+        <p class="text-sm text-red-500 mt-1">Este campo es requerido.</p>
+      }
+    </div>
+
+    <!-- RUPA -->
+    <div>
+      <div class="flex items-start gap-2 mb-1">
+        <label class="block text-gray-700 text-base">
+          RUPA:
+        </label>
+        <app-popover-icon
+          [position]="'top'"
+          [title]="'RUPA'"
+          [id]="'rupa-tooltip'"
+          [text]="'Ingresa tu Registro Único de Productores Agropecuarios (opcional).'"
+        />
+      </div>
+      <input
+        type="text"
+        [formControlName]="rupaControlName"
+        class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+      />
+    </div>
+  </div>
+</div>

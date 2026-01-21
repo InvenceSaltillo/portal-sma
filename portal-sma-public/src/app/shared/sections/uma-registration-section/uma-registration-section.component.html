@@ -1,0 +1,40 @@
+<div class="p-3 border border-slate-100 mb-4 rounded-md shadow-md" [formGroup]="group">
+  <h2 class="text-lg font-bold mb-3">Registro de la UMA</h2>
+
+  <div class="flex items-start gap-2">
+    <label class="block text-gray-700 text-lg">
+      <span class="text-red-600 text-sm font-bold">*</span>
+      Clave de Registro:
+    </label>
+
+    <app-popover-icon
+      [id]="'tooltip-uma-registro'"
+      [title]="'Clave de Registro de la UMA'"
+      [text]="'Ingresa la clave de registro de la UMA para continuar con el trámite.'"
+      [position]="'top'">
+    </app-popover-icon>
+  </div>
+
+  <div class="mt-2 flex w-full max-w-md">
+    <input
+      type="text"
+      [formControlName]="controlName"
+      class="flex-1 border border-gray-300 rounded-l-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+      placeholder="SMA-16040"
+    />
+
+    <button
+      type="button"
+      class="px-3 min-w-[44px] border border-l-0 rounded-r-md bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center"
+      (click)="onBuscarUma()"
+      aria-label="Buscar UMA"
+    >
+      <i class="pi pi-search"></i>
+    </button>
+  </div>
+
+  @if (control?.invalid && (control?.dirty || control?.touched)) {
+    <p class="text-sm text-red-500 mt-1">La clave de registro es obligatoria.</p>
+  }
+</div>
+

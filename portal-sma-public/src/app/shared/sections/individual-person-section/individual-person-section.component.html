@@ -1,0 +1,91 @@
+<div class="p-3 border border-slate-100 mb-4 rounded-md shadow-md bg-white" [formGroup]="group">
+  <div class="flex items-center gap-2 mb-3">
+    <h2 class="text-lg font-bold">Persona física</h2>
+    <app-popover-icon
+      [position]="'top'"
+      [title]="'Persona física'"
+      [id]="'individual-person-section'"
+      [text]="'Información de la persona física.'"
+    />
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+    <!-- Nombre -->
+    <div>
+      <label class="block text-gray-700 text-lg mb-1">
+        <span class="text-red-600 text-lg font-bold">*</span> Nombre:
+      </label>
+      <input
+        type="text"
+        [formControlName]="nameControlName"
+        class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        [class.border-red-500]="nameControl?.invalid && nameControl?.touched"
+      />
+      @if (nameControl?.invalid && nameControl?.touched) {
+        <p class="text-sm text-red-500 mt-1">Este campo es requerido.</p>
+      }
+    </div>
+
+    <!-- Apellido Paterno -->
+    <div>
+      <label class="block text-gray-700 text-lg mb-1">
+        <span class="text-red-600 text-lg font-bold">*</span> Apellido Paterno:
+      </label>
+      <input
+        type="text"
+        [formControlName]="paternalLastNameControlName"
+        class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        [class.border-red-500]="paternalLastNameControl?.invalid && paternalLastNameControl?.touched"
+      />
+      @if (paternalLastNameControl?.invalid && paternalLastNameControl?.touched) {
+        <p class="text-sm text-red-500 mt-1">Este campo es requerido.</p>
+      }
+    </div>
+
+    <!-- Apellido Materno -->
+    <div>
+      <label class="block text-gray-700 text-lg mb-1">
+        <span class="text-red-600 text-lg font-bold">*</span> Apellido Materno:
+      </label>
+      <input
+        type="text"
+        [formControlName]="maternalLastNameControlName"
+        class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        [class.border-red-500]="maternalLastNameControl?.invalid && maternalLastNameControl?.touched"
+      />
+      @if (maternalLastNameControl?.invalid && maternalLastNameControl?.touched) {
+        <p class="text-sm text-red-500 mt-1">Este campo es requerido.</p>
+      }
+    </div>
+  </div>
+
+  <!-- Sexo -->
+  <div>
+    <label class="block text-gray-700 text-lg mb-2">
+      <span class="text-red-600 text-lg font-bold">*</span> Seleccione su sexo:
+    </label>
+    <div class="flex gap-4">
+      <label class="flex items-center">
+        <input
+          type="radio"
+          [formControlName]="genderControlName"
+          value="masculino"
+          class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+        />
+        <span class="ml-2 text-gray-700 text-base">Masculino</span>
+      </label>
+      <label class="flex items-center">
+        <input
+          type="radio"
+          [formControlName]="genderControlName"
+          value="femenino"
+          class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+        />
+        <span class="ml-2 text-gray-700 text-base">Femenino</span>
+      </label>
+    </div>
+    @if (genderControl?.invalid && genderControl?.touched) {
+      <p class="text-sm text-red-500 mt-1">Este campo es requerido.</p>
+    }
+  </div>
+</div>

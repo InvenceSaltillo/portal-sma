@@ -1,0 +1,91 @@
+<div class="p-3 border border-slate-100 mb-4 rounded-md shadow-md bg-white" [formGroup]="group">
+  <div class="flex items-center gap-2 mb-3">
+    <h2 class="text-lg font-bold">III. Datos de información del trámite</h2>
+    <app-popover-icon
+      [position]="'top'"
+      [title]="'Datos de información del trámite'"
+      [id]="'non-extractive-info-section'"
+      [text]="'Completa la información del objeto, sitio y temporalidad del aprovechamiento.'"
+    />
+  </div>
+
+  <!-- Indique el objeto del aprovechamiento -->
+  <div class="mb-4">
+    <div class="flex items-start gap-2 mb-1">
+      <label class="block text-gray-700 text-sm">
+        <span class="text-red-600 text-sm font-bold">*</span> Indique el objeto del aprovechamiento:
+      </label>
+      <app-popover-icon
+        [position]="'top'"
+        [title]="'Objeto del aprovechamiento'"
+        [id]="'non-extractive-object-tooltip'"
+        [text]="'Describe el objeto del aprovechamiento.'"
+      />
+    </div>
+    <textarea
+      [formControlName]="exploitationObjectControlName"
+      rows="4"
+      class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-y"
+      [class.border-red-500]="exploitationObjectControl?.invalid && exploitationObjectControl?.touched"
+    ></textarea>
+    @if (exploitationObjectControl?.invalid && exploitationObjectControl?.touched) {
+      <p class="text-sm text-red-500 mt-1">Este campo es requerido.</p>
+    }
+  </div>
+
+  <!-- Sitio de aprovechamiento -->
+  <div class="mb-4">
+    <div class="flex items-start gap-2 mb-1">
+      <label class="block text-gray-700 text-sm">
+        <span class="text-red-600 text-sm font-bold">*</span> Sitio de aprovechamiento:
+      </label>
+      <app-popover-icon
+        [position]="'top'"
+        [title]="'Sitio de aprovechamiento'"
+        [id]="'non-extractive-site-tooltip'"
+        [text]="'Selecciona si el aprovechamiento es en UMA u otro predio.'"
+      />
+    </div>
+    <ng-select
+      [formControlName]="exploitationSiteControlName"
+      [items]="exploitationSiteOptions"
+      bindValue="value"
+      bindLabel="label"
+      [clearable]="false"
+      [searchable]="false"
+      class="custom-ng-select"
+      [class.border-red-500]="exploitationSiteControl?.invalid && exploitationSiteControl?.touched"
+    >
+    </ng-select>
+    <p class="text-xs text-gray-600 mt-1">
+      Si su aprovechamiento se realizará en UMA indique el nombre y el número de registro, si su aprovechamiento se realizará en otro predio indique el nombre y número de control del mismo.
+    </p>
+    @if (exploitationSiteControl?.invalid && exploitationSiteControl?.touched) {
+      <p class="text-sm text-red-500 mt-1">Este campo es requerido.</p>
+    }
+  </div>
+
+  <!-- Temporalidad -->
+  <div class="mb-4">
+    <div class="flex items-start gap-2 mb-1">
+      <label class="block text-gray-700 text-sm">
+        <span class="text-red-600 text-sm font-bold">*</span> Temporalidad en la que se realizará el aprovechamiento:
+      </label>
+      <app-popover-icon
+        [position]="'top'"
+        [title]="'Temporalidad'"
+        [id]="'non-extractive-temporality-tooltip'"
+        [text]="'Especifica la temporalidad del aprovechamiento.'"
+      />
+    </div>
+    <textarea
+      [formControlName]="exploitationTemporalityControlName"
+      rows="4"
+      class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-y"
+      [class.border-red-500]="exploitationTemporalityControl?.invalid && exploitationTemporalityControl?.touched"
+    ></textarea>
+    @if (exploitationTemporalityControl?.invalid && exploitationTemporalityControl?.touched) {
+      <p class="text-sm text-red-500 mt-1">Este campo es requerido.</p>
+    }
+  </div>
+</div>

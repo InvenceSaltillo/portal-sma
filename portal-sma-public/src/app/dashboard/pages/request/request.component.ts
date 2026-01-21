@@ -223,9 +223,8 @@ export default class RequestComponent implements OnInit {
       // Verificar si tiene componente específico y redirigir
       const { hasSpecificComponent } = await import('../../../config/service-to-component.map');
       if (hasSpecificComponent(serviceId)) {
-        this.router.navigate(['/dashboard/tramites', serviceId], {
-          queryParams: { serviceId }
-        });
+        // Navegar al wrapper que mantendrá los dropdowns visibles
+        this.router.navigate(['/dashboard/tramites', serviceId]);
         return;
       }
 
@@ -236,12 +235,12 @@ export default class RequestComponent implements OnInit {
     });
 
     // Descomentar en produccion
-    setTimeout(() => {
-      this.processForm.get('serviceType')?.setValue('123e4567-e89b-12d3-a456-426614174002');
-      setTimeout(() => {
-        this.processForm.get('service')?.setValue('123e4567-e89b-42d3-a456-426614174007');
-      }, 500);
-    }, 1000);
+    // setTimeout(() => {
+    //   this.processForm.get('serviceType')?.setValue('123e4567-e89b-12d3-a456-426614174002');
+    //   setTimeout(() => {
+    //     this.processForm.get('service')?.setValue('123e4567-e89b-42d3-a456-426614174007');
+    //   }, 500);
+    // }, 1000);
 
   }
 
@@ -291,7 +290,7 @@ export default class RequestComponent implements OnInit {
     console.log('DEBUG: form', this.form);
 
     // Descomentar en produccion
-    this.fillFakeData();
+    // this.fillFakeData();
   }
 
   initSectionToggles(): void {

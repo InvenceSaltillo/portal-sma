@@ -1,0 +1,60 @@
+<div class="p-3 border border-slate-100 mb-4 rounded-md shadow-md bg-white" [formGroup]="group">
+  <div class="flex items-center gap-2 mb-3">
+    <h2 class="text-lg font-bold">Lugar de Solicitud</h2>
+    <app-popover-icon
+      [position]="'top'"
+      [title]="'Lugar de solicitud'"
+      [id]="'request-location-section'"
+      [text]="'Indica el estado y municipio donde se presenta la solicitud.'"
+    />
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <!-- Estado -->
+    <div>
+      <label class="block text-gray-700 text-lg mb-1">
+        <span class="text-red-600 text-lg font-bold">*</span> Estado:
+      </label>
+      <ng-select
+        [items]="stateOptions"
+        bindLabel="label"
+        bindValue="value"
+        [formControlName]="stateControlName"
+        [searchable]="true"
+        [clearable]="true"
+        class="w-full"
+        [ngClass]="{
+          'ng-select-error': stateControl?.invalid && stateControl?.touched
+        }"
+      />
+
+      @if (stateControl?.invalid && stateControl?.touched) {
+        <p class="text-sm text-red-500 mt-1">Este campo es requerido.</p>
+      }
+    </div>
+
+    <!-- Municipio -->
+    <div>
+      <label class="block text-gray-700 text-lg mb-1">
+        <span class="text-red-600 text-sm font-bold">*</span> Municipio:
+      </label>
+      <ng-select
+        [items]="municipalityOptions"
+        bindLabel="label"
+        bindValue="value"
+        [formControlName]="municipalityControlName"
+        [searchable]="true"
+        [clearable]="true"
+        class="w-full"
+        [ngClass]="{
+          'ng-select-error': municipalityControl?.invalid && municipalityControl?.touched
+        }"
+      />
+
+      @if (municipalityControl?.invalid && municipalityControl?.touched) {
+        <p class="text-sm text-red-500 mt-1">Este campo es requerido.</p>
+      }
+    </div>
+  </div>
+</div>
+

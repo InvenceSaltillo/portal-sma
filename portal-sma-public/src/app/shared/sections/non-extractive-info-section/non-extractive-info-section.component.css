@@ -1,0 +1,18 @@
+/* Ajustes para el select y espaciados de la sección no extractiva */
+.custom-ng-select ::ng-deep .ng-select-container {
+  @apply w-full border border-gray-300 rounded-md px-2 py-2 bg-white focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500;
+}
+
+.custom-ng-select ::ng-deep .ng-dropdown-panel {
+  @apply bg-white border border-gray-300 shadow-md;
+}
+
+.custom-ng-select ::ng-deep .ng-option {
+  @apply px-3 py-2 text-sm;
+}
+
+.custom-ng-select ::ng-deep .ng-option.ng-option-selected,
+.custom-ng-select ::ng-deep .ng-option.ng-option-marked {
+  @apply bg-blue-600 text-white;
+}
+

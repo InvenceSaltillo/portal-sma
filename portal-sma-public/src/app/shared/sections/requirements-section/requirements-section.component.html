@@ -1,0 +1,35 @@
+<div class="p-3 border border-slate-100 mb-4 rounded-md shadow-md bg-white" [formGroup]="group">
+  <div class="flex items-center gap-2 mb-3">
+    <h2 class="text-lg font-bold">Requisitos</h2>
+    <app-popover-icon
+      [position]="'top'"
+      [title]="'Requisitos'"
+      [id]="'requirements-section'"
+      [text]="'Debe subir todos los requisitos en Formato PDF para realizar la solicitud de Trámite.'"
+    />
+  </div>
+
+  <!-- Banner informativo -->
+  <div class="bg-blue-50 border border-blue-200 rounded-md p-3 mb-4 flex items-start gap-2">
+    <svg class="h-5 w-5 text-blue-600 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+    </svg>
+    <p class="text-sm text-blue-800">
+      Debe subir todos los requisitos en <span class="font-semibold">Formato PDF</span> para realizar la solicitud de Trámite.
+      <svg class="inline-block h-4 w-4 ml-1" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16c0 1.1.9 2 2 2h12a2 2 0 0 0 2-2V8l-6-6Z"/>
+      </svg>
+    </p>
+  </div>
+
+  <!-- Lista de requisitos -->
+  @for (requirement of requirements; track requirement.controlName) {
+    <app-requirement-item
+      [group]="group"
+      [controlName]="requirement.controlName"
+      [title]="requirement.title"
+      [legalReference]="requirement.legalReference"
+      [maxSizeMB]="maxSizeMB"
+    />
+  }
+</div>

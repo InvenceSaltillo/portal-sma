@@ -1,0 +1,88 @@
+<div class="p-3 border border-slate-100 mb-4 rounded-md shadow-md bg-white" [formGroup]="group">
+  <div class="flex items-center gap-2 mb-3">
+    <h2 class="text-lg font-bold">III. Datos de Información del Trámite</h2>
+    <app-popover-icon
+      [position]="'top'"
+      [title]="'Datos de Información del Trámite'"
+      [id]="'transaction-information-section'"
+      [text]="'Información sobre el lugar y finalidad del aprovechamiento.'"
+    />
+  </div>
+
+  <!-- Dropdown: Indique dónde se realizará el aprovechamiento -->
+  <div class="mb-4">
+    <div class="flex items-start gap-2 mb-1">
+      <label class="block text-gray-700 text-lg">
+        Indique dónde se realizará el aprovechamiento:
+      </label>
+      <app-popover-icon
+        [position]="'top'"
+        [title]="'Ubicación del aprovechamiento'"
+        [id]="'exploitation-location-tooltip'"
+        [text]="'Selecciona el tipo de lugar donde se realizará el aprovechamiento.'"
+      />
+    </div>
+    <ng-select
+      [formControlName]="exploitationLocationControlName"
+      [items]="exploitationLocationOptions"
+      bindValue="value"
+      bindLabel="label"
+      [clearable]="false"
+      [searchable]="true"
+      class="custom-ng-select"
+      [class.border-red-500]="exploitationLocationControl?.invalid && exploitationLocationControl?.touched"
+    >
+    </ng-select>
+    @if (exploitationLocationControl?.invalid && exploitationLocationControl?.touched) {
+      <p class="text-sm text-red-500 mt-1">Este campo es requerido.</p>
+    }
+  </div>
+
+  <!-- Input: Datos del lugar -->
+  <div class="mb-4">
+    <div class="flex items-start gap-2 mb-1">
+      <label class="block text-gray-700 text-lg">
+        Datos del lugar:
+      </label>
+      <app-popover-icon
+        [position]="'top'"
+        [title]="'Datos del lugar'"
+        [id]="'place-data-tooltip'"
+        [text]="'Ingresa información adicional sobre el lugar del aprovechamiento.'"
+      />
+    </div>
+    <input
+      type="text"
+      [formControlName]="placeDataControlName"
+      class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+      [class.border-red-500]="placeDataControl?.invalid && placeDataControl?.touched"
+    />
+    @if (placeDataControl?.invalid && placeDataControl?.touched) {
+      <p class="text-sm text-red-500 mt-1">Este campo es requerido.</p>
+    }
+  </div>
+
+  <!-- Textarea: Finalidad del Aprovechamiento -->
+  <div class="mb-4">
+    <div class="flex items-start gap-2 mb-1">
+      <label class="block text-gray-700 text-lg">
+        Finalidad del Aprovechamiento:
+      </label>
+      <app-popover-icon
+        [position]="'top'"
+        [title]="'Finalidad del Aprovechamiento'"
+        [id]="'exploitation-purpose-tooltip'"
+        [text]="'Describe la finalidad o propósito del aprovechamiento.'"
+      />
+    </div>
+    <textarea
+      [formControlName]="exploitationPurposeControlName"
+      rows="4"
+      class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-y"
+      [class.border-red-500]="exploitationPurposeControl?.invalid && exploitationPurposeControl?.touched"
+    ></textarea>
+    @if (exploitationPurposeControl?.invalid && exploitationPurposeControl?.touched) {
+      <p class="text-sm text-red-500 mt-1">Este campo es requerido.</p>
+    }
+  </div>
+</div>

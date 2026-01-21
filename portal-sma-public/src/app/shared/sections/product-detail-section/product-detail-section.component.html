@@ -1,0 +1,175 @@
+<div class="p-3 border border-slate-100 mb-4 rounded-md shadow-md bg-white" [formGroup]="group">
+  <div class="flex items-center gap-2 mb-3">
+    <h2 class="text-lg font-bold">Detalle los productos objeto del movimiento</h2>
+    <app-popover-icon
+      [position]="'top'"
+      [title]="'Detalle los productos objeto del movimiento'"
+      [id]="'product-detail-section'"
+      [text]="'Agrega los detalles de los productos que serán objeto del movimiento.'"
+    />
+  </div>
+
+  @for (product of productsArray.controls; track $index) {
+    <div class="mb-6 p-4 border border-gray-200 rounded-md ">
+      @if (productsArray.length > 1) {
+        <div class="flex justify-end mb-2">
+          <button
+            type="button"
+            (click)="removeProduct($index)"
+            class="text-red-600 hover:text-red-800 text-sm font-medium"
+          >
+            Eliminar
+          </button>
+        </div>
+      }
+
+      <div [formGroup]="getProductGroup($index)">
+        <!-- Primera fila: 4 columnas -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+          <!-- Especie -->
+          <div>
+            <div class="flex items-start gap-2 mb-1">
+              <label class="block text-gray-700 text-lg">
+                <span class="text-red-600 text-lg font-bold">*</span> Especie:
+              </label>
+              <app-popover-icon
+                [position]="'top'"
+                [title]="'Especie'"
+                [id]="'species-tooltip-' + $index"
+                [text]="'Selecciona la especie del producto.'"
+              />
+            </div>
+            <ng-select
+              formControlName="species"
+              [items]="speciesOptions"
+              bindValue="value"
+              bindLabel="label"
+              [clearable]="false"
+              [searchable]="true"
+              class="custom-ng-select"
+              [class.border-red-500]="getProductControl($index, 'species')?.invalid && getProductControl($index, 'species')?.touched"
+            >
+            </ng-select>
+            @if (getProductControl($index, 'species')?.invalid && getProductControl($index, 'species')?.touched) {
+              <p class="text-sm text-red-500 mt-1">Este campo es requerido.</p>
+            }
+          </div>
+
+          <!-- Cantidad solicitada -->
+          <div>
+            <label class="block text-gray-700 text-lg mb-1">
+              <span class="text-red-600 text-lg font-bold">*</span> Cantidad solicitada:
+            </label>
+            <input
+              type="text"
+              formControlName="requested_quantity"
+              class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              [class.border-red-500]="getProductControl($index, 'requested_quantity')?.invalid && getProductControl($index, 'requested_quantity')?.touched"
+            />
+            @if (getProductControl($index, 'requested_quantity')?.invalid && getProductControl($index, 'requested_quantity')?.touched) {
+              <p class="text-sm text-red-500 mt-1">Este campo es requerido.</p>
+            }
+          </div>
+
+          <!-- Superficie Muestreada -->
+          <div>
+            <label class="block text-gray-700 text-lg mb-1">
+              <span class="text-red-600 text-lg font-bold">*</span> Superficie Muestreada:
+            </label>
+            <input
+              type="text"
+              formControlName="sampled_surface"
+              class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              [class.border-red-500]="getProductControl($index, 'sampled_surface')?.invalid && getProductControl($index, 'sampled_surface')?.touched"
+            />
+            @if (getProductControl($index, 'sampled_surface')?.invalid && getProductControl($index, 'sampled_surface')?.touched) {
+              <p class="text-sm text-red-500 mt-1">Este campo es requerido.</p>
+            }
+          </div>
+
+          <!-- Superficie Total -->
+          <div>
+            <label class="block text-gray-700 text-lg mb-1">
+              <span class="text-red-600 text-lg font-bold">*</span> Superficie Total:
+            </label>
+            <input
+              type="text"
+              formControlName="total_surface"
+              class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              [class.border-red-500]="getProductControl($index, 'total_surface')?.invalid && getProductControl($index, 'total_surface')?.touched"
+            />
+            @if (getProductControl($index, 'total_surface')?.invalid && getProductControl($index, 'total_surface')?.touched) {
+              <p class="text-sm text-red-500 mt-1">Este campo es requerido.</p>
+            }
+          </div>
+        </div>
+
+        <!-- Segunda fila: 2 columnas -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <!-- Sistema de Marca -->
+          <div>
+            <label class="block text-gray-700 text-lg mb-1">
+              <span class="text-red-600 text-lg font-bold">*</span> Sistema de Marca:
+            </label>
+            <input
+              type="text"
+              formControlName="marking_system"
+              class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              [class.border-red-500]="getProductControl($index, 'marking_system')?.invalid && getProductControl($index, 'marking_system')?.touched"
+            />
+            @if (getProductControl($index, 'marking_system')?.invalid && getProductControl($index, 'marking_system')?.touched) {
+              <p class="text-sm text-red-500 mt-1">Este campo es requerido.</p>
+            }
+          </div>
+
+          <!-- Determinación de partes o derivados -->
+          <div>
+            <label class="block text-gray-700 text-lg mb-1">
+              <span class="text-red-600 text-lg font-bold">*</span> Determinación de partes o derivados:
+            </label>
+            <input
+              type="text"
+              formControlName="parts_derivatives_determination"
+              class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              [class.border-red-500]="getProductControl($index, 'parts_derivatives_determination')?.invalid && getProductControl($index, 'parts_derivatives_determination')?.touched"
+            />
+            @if (getProductControl($index, 'parts_derivatives_determination')?.invalid && getProductControl($index, 'parts_derivatives_determination')?.touched) {
+              <p class="text-sm text-red-500 mt-1">Este campo es requerido.</p>
+            }
+          </div>
+        </div>
+
+        <!-- Tercera fila: Checkbox -->
+        <div class="mb-4">
+          <label class="flex items-center">
+            <input
+              type="checkbox"
+              formControlName="migratory_species"
+              class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+            />
+            <span class="ml-2 text-gray-700 text-lg">
+              <span class="text-red-600 text-lg font-bold">*</span> Especie Migratoria
+            </span>
+          </label>
+          @if (getProductControl($index, 'migratory_species')?.invalid && getProductControl($index, 'migratory_species')?.touched) {
+            <p class="text-sm text-red-500 mt-1">Este campo es requerido.</p>
+          }
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Botón Agregar -->
+  <div class="flex justify-start mt-4">
+    <button
+      type="button"
+      (click)="addProduct()"
+      class="flex items-center gap-2 px-3 py-1.5 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+    >
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+      </svg>
+      Agregar
+    </button>
+  </div>
+</div>

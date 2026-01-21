@@ -134,3 +134,47 @@ export const getServicesByType = async (req, res, next) => {
     next(error);
   }
 };
+
+/**
+ * Obtener campos de formulario por servicio
+ * GET /api/services/:id/form-fields
+ */
+export const getFormFieldsByService = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    // Intentar usar RPC primero
+    const { data: rpcData, error: rpcError } = await req.supabase.rpc('get_form_fields_by_service', {
+      p_service_id: id
+    });
+
+    if (!rpcError && rpcData) {
+      try {
+        const parsed = typeof rpcData === 'string' ? JSON.parse(rpcData) : rpcData;
+        return res.json(parsed);
+      } catch (parseError) {
+        return res.json(rpcData);
+      }
+    }
+
+    // Fallback: obtener campos desde las tablas directamente
+    const { data: fields, error: fieldsError } = await req.supabase
+      .from('form_field_templates')
+      .select(`
+        *,
+        form_section_templates (
+          id,
+          title,
+          order_index
+        )
+      `)
+      .eq('service_id', id)
+      .order('order_index');
+
+    if (fieldsError) throw fieldsError;
+
+    res.json(fields || []);
+  } catch (error) {
+    next(error);
+  }
+};
