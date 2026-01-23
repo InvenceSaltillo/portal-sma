@@ -1,7 +1,7 @@
 export const environment = {
   production: true,
   // Nueva API local
-  apiUrl: 'https://portal-sma-api.vercel.app/',
+  apiUrl: 'https://portal-sma-api.vercel.app/api',
   weatherApiUrl: 'https://api.weatherapi.com/v1/current.json?key=',
   weatherApiKey: '62601a162973447a89445913242507',
   supabaseUrl: 'https://hbijosnnqdolhxaeepjl.supabase.co',
