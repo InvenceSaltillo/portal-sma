@@ -33,8 +33,8 @@
             ],
             "scripts": [],
             "prerender": false,
-            "baseHref": "/portal-sma/",
-            "deployUrl": "/portal-sma/"
+            "baseHref": "/",
+            "deployUrl": "/"
           },
           "configurations": {
             "production": {
