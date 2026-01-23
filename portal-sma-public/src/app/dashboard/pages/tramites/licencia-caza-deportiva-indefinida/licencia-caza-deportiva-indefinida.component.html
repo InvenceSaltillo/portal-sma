@@ -42,7 +42,7 @@
         </div>
 
         <!-- Cuerpo de la sección (solo visible si toggle ON o no colapsable) -->
-        @if (!section.is_collapsible || sectionToggles[section.id]?.value) {
+        @if (!section.is_collapsible || sectionToggles[section.id].value) {
           <!-- Grid dinámico por sección -->
           <div [ngClass]="getGridColsClass(section.section_grid_columns)">
             @for (field of getFieldsBySection(section.id); track field.field_id) {

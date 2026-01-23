@@ -263,6 +263,11 @@ export default class TramiteWrapperComponent implements OnInit, OnDestroy {
         'autorizacion-aprovechamiento-extractivo-comercial': () => import('./autorizacion-aprovechamiento-extractivo-comercial/commercial-extractive-authorization.component'),
         'autorizacion-aprovechamiento-no-extractivo': () => import('./autorizacion-aprovechamiento-no-extractivo/non-extractive-authorization.component'),
         'licencia-caza-deportiva-indefinida': () => import('./licencia-caza-deportiva-indefinida/licencia-caza-deportiva-indefinida.component'),
+        'autorizacion-ejemplares-perjudiciales': () => import('./autorizacion-ejemplares-perjudiciales/harmful-specimens-authorization.component'),
+        'autorizacion-ejemplares-perjudiciales-fuera-uma': () => import('./autorizacion-ejemplares-perjudiciales-fuera-uma/harmful-specimens-outside-uma-authorization.component'),
+        'informe-resultados-perjudiciales': () => import('./informe-resultados-perjudiciales/results-report-harmful-specimens.component'),
+        'aviso-aprovechamiento-exoticos': () => import('./aviso-aprovechamiento-exoticos/exotic-species-exploitation-notice.component'),
+        'autorizacion-liberacion-ejemplares': () => import('./autorizacion-liberacion-ejemplares/specimen-release-authorization.component'),
         // Agregar más componentes aquí cuando se creen
       };
 

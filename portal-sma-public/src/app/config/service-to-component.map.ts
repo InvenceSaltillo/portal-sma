@@ -9,8 +9,10 @@ export const SERVICE_TO_COMPONENT_MAP: Record<string, string> = {
   '123e4567-e89b-42d3-a456-426614174014': 'autorizacion-aprovechamiento-extractivo-comercial',
   '123e4567-e89b-42d3-a456-426614174004': 'autorizacion-aprovechamiento-no-extractivo',
   '123e4567-e89b-42d3-a456-426614174021': 'autorizacion-ejemplares-exoticos-mascota',
-  '123e4567-e89b-42d3-a456-426614174006': 'autorizacion-ejemplares-perjudiciales',
-  '123e4567-e89b-42d3-a456-426614174005': 'autorizacion-ejemplares-perjudiciales-fuera-uma',
+  // SEMARNAT-08-041: Autorización para el manejo, control y remediación... (dentro de UMA)
+  '123e4567-e89b-42d3-a456-426614174005': 'autorizacion-ejemplares-perjudiciales',
+  // Variante FUERA DE UMA (usa por ahora formulario genérico)
+  '123e4567-e89b-42d3-a456-426614174006': 'autorizacion-ejemplares-perjudiciales-fuera-uma',
   '123e4567-e89b-42d3-a456-426614174010': 'autorizacion-liberacion-ejemplares',
   '123e4567-e89b-42d3-a456-426614174007': 'aviso-aprovechamiento-exoticos',
   '123e4567-e89b-42d3-a456-426614174011': 'aviso-aves-migratorias',

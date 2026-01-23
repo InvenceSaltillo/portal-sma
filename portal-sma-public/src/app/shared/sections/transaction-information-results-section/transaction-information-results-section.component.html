@@ -1,0 +1,201 @@
+<div class="text-3xl text-black relative p-3 border border-slate-100 rounded-md shadow-md">
+  <h2 class="text-lg font-semibold mb-4">
+    III. Datos de Información del Trámite
+  </h2>
+
+  <div class="space-y-4">
+    <div>
+      <div class="flex items-center gap-2 mb-2">
+        <p class="text-sm text-gray-600">
+          Efectividad de la medida o medidas correspondientes:
+        </p>
+        <app-popover-icon
+          [position]="'top'"
+          [title]="'Efectividad de la medida'"
+          [id]="'effectiveness-tooltip'"
+          [text]="'Describa la efectividad de las medidas aplicadas.'"
+        />
+      </div>
+
+      <div class="space-y-4">
+        <!-- Especie -->
+        <div>
+          <div class="flex items-start gap-2 mb-1">
+            <label class="block text-gray-700 text-sm">
+              <span class="text-red-600 text-sm font-bold">*</span> Especie:
+            </label>
+            <app-popover-icon
+              [position]="'top'"
+              [title]="'Especie'"
+              [id]="'species-tooltip'"
+              [text]="'Seleccione la especie para la cual se reportan los resultados.'"
+            />
+          </div>
+          @if (speciesControl) {
+            <ng-select
+              [items]="speciesOptions"
+              bindLabel="label"
+              bindValue="value"
+              [clearable]="true"
+              [searchable]="true"
+              [virtualScroll]="true"
+              [formControl]="speciesControl"
+              [disabled]="isEditing()"
+            >
+            </ng-select>
+            @if (speciesControl.invalid && (speciesControl.touched || speciesControl.dirty)) {
+              <p class="text-sm text-red-500 mt-1">
+                Seleccione una especie.
+              </p>
+            }
+          }
+        </div>
+
+        <!-- Cantidad de ejemplares -->
+        <div>
+          <label class="block text-gray-700 text-sm mb-1">
+            <span class="text-red-600 text-sm font-bold">*</span> Cantidad de ejemplares:
+          </label>
+          @if (quantityControl) {
+            <input
+              type="number"
+              [formControl]="quantityControl"
+              min="1"
+              class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              [class.border-red-500]="quantityControl.invalid && (quantityControl.touched || quantityControl.dirty)"
+            />
+            @if (quantityControl.invalid && (quantityControl.touched || quantityControl.dirty)) {
+              <p class="text-sm text-red-500 mt-1">
+                @if (quantityControl.hasError('required')) {
+                  Este campo es requerido.
+                } @else if (quantityControl.hasError('min')) {
+                  La cantidad debe ser mayor a 0.
+                }
+              </p>
+            }
+          }
+        </div>
+
+        <!-- Medida de control -->
+        <div>
+          <label class="block text-gray-700 text-sm mb-1">
+            <span class="text-red-600 text-sm font-bold">*</span> Medida de control:
+          </label>
+          @if (controlMeasureControl) {
+            <textarea
+              [formControl]="controlMeasureControl"
+              rows="4"
+              class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-y"
+              [class.border-red-500]="controlMeasureControl.invalid && (controlMeasureControl.touched || controlMeasureControl.dirty)"
+            ></textarea>
+            @if (controlMeasureControl.invalid && (controlMeasureControl.touched || controlMeasureControl.dirty)) {
+              <p class="text-sm text-red-500 mt-1">
+                Este campo es requerido.
+              </p>
+            }
+          }
+        </div>
+      </div>
+
+      <!-- Botones -->
+      <div class="flex gap-2 mt-4">
+        @if (isEditing()) {
+          <button
+            type="button"
+            class="btn-primary flex items-center gap-2 px-4 py-2 text-sm"
+            (click)="updateResult()"
+          >
+            <span>Actualizar</span>
+          </button>
+          <button
+            type="button"
+            class="bg-orange-500 hover:bg-orange-600 text-white flex items-center gap-2 px-4 py-2 rounded-md text-sm"
+            (click)="clearFields()"
+          >
+            <span>Cancelar</span>
+          </button>
+        } @else {
+          <button
+            type="button"
+            class="btn-primary flex items-center gap-2 px-4 py-2 text-sm"
+            (click)="addResult()"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+            </svg>
+            <span>Agregar</span>
+          </button>
+          <button
+            type="button"
+            class="bg-orange-500 hover:bg-orange-600 text-white flex items-center gap-2 px-4 py-2 rounded-md text-sm"
+            (click)="clearFields()"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+            <span>Limpiar</span>
+          </button>
+        }
+      </div>
+    </div>
+
+    <!-- Tabla de resultados -->
+    @if (resultsArray.length > 0) {
+      <div class="mt-4 overflow-x-auto w-full">
+        <table class="min-w-full w-full bg-white border border-gray-200 text-sm">
+          <thead>
+            <tr class="bg-gray-100 text-left">
+              <th class="px-4 py-2 border-b">Especie</th>
+              <th class="px-4 py-2 border-b">No. Ejemplares</th>
+              <th class="px-4 py-2 border-b">Medida de control</th>
+              <th class="px-4 py-2 border-b w-24 text-center">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of resultsArray.controls; track row; let i = $index) {
+              <tr class="border-t">
+                <td class="px-4 py-2 border-b">
+                  {{ getResultRow(i).get('scientific_name')?.value || getResultRow(i).get('species_label')?.value }}
+                </td>
+                <td class="px-4 py-2 border-b">
+                  {{ getResultRow(i).get('quantity')?.value }}
+                </td>
+                <td class="px-4 py-2 border-b">
+                  {{ getResultRow(i).get('control_measure')?.value }}
+                </td>
+                <td class="px-4 py-2 border-b text-center">
+                  <div class="flex justify-center gap-2">
+                    <button
+                      type="button"
+                      class="text-blue-600 hover:text-blue-800 p-1"
+                      (click)="editResult(i)"
+                      [disabled]="isEditing() && editingIndex !== i"
+                      aria-label="Editar"
+                      title="Editar"
+                    >
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                      </svg>
+                    </button>
+                    <button
+                      type="button"
+                      class="text-red-600 hover:text-red-800 p-1"
+                      (click)="removeResult(i)"
+                      [disabled]="isEditing()"
+                      aria-label="Eliminar"
+                      title="Eliminar"
+                    >
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                      </svg>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</div>

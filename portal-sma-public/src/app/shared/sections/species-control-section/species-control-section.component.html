@@ -1,0 +1,278 @@
+<div class="text-3xl text-black relative p-3 border border-slate-100 rounded-md shadow-md">
+  <h2 class="text-lg font-semibold mb-4">
+    III. Datos de Información del Trámite
+  </h2>
+
+  <div class="space-y-4">
+    <div>
+      <div class="flex items-center gap-2 mb-2">
+        <h3 class="text-base font-semibold">Especies a controlar</h3>
+      </div>
+
+      <div class="flex items-start gap-2 mb-1">
+        <label class="block text-gray-700 text-sm">
+          <span class="text-red-600 text-sm font-bold">*</span> Especie:
+        </label>
+        <app-popover-icon
+          [position]="'top'"
+          [title]="'Especie'"
+          [id]="'species-control-tooltip'"
+          [text]="'Seleccione la especie que desea agregar a la lista de especies a controlar.'"
+        />
+      </div>
+
+      <div class="flex flex-wrap items-center gap-3">
+        <div class="w-full md:w-1/2">
+          @if (speciesControl) {
+            <ng-select
+              [items]="speciesOptions"
+              bindLabel="label"
+              bindValue="value"
+              [clearable]="true"
+              [searchable]="true"
+              [virtualScroll]="true"
+              [formControl]="speciesControl"
+            >
+            </ng-select>
+
+            @if (speciesControl.invalid && speciesControl.touched) {
+              <p class="text-sm text-red-500 mt-1">
+                Seleccione una especie.
+              </p>
+            }
+          }
+        </div>
+
+        <button
+          type="button"
+          class="btn-primary flex items-center gap-2 px-3 py-2 text-sm"
+          (click)="addSpecies()"
+        >
+          <span>Agregar</span>
+        </button>
+      </div>
+    </div>
+
+    @if (speciesListArray.length > 0) {
+      <div class="mt-4 overflow-x-auto w-full">
+        <table class="min-w-full w-full bg-white border border-gray-200 text-sm">
+          <thead>
+            <tr class="bg-gray-100 text-left">
+              <th class="px-4 py-2 border-b">Nombre Común</th>
+              <th class="px-4 py-2 border-b">Nombre científico</th>
+              <th class="px-4 py-2 border-b w-16 text-center">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of speciesListArray.controls; track row; let i = $index) {
+              <tr class="border-t">
+                <td class="px-4 py-2 border-b">
+                  {{ getSpeciesRow(i).get('common_name')?.value }}
+                </td>
+                <td class="px-4 py-2 border-b">
+                  {{ getSpeciesRow(i).get('scientific_name')?.value }}
+                </td>
+                <td class="px-4 py-2 border-b text-center">
+                  <button
+                    type="button"
+                    class="text-red-600 hover:text-red-800"
+                    (click)="removeSpecies(i)"
+                    aria-label="Eliminar especie"
+                  >
+                    🗑
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+
+    <!-- Campos de información del trámite -->
+    <div class="space-y-4 mt-6">
+      <!-- Razones para considerar perjudiciales -->
+      <div>
+        <div class="flex items-start gap-2 mb-1">
+          <label class="block text-gray-700 text-sm">
+            Razones para considerar a los ejemplares o poblaciones de la especie o especies de que se trate como perjudiciales:
+          </label>
+          <app-popover-icon
+            [position]="'top'"
+            [title]="'Razones para considerar perjudiciales'"
+            [id]="'reasons-harmful-tooltip'"
+            [text]="'Describa las razones por las cuales se consideran perjudiciales los ejemplares o poblaciones.'"
+          />
+        </div>
+        @if (getControl('reasons_consider_harmful')) {
+          <textarea
+            [formControl]="getControl('reasons_consider_harmful')!"
+            rows="4"
+            class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-y"
+            [class.border-red-500]="getControl('reasons_consider_harmful')?.invalid && getControl('reasons_consider_harmful')?.touched"
+          ></textarea>
+          @if (getControl('reasons_consider_harmful')?.invalid && getControl('reasons_consider_harmful')?.touched) {
+            <p class="text-sm text-red-500 mt-1">Este campo es requerido.</p>
+          }
+        }
+      </div>
+
+      <!-- Tipo de daño y magnitud -->
+      <div>
+        <div class="flex items-start gap-2 mb-1">
+          <label class="block text-gray-700 text-sm">
+            Tipo de daño que provocan y su magnitud:
+          </label>
+          <app-popover-icon
+            [position]="'top'"
+            [title]="'Tipo de daño y magnitud'"
+            [id]="'damage-type-tooltip'"
+            [text]="'Describa el tipo de daño que provocan y su magnitud.'"
+          />
+        </div>
+        @if (getControl('damage_type_magnitude')) {
+          <textarea
+            [formControl]="getControl('damage_type_magnitude')!"
+            rows="4"
+            class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-y"
+            [class.border-red-500]="getControl('damage_type_magnitude')?.invalid && getControl('damage_type_magnitude')?.touched"
+          ></textarea>
+          @if (getControl('damage_type_magnitude')?.invalid && getControl('damage_type_magnitude')?.touched) {
+            <p class="text-sm text-red-500 mt-1">Este campo es requerido.</p>
+          }
+        }
+      </div>
+
+      <!-- Métodos y técnicas de control -->
+      <div>
+        <div class="flex items-start gap-2 mb-1">
+          <label class="block text-gray-700 text-sm">
+            Métodos, técnicas o medidas de control que se proponen utilizar:
+          </label>
+          <app-popover-icon
+            [position]="'top'"
+            [title]="'Métodos y técnicas de control'"
+            [id]="'control-methods-tooltip'"
+            [text]="'Describa los métodos, técnicas o medidas de control propuestas.'"
+          />
+        </div>
+        @if (getControl('control_methods_techniques')) {
+          <textarea
+            [formControl]="getControl('control_methods_techniques')!"
+            rows="4"
+            class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-y"
+            [class.border-red-500]="getControl('control_methods_techniques')?.invalid && getControl('control_methods_techniques')?.touched"
+          ></textarea>
+          @if (getControl('control_methods_techniques')?.invalid && getControl('control_methods_techniques')?.touched) {
+            <p class="text-sm text-red-500 mt-1">Este campo es requerido.</p>
+          }
+        }
+      </div>
+
+      <!-- Periodo de tiempo o etapas -->
+      <div>
+        <div class="flex items-start gap-2 mb-1">
+          <label class="block text-gray-700 text-sm">
+            Periodo de tiempo o etapas en que se llevará a cabo el control:
+          </label>
+          <app-popover-icon
+            [position]="'top'"
+            [title]="'Periodo de tiempo o etapas'"
+            [id]="'control-period-tooltip'"
+            [text]="'Describa el periodo de tiempo o etapas en que se llevará a cabo el control.'"
+          />
+        </div>
+        @if (getControl('control_period_stages')) {
+          <textarea
+            [formControl]="getControl('control_period_stages')!"
+            rows="4"
+            class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-y"
+            [class.border-red-500]="getControl('control_period_stages')?.invalid && getControl('control_period_stages')?.touched"
+          ></textarea>
+          @if (getControl('control_period_stages')?.invalid && getControl('control_period_stages')?.touched) {
+            <p class="text-sm text-red-500 mt-1">Este campo es requerido.</p>
+          }
+        }
+      </div>
+
+      <!-- Responsable técnico -->
+      <div>
+        <div class="flex items-start gap-2 mb-1">
+          <label class="block text-gray-700 text-sm">
+            Responsable técnico que supervisará la ejecución de las medidas propuestas:
+          </label>
+          <app-popover-icon
+            [position]="'top'"
+            [title]="'Responsable técnico'"
+            [id]="'technical-responsible-tooltip'"
+            [text]="'Indique el responsable técnico que supervisará la ejecución de las medidas propuestas.'"
+          />
+        </div>
+        @if (getControl('technical_responsible')) {
+          <textarea
+            [formControl]="getControl('technical_responsible')!"
+            rows="4"
+            class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-y"
+            [class.border-red-500]="getControl('technical_responsible')?.invalid && getControl('technical_responsible')?.touched"
+          ></textarea>
+          @if (getControl('technical_responsible')?.invalid && getControl('technical_responsible')?.touched) {
+            <p class="text-sm text-red-500 mt-1">Este campo es requerido.</p>
+          }
+        }
+      </div>
+
+      <!-- Forma de disposición -->
+      <div>
+        <div class="flex items-start gap-2 mb-1">
+          <label class="block text-gray-700 text-sm">
+            Forma en que se pretende disponer de los ejemplares objeto de las medidas de control:
+          </label>
+          <app-popover-icon
+            [position]="'top'"
+            [title]="'Forma de disposición'"
+            [id]="'disposal-method-tooltip'"
+            [text]="'Describa la forma en que se pretende disponer de los ejemplares objeto de las medidas de control.'"
+          />
+        </div>
+        @if (getControl('disposal_method')) {
+          <textarea
+            [formControl]="getControl('disposal_method')!"
+            rows="4"
+            class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-y"
+            [class.border-red-500]="getControl('disposal_method')?.invalid && getControl('disposal_method')?.touched"
+          ></textarea>
+          @if (getControl('disposal_method')?.invalid && getControl('disposal_method')?.touched) {
+            <p class="text-sm text-red-500 mt-1">Este campo es requerido.</p>
+          }
+        }
+      </div>
+
+      <!-- Medidas de prevención y control -->
+      <div>
+        <div class="flex items-start gap-2 mb-1">
+          <label class="block text-gray-700 text-sm">
+            En su caso medidas de prevención y control aplicadas con anterioridad para resolver el problema, así como las que se propongan para atender los problemas secundarios que pudieran derivarse de la aplicación del método de control propuesto:
+          </label>
+          <app-popover-icon
+            [position]="'top'"
+            [title]="'Medidas de prevención y control'"
+            [id]="'prevention-control-tooltip'"
+            [text]="'Describa las medidas de prevención y control aplicadas anteriormente y las propuestas para problemas secundarios.'"
+          />
+        </div>
+        @if (getControl('prevention_control_measures')) {
+          <textarea
+            [formControl]="getControl('prevention_control_measures')!"
+            rows="4"
+            class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-y"
+            [class.border-red-500]="getControl('prevention_control_measures')?.invalid && getControl('prevention_control_measures')?.touched"
+          ></textarea>
+          @if (getControl('prevention_control_measures')?.invalid && getControl('prevention_control_measures')?.touched) {
+            <p class="text-sm text-red-500 mt-1">Este campo es requerido.</p>
+          }
+        }
+      </div>
+    </div>
+  </div>
+</div>
+

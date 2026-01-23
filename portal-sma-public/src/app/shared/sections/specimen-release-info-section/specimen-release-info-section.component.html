@@ -1,0 +1,294 @@
+<div class="text-3xl text-black relative p-3 border border-slate-100 rounded-md shadow-md">
+  <h2 class="text-lg font-semibold mb-4">
+    III. Datos de Información del Trámite
+  </h2>
+
+  <div class="space-y-6">
+    <!-- Objetivo de la liberación -->
+    <div>
+      <div class="flex items-start gap-2 mb-1">
+        <label class="block text-gray-700 text-sm">
+          <span class="text-red-600 text-sm font-bold">*</span> Indique el objetivo de la liberación:
+        </label>
+        <app-popover-icon
+          [position]="'top'"
+          [title]="'Objetivo de la liberación'"
+          [id]="'release-objective-tooltip'"
+          [text]="'Seleccione el objetivo principal de la liberación de ejemplares.'"
+        />
+      </div>
+      @if (releaseObjectiveControl) {
+        <ng-select
+          [items]="releaseObjectiveOptions"
+          bindLabel="label"
+          bindValue="value"
+          [clearable]="false"
+          [searchable]="true"
+          [formControl]="releaseObjectiveControl"
+        >
+        </ng-select>
+        @if (releaseObjectiveControl.invalid && (releaseObjectiveControl.touched || releaseObjectiveControl.dirty)) {
+          <p class="text-sm text-red-500 mt-1">
+            Seleccione el objetivo de la liberación.
+          </p>
+        }
+      }
+    </div>
+
+    <!-- Sección Ejemplares a liberar -->
+    <div>
+      <div class="flex items-center gap-2 mb-4">
+        <h3 class="text-base font-semibold">Ejemplares a liberar</h3>
+      </div>
+
+      <div class="space-y-4">
+        <!-- Primera fila: Cantidad, Especie y Edad -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <!-- Cantidad -->
+          <div>
+            <label class="block text-gray-700 text-sm mb-1">
+              <span class="text-red-600 text-sm font-bold">*</span> Cantidad:
+            </label>
+            @if (quantityControl) {
+              <input
+                type="number"
+                [formControl]="quantityControl"
+                min="1"
+                class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                [class.border-red-500]="quantityControl.invalid && (quantityControl.touched || quantityControl.dirty)"
+              />
+              @if (quantityControl.invalid && (quantityControl.touched || quantityControl.dirty)) {
+                <p class="text-sm text-red-500 mt-1">
+                  @if (quantityControl.hasError('required')) {
+                    Este campo es requerido.
+                  } @else if (quantityControl.hasError('min')) {
+                    La cantidad debe ser mayor a 0.
+                  }
+                </p>
+              }
+            }
+          </div>
+
+          <!-- Especie -->
+          <div>
+            <div class="flex items-start gap-2 mb-1">
+              <label class="block text-gray-700 text-sm">
+                <span class="text-red-600 text-sm font-bold">*</span> Especie:
+              </label>
+            </div>
+            @if (speciesControl) {
+              <ng-select
+                [items]="speciesOptions"
+                bindLabel="label"
+                bindValue="value"
+                [clearable]="true"
+                [searchable]="true"
+                [virtualScroll]="true"
+                [formControl]="speciesControl"
+                [disabled]="isEditing()"
+              >
+              </ng-select>
+              @if (speciesControl.invalid && (speciesControl.touched || speciesControl.dirty)) {
+                <p class="text-sm text-red-500 mt-1">
+                  Seleccione una especie.
+                </p>
+              }
+            }
+          </div>
+
+          <!-- Edad -->
+          <div>
+            <label class="block text-gray-700 text-sm mb-1">
+              <span class="text-red-600 text-sm font-bold">*</span> Edad:
+            </label>
+            @if (ageControl) {
+              <input
+                type="text"
+                [formControl]="ageControl"
+                class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                [class.border-red-500]="ageControl.invalid && (ageControl.touched || ageControl.dirty)"
+              />
+              @if (ageControl.invalid && (ageControl.touched || ageControl.dirty)) {
+                <p class="text-sm text-red-500 mt-1">
+                  Este campo es requerido.
+                </p>
+              }
+            }
+          </div>
+        </div>
+
+        <!-- Segunda fila: Sexo -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Sexo -->
+          <div>
+            <label class="block text-gray-700 text-sm mb-1">
+              <span class="text-red-600 text-sm font-bold">*</span> Sexo:
+            </label>
+            @if (sexControl) {
+              <ng-select
+                [items]="sexOptions"
+                bindLabel="label"
+                bindValue="value"
+                [clearable]="false"
+                [formControl]="sexControl"
+              >
+              </ng-select>
+              @if (sexControl.invalid && (sexControl.touched || sexControl.dirty)) {
+                <p class="text-sm text-red-500 mt-1">
+                  Seleccione el sexo.
+                </p>
+              }
+            }
+          </div>
+
+          <!-- Número y tipo de marca -->
+          <div>
+            <label class="block text-gray-700 text-sm mb-1">
+              <span class="text-red-600 text-sm font-bold">*</span> Número y tipo de marca:
+            </label>
+            @if (markingControl) {
+              <input
+                type="text"
+                [formControl]="markingControl"
+                class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                [class.border-red-500]="markingControl.invalid && (markingControl.touched || markingControl.dirty)"
+              />
+              @if (markingControl.invalid && (markingControl.touched || markingControl.dirty)) {
+                <p class="text-sm text-red-500 mt-1">
+                  Este campo es requerido.
+                </p>
+              }
+            }
+          </div>
+        </div>
+
+
+        <!-- Cuarta fila: Control Sanitario -->
+        <div>
+          <label class="block text-gray-700 text-sm mb-1">
+            <span class="text-red-600 text-sm font-bold">*</span> Control Sanitario:
+          </label>
+          @if (sanitaryControlControl) {
+            <textarea
+              [formControl]="sanitaryControlControl"
+              rows="3"
+              class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-y"
+              [class.border-red-500]="sanitaryControlControl.invalid && (sanitaryControlControl.touched || sanitaryControlControl.dirty)"
+            ></textarea>
+            @if (sanitaryControlControl.invalid && (sanitaryControlControl.touched || sanitaryControlControl.dirty)) {
+              <p class="text-sm text-red-500 mt-1">
+                Este campo es requerido.
+              </p>
+            }
+          }
+        </div>
+      </div>
+
+      <!-- Botones -->
+      <div class="flex gap-2 mt-4">
+        @if (isEditing()) {
+          <button
+            type="button"
+            class="btn-primary flex items-center gap-2 px-4 py-2 text-sm"
+            (click)="updateSpecimen()"
+          >
+            <span>Actualizar</span>
+          </button>
+          <button
+            type="button"
+            class="bg-orange-500 hover:bg-orange-600 text-white flex items-center gap-2 px-4 py-2 rounded-md text-sm"
+            (click)="clearFields()"
+          >
+            <span>Cancelar</span>
+          </button>
+        } @else {
+          <button
+            type="button"
+            class="btn-primary flex items-center gap-2 px-4 py-2 text-sm"
+            (click)="addSpecimen()"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+            </svg>
+            <span>Agregar</span>
+          </button>
+        }
+      </div>
+    </div>
+
+    <!-- Tabla de ejemplares -->
+    @if (specimensArray.length > 0) {
+      <div class="mt-4 overflow-x-auto w-full">
+        <table class="min-w-full w-full bg-white border border-gray-200 text-sm">
+          <thead>
+            <tr class="bg-gray-100 text-left">
+              <th class="px-4 py-2 border-b">Especie</th>
+              <th class="px-4 py-2 border-b">Nombre Científico</th>
+              <th class="px-4 py-2 border-b">Cantidad</th>
+              <th class="px-4 py-2 border-b">Edad</th>
+              <th class="px-4 py-2 border-b">Sexo</th>
+              <th class="px-4 py-2 border-b">Número y tipo de marca</th>
+              <th class="px-4 py-2 border-b">Control Sanitario</th>
+              <th class="px-4 py-2 border-b w-24 text-center">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of specimensArray.controls; track row; let i = $index) {
+              <tr class="border-t">
+                <td class="px-4 py-2 border-b">
+                  {{ getSpecimenRow(i).get('common_name')?.value || '-' }}
+                </td>
+                <td class="px-4 py-2 border-b">
+                  {{ getSpecimenRow(i).get('scientific_name')?.value || '-' }}
+                </td>
+                <td class="px-4 py-2 border-b">
+                  {{ getSpecimenRow(i).get('quantity')?.value }}
+                </td>
+                <td class="px-4 py-2 border-b">
+                  {{ getSpecimenRow(i).get('age')?.value }}
+                </td>
+                <td class="px-4 py-2 border-b">
+                  {{ getSexLabel(getSpecimenRow(i).get('sex')?.value) }}
+                </td>
+                <td class="px-4 py-2 border-b">
+                  {{ getSpecimenRow(i).get('marking_number_type')?.value }}
+                </td>
+                <td class="px-4 py-2 border-b">
+                  {{ getSpecimenRow(i).get('sanitary_control')?.value }}
+                </td>
+                <td class="px-4 py-2 border-b text-center">
+                  <div class="flex justify-center gap-2">
+                    <button
+                      type="button"
+                      class="text-blue-600 hover:text-blue-800 p-1"
+                      (click)="editSpecimen(i)"
+                      [disabled]="isEditing() && editingIndex !== i"
+                      aria-label="Editar"
+                      title="Editar"
+                    >
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                      </svg>
+                    </button>
+                    <button
+                      type="button"
+                      class="text-red-600 hover:text-red-800 p-1"
+                      (click)="removeSpecimen(i)"
+                      [disabled]="isEditing()"
+                      aria-label="Eliminar"
+                      title="Eliminar"
+                    >
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                      </svg>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</div>

@@ -1,0 +1,92 @@
+<div class="text-3xl text-black relative p-3 border border-slate-100 rounded-md mt-4 mx-2 sm:mx-20 shadow-md">
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-6">
+
+    <!-- Lugar de Solicitud -->
+    <app-request-location-section
+      [group]="requestLocationGroup"
+      stateControlName="state_id"
+      municipalityControlName="municipality_id"
+      [stateOptions]="stateOptions"
+      [municipalityOptions]="municipalityOptions"
+    />
+
+    <!-- Datos generales -->
+    <app-general-data-section
+      [group]="generalDataGroup"
+    />
+
+    <!-- Persona física -->
+    <app-individual-person-section
+      [group]="individualPersonGroup"
+    />
+
+    <!-- Persona moral -->
+    <app-legal-entity-section
+      [group]="legalEntityGroup"
+    />
+
+    <!-- Representante legal -->
+    <app-legal-representative-section
+      [group]="legalRepresentativeGroup"
+    />
+
+    <!-- Persona(s) autorizada(s) para oír o recibir notificaciones -->
+    <app-authorized-person-section
+      [group]="authorizedPersonGroup"
+    />
+
+    <!-- Domicilio y medios de contacto -->
+    <app-address-contact-section
+      [group]="addressContactGroup"
+      [stateOptions]="addressStateOptions"
+      [municipalityOptions]="addressMunicipalityOptions"
+    />
+
+    <!-- Notificaciones - Domicilio y medios de contacto -->
+    <app-notification-address-contact-section
+      [group]="notificationAddressContactGroup"
+      [stateOptions]="notificationStateOptions"
+      [municipalityOptions]="notificationMunicipalityOptions"
+    />
+
+    <!-- III. Datos de Información del Trámite -->
+    <app-specimen-release-info-section
+      [group]="releaseInfoGroup"
+      [speciesOptions]="speciesOptions"
+    />
+
+    <!-- Documentación que se anexa -->
+    <app-attached-documentation-section
+      [group]="attachedDocumentationGroup"
+      [documentationItems]="documentationItems"
+    />
+
+    <!-- Requisitos -->
+    <app-requirements-section
+      [group]="requirementsGroup"
+      [requirements]="requirementsList"
+    />
+
+    <!-- Firma -->
+    <app-signature-section
+      [group]="signatureGroup"
+      [signatures]="signaturesList"
+    />
+
+    <!-- Aviso de privacidad -->
+    <app-privacy-acceptance-section
+      [group]="privacyAcceptanceGroup"
+      controlName="privacyAccepted"
+    />
+
+    <div class="flex justify-end mt-6">
+      <button
+        type="submit"
+        class="btn-primary cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+        [disabled]="form.invalid"
+      >
+        Enviar Trámite
+      </button>
+    </div>
+  </form>
+</div>

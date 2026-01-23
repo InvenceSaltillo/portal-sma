@@ -1,0 +1,82 @@
+<div class="text-3xl text-black relative p-3 border border-slate-100 rounded-md shadow-md">
+  <h2 class="text-lg font-semibold mb-4">
+    Documentación que se anexa
+  </h2>
+
+  <div class="overflow-x-auto">
+    <table class="min-w-full w-full bg-white border border-gray-200 text-sm">
+      <thead>
+        <tr class="bg-gray-100 text-left">
+          <th class="px-4 py-2 border-b">Descripción</th>
+          <th class="px-4 py-2 border-b text-center">Si</th>
+          <th class="px-4 py-2 border-b text-center">No</th>
+          <th class="px-4 py-2 border-b text-center">No Aplica</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (item of documentationItems; track item.controlName) {
+          <tr class="border-t">
+            <td class="px-4 py-2 border-b">
+              {{ item.description }}
+            </td>
+            <td class="px-4 py-2 border-b text-center">
+              <input
+                type="radio"
+                [formControl]="getControl(item.controlName)!"
+                [name]="item.controlName"
+                value="yes"
+                class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+              />
+            </td>
+            <td class="px-4 py-2 border-b text-center">
+              <input
+                type="radio"
+                [formControl]="getControl(item.controlName)!"
+                [name]="item.controlName"
+                value="no"
+                class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+              />
+            </td>
+            <td class="px-4 py-2 border-b">
+              <div class="flex items-center justify-center gap-2">
+                @if (item.hasNotApplicable) {
+                  <input
+                    type="radio"
+                    [formControl]="getControl(item.controlName)!"
+                    [name]="item.controlName"
+                    value="not_applicable"
+                    class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                  />
+                  @if (isNotApplicableSelected(item.controlName)) {
+                    <input
+                      type="text"
+                      [formControl]="getNotApplicableControl(item.controlName)!"
+                      placeholder="Especificar motivo"
+                      class="flex-1 max-w-xs border border-gray-300 rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  }
+                } @else {
+                  <span class="text-gray-400">-</span>
+                }
+              </div>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Campo "Otros" -->
+  <div class="mt-4">
+    <label class="block text-gray-700 text-sm font-semibold mb-2">
+      Otros (Indicarlos)
+    </label>
+    @if (getOthersControl()) {
+      <textarea
+        [formControl]="getOthersControl()!"
+        rows="4"
+        class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-y"
+      ></textarea>
+    }
+  </div>
+</div>

@@ -1,0 +1,10 @@
+/* Ajustes visuales para la tabla y el dropdown de especies */
+
+::ng-deep .ng-select .ng-select-container {
+  @apply w-full border border-gray-300 rounded-md min-h-[2.5rem];
+}
+
+::ng-deep .ng-dropdown-panel {
+  background-color: #ffffff;
+}
+
