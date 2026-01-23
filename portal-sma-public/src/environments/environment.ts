@@ -1,9 +1,7 @@
 export const environment = {
   production: true,
   // Nueva API local
-  apiUrl: 'http://localhost:3000/api',
-  // API antigua (deprecada, se eliminará)
-  // apiUrl: 'https://invence.com.mx/portal-sma/api/public/api/',
+  apiUrl: 'https://portal-sma-api.vercel.app/',
   weatherApiUrl: 'https://api.weatherapi.com/v1/current.json?key=',
   weatherApiKey: '62601a162973447a89445913242507',
   supabaseUrl: 'https://hbijosnnqdolhxaeepjl.supabase.co',
