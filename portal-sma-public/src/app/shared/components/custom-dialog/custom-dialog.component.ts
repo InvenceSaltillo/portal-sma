@@ -1,11 +1,12 @@
 import { Component, OnInit, inject, input, output } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { CustomDialogConfig, FormControlConfig, FormControlType } from '../../../interfaces/custom.dialog.interfaces';
+import { DropdownModule } from 'primeng/dropdown';
 
 @Component({
   selector: 'app-custom-dialog',
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, DropdownModule],
   templateUrl: './custom-dialog.component.html',
   styleUrl: './custom-dialog.component.css'
 })

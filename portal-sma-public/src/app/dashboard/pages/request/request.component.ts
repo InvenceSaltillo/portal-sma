@@ -24,6 +24,7 @@ import { AccordionModule } from 'primeng/accordion';
 import { ButtonModule } from 'primeng/button';
 import { ToggleButtonModule } from 'primeng/togglebutton';
 import { TooltipModule } from 'primeng/tooltip';
+import { DropdownModule } from 'primeng/dropdown';
 import { EmailService } from '../../../services/email/email.service';
 import { supabaseClient } from '../../../core/supabase.client';
 import { LocalStorageService } from '../../../services/local-storage/local-storage.service';
@@ -57,6 +58,7 @@ interface SpeciesRow {
     ButtonModule,
     ToggleButtonModule,
     TooltipModule,
+    DropdownModule,
   ],
   templateUrl: './request.component.html',
   styleUrl: './request.component.css'

@@ -15,13 +15,13 @@
       <label class="block text-gray-700 text-lg mb-1">
         <span class="text-red-600 text-lg font-bold">*</span> Estado:
       </label>
-      <ng-select
-        [items]="stateOptions"
-        bindLabel="label"
-        bindValue="value"
+      <p-dropdown
+        [options]="stateOptions"
+        optionLabel="label"
+        optionValue="value"
         [formControlName]="stateControlName"
-        [searchable]="true"
-        [clearable]="true"
+        [filter]="true"
+        [showClear]="true"
         class="w-full"
         [ngClass]="{
           'ng-select-error': stateControl?.invalid && stateControl?.touched
@@ -38,13 +38,13 @@
       <label class="block text-gray-700 text-lg mb-1">
         <span class="text-red-600 text-sm font-bold">*</span> Municipio:
       </label>
-      <ng-select
-        [items]="municipalityOptions"
-        bindLabel="label"
-        bindValue="value"
+      <p-dropdown
+        [options]="municipalityOptions"
+        optionLabel="label"
+        optionValue="value"
         [formControlName]="municipalityControlName"
-        [searchable]="true"
-        [clearable]="true"
+        [filter]="true"
+        [showClear]="true"
         class="w-full"
         [ngClass]="{
           'ng-select-error': municipalityControl?.invalid && municipalityControl?.touched

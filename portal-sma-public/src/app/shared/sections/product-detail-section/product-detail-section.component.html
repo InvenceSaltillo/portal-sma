@@ -39,17 +39,17 @@
                 [text]="'Selecciona la especie del producto.'"
               />
             </div>
-            <ng-select
+            <p-dropdown
               formControlName="species"
-              [items]="speciesOptions"
-              bindValue="value"
-              bindLabel="label"
-              [clearable]="false"
-              [searchable]="true"
+              [options]="speciesOptions"
+              optionValue="value"
+              optionLabel="label"
+              [showClear]="false"
+              [filter]="true"
               class="custom-ng-select"
               [class.border-red-500]="getProductControl($index, 'species')?.invalid && getProductControl($index, 'species')?.touched"
             >
-            </ng-select>
+            </p-dropdown>
             @if (getProductControl($index, 'species')?.invalid && getProductControl($index, 'species')?.touched) {
               <p class="text-sm text-red-500 mt-1">Este campo es requerido.</p>
             }

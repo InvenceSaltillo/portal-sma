@@ -22,17 +22,17 @@
         [text]="'Selecciona el tipo de lugar donde se realizará el aprovechamiento.'"
       />
     </div>
-    <ng-select
+    <p-dropdown
       [formControlName]="exploitationLocationControlName"
-      [items]="exploitationLocationOptions"
-      bindValue="value"
-      bindLabel="label"
-      [clearable]="false"
-      [searchable]="true"
+      [options]="exploitationLocationOptions"
+      optionValue="value"
+      optionLabel="label"
+      [showClear]="false"
+      [filter]="true"
       class="custom-ng-select"
       [class.border-red-500]="exploitationLocationControl?.invalid && exploitationLocationControl?.touched"
     >
-    </ng-select>
+    </p-dropdown>
     @if (exploitationLocationControl?.invalid && exploitationLocationControl?.touched) {
       <p class="text-sm text-red-500 mt-1">Este campo es requerido.</p>
     }

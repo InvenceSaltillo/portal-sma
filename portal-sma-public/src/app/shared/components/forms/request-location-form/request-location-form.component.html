@@ -7,7 +7,7 @@
       [position]="'right'"
       [title]="'1. Lugar de solicitud'"
       [id]="'request-location'"
-      [text]="'Indicar el lugar donde se presenta la solicitud, municipio y estado, ejemplo: Coyoacán, Ciudad de México.'"
+      [text]="'Indicar el lugar donde se presenta la solicitud, municipio y estado, ejemplo: Coyoac�n, Ciudad de M�xico.'"
     />
   </div>
 
@@ -17,13 +17,19 @@
         <label for="state" class="block text-gray-700 text-lg">
           <span class="text-red-600 text-lg font-bold">*</span> Estado:
         </label>
-        <select
+        <p-dropdown
           formControlName="state"
-          class="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
-          autocomplete="off"
-        >
-          <option value="">-- Seleccione --</option>
-        </select>
+          [options]="[{ value: '', label: '-- Seleccione --' }]"
+          optionLabel="label"
+          optionValue="value"
+          [filter]="true"
+          [showClear]="false"
+          [styleClass]="'w-full text-base tramite-service-dropdown'"
+          [appendTo]="'body'"
+          [autoZIndex]="false"
+          [baseZIndex]="20"
+          panelStyleClass="tramite-dropdown-panel"
+        ></p-dropdown>
         @if (
           (requestLocationForm.hasError('required', 'state')) && requestLocationForm.controls['state'].touched
         ) {
@@ -38,14 +44,20 @@
         <label for="municipality" class="block text-gray-700 text-lg">
           <span class="text-red-600 text-lg font-bold">*</span> Municipio:
         </label>
-        <select
+        <p-dropdown
           formControlName="municipality"
-          class="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
-          autocomplete="off"
-        >
-          <option value="">-- Sin opción --</option>
-          <option value="value1">Tramite 1</option>
-        </select>
+          [options]="[{ value: '', label: '-- Sin opci�n --' }, { value: 'value1', label: 'Tramite 1' }]"
+          optionLabel="label"
+          optionValue="value"
+          [filter]="true"
+          [showClear]="false"
+          [placeholder]="'-- Sin opci�n --'"
+          [styleClass]="'w-full text-base tramite-service-dropdown'"
+          [appendTo]="'body'"
+          [autoZIndex]="false"
+          [baseZIndex]="20"
+          panelStyleClass="tramite-dropdown-panel"
+        ></p-dropdown>
         @if (
           (requestLocationForm.hasError('required', 'municipality')) && requestLocationForm.controls['municipality'].touched
         ) {

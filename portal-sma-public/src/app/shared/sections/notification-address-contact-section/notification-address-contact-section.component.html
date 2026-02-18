@@ -121,17 +121,17 @@
         <label class="block text-gray-700 text-lg mb-1">
           <span class="text-red-600 text-lg font-bold">*</span> Estado:
         </label>
-        <ng-select
+        <p-dropdown
           [formControlName]="stateControlName"
-          [items]="stateOptions"
-          bindValue="value"
-          bindLabel="label"
-          [clearable]="false"
-          [searchable]="true"
+          [options]="stateOptions"
+          optionValue="value"
+          optionLabel="label"
+          [showClear]="false"
+          [filter]="true"
           class="custom-ng-select"
           [class.border-red-500]="stateControl?.invalid && stateControl?.touched"
         >
-        </ng-select>
+        </p-dropdown>
         @if (stateControl?.invalid && stateControl?.touched) {
           <p class="text-sm text-red-500 mt-1">Este campo es requerido.</p>
         }
@@ -142,17 +142,17 @@
         <label class="block text-gray-700 text-lg mb-1">
           <span class="text-red-600 text-lg font-bold">*</span> Municipio o Delegación:
         </label>
-        <ng-select
+        <p-dropdown
           [formControlName]="municipalityControlName"
-          [items]="municipalityOptions"
-          bindValue="value"
-          bindLabel="label"
-          [clearable]="false"
-          [searchable]="true"
+          [options]="municipalityOptions"
+          optionValue="value"
+          optionLabel="label"
+          [showClear]="false"
+          [filter]="true"
           class="custom-ng-select"
           [class.border-red-500]="municipalityControl?.invalid && municipalityControl?.touched"
         >
-        </ng-select>
+        </p-dropdown>
         @if (municipalityControl?.invalid && municipalityControl?.touched) {
           <p class="text-sm text-red-500 mt-1">Este campo es requerido.</p>
         }

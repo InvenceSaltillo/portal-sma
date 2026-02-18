@@ -23,3 +23,40 @@
         /* CSS to Reset */
     }
 }
+
+/* Unified PrimeNG dropdown style */
+.p-dropdown,
+.tramite-service-dropdown.p-dropdown,
+.custom-ng-select .p-dropdown {
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  height: 42px;
+  min-height: 42px;
+  width: 100%;
+}
+
+.p-dropdown .p-dropdown-label,
+.tramite-service-dropdown.p-dropdown .p-dropdown-label,
+.custom-ng-select .p-dropdown .p-dropdown-label {
+  font-size: 1rem;
+  padding: 0.5rem 0.75rem;
+  line-height: 1.5rem;
+}
+
+.p-dropdown.p-focus,
+.tramite-service-dropdown.p-dropdown.p-focus,
+.custom-ng-select .p-dropdown.p-focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 1px #3b82f6;
+}
+
+.p-dropdown.ng-invalid,
+.tramite-service-dropdown.p-dropdown.ng-invalid,
+.custom-ng-select.ng-select-error .p-dropdown,
+.border-red-500 .p-dropdown {
+  border-color: #ef4444;
+}
+
+.tramite-dropdown-panel.p-dropdown-panel {
+  z-index: 20 !important;
+}

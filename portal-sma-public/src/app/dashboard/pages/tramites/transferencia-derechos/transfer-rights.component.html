@@ -1,0 +1,194 @@
+<div class="text-3xl text-black relative p-3 border border-slate-100 rounded-md mt-4 mx-2 sm:mx-20 shadow-md">
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-6">
+    <app-request-location-section
+      [group]="requestLocationGroup"
+      stateControlName="state_id"
+      municipalityControlName="municipality_id"
+      [stateOptions]="stateOptions"
+      [municipalityOptions]="municipalityOptions"
+    />
+
+    <app-general-data-section
+      [group]="generalDataGroup"
+    />
+
+    <app-individual-person-section
+      [group]="individualPersonGroup"
+    />
+
+    <app-legal-entity-section
+      [group]="legalEntityGroup"
+    />
+
+    <app-legal-representative-section
+      [group]="legalRepresentativeGroup"
+    />
+
+    <app-authorized-person-section
+      [group]="authorizedPersonGroup"
+    />
+
+    <app-address-contact-section
+      [group]="addressContactGroup"
+      [stateOptions]="addressStateOptions"
+      [municipalityOptions]="addressMunicipalityOptions"
+    />
+
+    <app-notification-address-contact-section
+      [group]="notificationAddressContactGroup"
+      [stateOptions]="notificationStateOptions"
+      [municipalityOptions]="notificationMunicipalityOptions"
+    />
+
+    <div class="p-3 border border-slate-100 mb-4 rounded-md shadow-md bg-white" [formGroup]="transactionInformationGroup">
+      <div class="flex items-center gap-2 mb-3">
+        <h2 class="text-lg font-bold">III. Datos de información del trámite</h2>
+      </div>
+
+      <div class="mb-4">
+        <div class="flex items-start gap-2 mb-1">
+          <label class="block text-gray-700 text-sm">
+            <span class="text-red-600 text-sm font-bold">*</span> Petición que se formula:
+          </label>
+          <app-popover-icon
+            [position]="'top'"
+            [title]="'Petición que se formula'"
+            [id]="'transfer-petition-type'"
+            [text]="'Seleccione el tipo de petición de la transferencia de derechos.'"
+          />
+        </div>
+        <p-dropdown
+          formControlName="petition_type"
+          [options]="petitionTypeOptions"
+          optionValue="value"
+          optionLabel="label"
+          [filter]="false"
+          [showClear]="false"
+          [styleClass]="'w-full text-base tramite-service-dropdown'"
+          [appendTo]="'body'"
+          [autoZIndex]="false"
+          [baseZIndex]="20"
+          panelStyleClass="tramite-dropdown-panel"
+          [class.ng-invalid]="transactionInformationGroup.get('petition_type')?.invalid && transactionInformationGroup.get('petition_type')?.touched"
+        ></p-dropdown>
+        @if (transactionInformationGroup.get('petition_type')?.invalid && transactionInformationGroup.get('petition_type')?.touched) {
+          <p class="text-sm text-red-500 mt-1">Este campo es requerido.</p>
+        }
+      </div>
+
+      <div class="mb-4">
+        <div class="flex items-start gap-2 mb-1">
+          <label class="block text-gray-700 text-sm">
+            <span class="text-red-600 text-sm font-bold">*</span> Temporalidad de la transferencia:
+          </label>
+          <app-popover-icon
+            [position]="'top'"
+            [title]="'Temporalidad de la transferencia'"
+            [id]="'transfer-temporality'"
+            [text]="'Indique la temporalidad de la transferencia de derechos.'"
+          />
+        </div>
+        <textarea
+          formControlName="transfer_temporality"
+          rows="3"
+          class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-y"
+          [class.border-red-500]="transactionInformationGroup.get('transfer_temporality')?.invalid && transactionInformationGroup.get('transfer_temporality')?.touched"
+        ></textarea>
+        @if (transactionInformationGroup.get('transfer_temporality')?.invalid && transactionInformationGroup.get('transfer_temporality')?.touched) {
+          <p class="text-sm text-red-500 mt-1">Este campo es requerido.</p>
+        }
+      </div>
+
+      <div class="mb-4">
+        <div class="flex items-start gap-2 mb-1">
+          <label class="block text-gray-700 text-sm">
+            <span class="text-red-600 text-sm font-bold">*</span> Nombre y número de registro, en caso de que se trate de una UMA o el número de control si se trata de un predio de propiedad federal:
+          </label>
+          <app-popover-icon
+            [position]="'top'"
+            [title]="'Registro UMA o predio'"
+            [id]="'transfer-uma-registration'"
+            [text]="'Capture el nombre y número de registro de UMA o número de control del predio federal.'"
+          />
+        </div>
+        <textarea
+          formControlName="uma_or_property_registration"
+          rows="4"
+          class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-y"
+          [class.border-red-500]="transactionInformationGroup.get('uma_or_property_registration')?.invalid && transactionInformationGroup.get('uma_or_property_registration')?.touched"
+        ></textarea>
+        @if (transactionInformationGroup.get('uma_or_property_registration')?.invalid && transactionInformationGroup.get('uma_or_property_registration')?.touched) {
+          <p class="text-sm text-red-500 mt-1">Este campo es requerido.</p>
+        }
+      </div>
+
+      <div class="mb-1">
+        <div class="flex items-start gap-2 mb-1">
+          <label class="block text-gray-700 text-sm">
+            <span class="text-red-600 text-sm font-bold">*</span> Derechos que se transmiten:
+          </label>
+          <app-popover-icon
+            [position]="'top'"
+            [title]="'Derechos que se transmiten'"
+            [id]="'transfer-rights'"
+            [text]="'Describa los derechos derivados de la autorización que serán transferidos.'"
+          />
+        </div>
+        <textarea
+          formControlName="transferred_rights"
+          rows="4"
+          class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-y"
+          [class.border-red-500]="transactionInformationGroup.get('transferred_rights')?.invalid && transactionInformationGroup.get('transferred_rights')?.touched"
+        ></textarea>
+        @if (transactionInformationGroup.get('transferred_rights')?.invalid && transactionInformationGroup.get('transferred_rights')?.touched) {
+          <p class="text-sm text-red-500 mt-1">Este campo es requerido.</p>
+        }
+      </div>
+    </div>
+
+    <div class="p-3 border border-slate-100 mb-4 rounded-md shadow-md bg-white">
+      <h2 class="text-lg font-bold mb-3">Persona a la que se le transfieren los derechos</h2>
+
+      <app-general-data-section
+        [group]="transfereeGeneralDataGroup"
+      />
+
+      <app-individual-person-section
+        [group]="transfereeIndividualPersonGroup"
+      />
+
+      <app-legal-entity-section
+        [group]="transfereeLegalEntityGroup"
+      />
+
+      <app-legal-representative-section
+        [group]="transfereeLegalRepresentativeGroup"
+      />
+
+      <app-authorized-person-section
+        [group]="transfereeAuthorizedPersonGroup"
+      />
+
+      <app-address-contact-section
+        [group]="transfereeAddressContactGroup"
+        [stateOptions]="transfereeAddressStateOptions"
+        [municipalityOptions]="transfereeAddressMunicipalityOptions"
+      />
+    </div>
+
+    <app-privacy-acceptance-section
+      [group]="privacyAcceptanceGroup"
+      controlName="privacyAccepted"
+    />
+
+    <div class="flex justify-end mt-6">
+      <button
+        type="submit"
+        class="btn-primary cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+        [disabled]="form.invalid"
+      >
+        Continuar
+      </button>
+    </div>
+  </form>
+</div>

@@ -18,15 +18,15 @@
         />
       </div>
       @if (releaseObjectiveControl) {
-        <ng-select
-          [items]="releaseObjectiveOptions"
-          bindLabel="label"
-          bindValue="value"
-          [clearable]="false"
-          [searchable]="true"
+        <p-dropdown
+          [options]="releaseObjectiveOptions"
+          optionLabel="label"
+          optionValue="value"
+          [showClear]="false"
+          [filter]="true"
           [formControl]="releaseObjectiveControl"
         >
-        </ng-select>
+        </p-dropdown>
         @if (releaseObjectiveControl.invalid && (releaseObjectiveControl.touched || releaseObjectiveControl.dirty)) {
           <p class="text-sm text-red-500 mt-1">
             Seleccione el objetivo de la liberación.
@@ -77,17 +77,17 @@
               </label>
             </div>
             @if (speciesControl) {
-              <ng-select
-                [items]="speciesOptions"
-                bindLabel="label"
-                bindValue="value"
-                [clearable]="true"
-                [searchable]="true"
+              <p-dropdown
+                [options]="speciesOptions"
+                optionLabel="label"
+                optionValue="value"
+                [showClear]="true"
+                [filter]="true"
                 [virtualScroll]="true"
                 [formControl]="speciesControl"
                 [disabled]="isEditing()"
               >
-              </ng-select>
+              </p-dropdown>
               @if (speciesControl.invalid && (speciesControl.touched || speciesControl.dirty)) {
                 <p class="text-sm text-red-500 mt-1">
                   Seleccione una especie.
@@ -125,14 +125,14 @@
               <span class="text-red-600 text-sm font-bold">*</span> Sexo:
             </label>
             @if (sexControl) {
-              <ng-select
-                [items]="sexOptions"
-                bindLabel="label"
-                bindValue="value"
-                [clearable]="false"
+              <p-dropdown
+                [options]="sexOptions"
+                optionLabel="label"
+                optionValue="value"
+                [showClear]="false"
                 [formControl]="sexControl"
               >
-              </ng-select>
+              </p-dropdown>
               @if (sexControl.invalid && (sexControl.touched || sexControl.dirty)) {
                 <p class="text-sm text-red-500 mt-1">
                   Seleccione el sexo.

@@ -10,6 +10,7 @@ import { LocalStorageService } from '../../../services/local-storage/local-stora
 import { User } from '../../../interfaces/user.interface';
 import { TitleBarComponent } from '../../../shared/title-bar/title-bar.component';
 import { firstValueFrom } from 'rxjs';
+import { DropdownModule } from 'primeng/dropdown';
 
 /**
  * Componente wrapper que carga dinámicamente el componente específico del trámite
@@ -18,7 +19,7 @@ import { firstValueFrom } from 'rxjs';
 @Component({
   selector: 'app-tramite-wrapper',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, TitleBarComponent],
+  imports: [CommonModule, ReactiveFormsModule, TitleBarComponent, DropdownModule],
   template: `
     <app-title-bar
       [title]="'Solicitud de Trámite'"
@@ -35,20 +36,24 @@ import { firstValueFrom } from 'rxjs';
               <label for="serviceType" class="block text-gray-700 text-lg">
                 <span class="text-red-600 text-lg font-bold">*</span> Tipo de trámite/Servicio:
               </label>
-              <select
+              <p-dropdown
                 formControlName="serviceType"
-                class="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
-                autocomplete="off"
-              >
-                @if (serviceTypeService.serviceTypes()?.length) {
-                  <option value="">-- Seleccione --</option>
-                }
-                @for (serviceType of serviceTypeService.serviceTypes(); track serviceType.id) {
-                  <option [value]="serviceType.id">{{serviceType.name}}</option>
-                }@empty {
-                  <option value="">Cargando...</option>
-                }
-              </select>
+                [options]="serviceTypeService.serviceTypes() || []"
+                optionLabel="name"
+                optionValue="id"
+                [filter]="true"
+                filterBy="name"
+                [showClear]="false"
+                [placeholder]="'-- Seleccione --'"
+                [styleClass]="'w-full text-base tramite-service-dropdown'"
+                [appendTo]="'body'"
+                [autoZIndex]="false"
+                [baseZIndex]="20"
+                panelStyleClass="tramite-dropdown-panel"
+                emptyMessage="Cargando..."
+                emptyFilterMessage="Sin resultados"
+                [class.ng-invalid]="processForm.controls['serviceType'].invalid && processForm.controls['serviceType'].touched"
+              ></p-dropdown>
               @if (
                 (processForm.hasError('required', 'serviceType')) && processForm.controls['serviceType'].touched
               ) {
@@ -61,20 +66,24 @@ import { firstValueFrom } from 'rxjs';
               <label for="service" class="block text-gray-700 text-lg">
                 <span class="text-red-600 text-lg font-bold">*</span> Trámite:
               </label>
-              <select
+              <p-dropdown
                 formControlName="service"
-                class="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
-                autocomplete="off"
-              >
-                @if (serviceService.services()?.length) {
-                  <option value="">-- Seleccione --</option>
-                }
-                @for (service of serviceService.services(); track service) {
-                  <option [value]="service.id">{{service.name}}</option>
-                }@empty {
-                  <option value="">-- Sin opción --</option>
-                }
-              </select>
+                [options]="serviceService.services() || []"
+                optionLabel="name"
+                optionValue="id"
+                [filter]="true"
+                filterBy="name"
+                [showClear]="false"
+                [placeholder]="'-- Seleccione --'"
+                [styleClass]="'w-full text-base tramite-service-dropdown'"
+                [appendTo]="'body'"
+                [autoZIndex]="false"
+                [baseZIndex]="20"
+                panelStyleClass="tramite-dropdown-panel"
+                emptyMessage="-- Sin opción --"
+                emptyFilterMessage="Sin resultados"
+                [class.ng-invalid]="processForm.controls['service'].invalid && processForm.controls['service'].touched"
+              ></p-dropdown>
               @if (
                 (processForm.hasError('required', 'service')) && processForm.controls['service'].touched
               ) {
@@ -267,6 +276,8 @@ export default class TramiteWrapperComponent implements OnInit, OnDestroy {
         'autorizacion-ejemplares-perjudiciales-fuera-uma': () => import('./autorizacion-ejemplares-perjudiciales-fuera-uma/harmful-specimens-outside-uma-authorization.component'),
         'informe-resultados-perjudiciales': () => import('./informe-resultados-perjudiciales/results-report-harmful-specimens.component'),
         'aviso-aprovechamiento-exoticos': () => import('./aviso-aprovechamiento-exoticos/exotic-species-exploitation-notice.component'),
+        'aviso-aves-migratorias': () => import('./aviso-aves-migratorias/migratory-birds-notice.component'),
+        'transferencia-derechos': () => import('./transferencia-derechos/transfer-rights.component'),
         'autorizacion-liberacion-ejemplares': () => import('./autorizacion-liberacion-ejemplares/specimen-release-authorization.component'),
         // Agregar más componentes aquí cuando se creen
       };
@@ -333,3 +344,4 @@ export default class TramiteWrapperComponent implements OnInit, OnDestroy {
     }
   }
 }
+

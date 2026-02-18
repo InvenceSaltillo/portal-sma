@@ -24,16 +24,16 @@
       <div class="flex flex-wrap items-center gap-3">
         <div class="w-full md:w-1/2">
           @if (speciesControl) {
-            <ng-select
-              [items]="speciesOptions"
-              bindLabel="label"
-              bindValue="value"
-              [clearable]="true"
-              [searchable]="true"
+            <p-dropdown
+              [options]="speciesOptions"
+              optionLabel="label"
+              optionValue="value"
+              [showClear]="true"
+              [filter]="true"
               [virtualScroll]="true"
               [formControl]="speciesControl"
             >
-            </ng-select>
+            </p-dropdown>
 
             @if (speciesControl.invalid && speciesControl.touched) {
               <p class="text-sm text-red-500 mt-1">

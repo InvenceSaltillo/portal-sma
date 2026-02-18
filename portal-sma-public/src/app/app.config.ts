@@ -10,7 +10,7 @@ import { provideToastr } from 'ngx-toastr';
 import { authInterceptor } from './auth.interceptor';
 import { NgxTippyModule } from 'ngx-tippy-wrapper';
 import { provideEnvironmentNgxMask, provideNgxMask } from 'ngx-mask';
-import { NgSelectModule } from '@ng-select/ng-select';
+import { DropdownModule } from 'primeng/dropdown';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -31,7 +31,7 @@ export const appConfig: ApplicationConfig = {
     importProvidersFrom(
       HttpClientModule,
       NgxTippyModule,
-      NgSelectModule,
+      DropdownModule,
     ),
     provideToastr({
       timeOut: 3000,

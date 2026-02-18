@@ -46,17 +46,17 @@
         [text]="'Selecciona si el aprovechamiento es en UMA u otro predio.'"
       />
     </div>
-    <ng-select
+    <p-dropdown
       [formControlName]="exploitationSiteControlName"
-      [items]="exploitationSiteOptions"
-      bindValue="value"
-      bindLabel="label"
-      [clearable]="false"
-      [searchable]="false"
+      [options]="exploitationSiteOptions"
+      optionValue="value"
+      optionLabel="label"
+      [showClear]="false"
+      [filter]="false"
       class="custom-ng-select"
       [class.border-red-500]="exploitationSiteControl?.invalid && exploitationSiteControl?.touched"
     >
-    </ng-select>
+    </p-dropdown>
     <p class="text-xs text-gray-600 mt-1">
       Si su aprovechamiento se realizará en UMA indique el nombre y el número de registro, si su aprovechamiento se realizará en otro predio indique el nombre y número de control del mismo.
     </p>

@@ -3,7 +3,7 @@ import { DynamicFormField } from '../../../interfaces/dynamic-form-field.interfa
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { PopoverIconComponent } from '../popover-icon/popover-icon.component';
-import { NgSelectModule } from '@ng-select/ng-select';
+import { DropdownModule } from 'primeng/dropdown';
 import { NgxMaskDirective } from 'ngx-mask';
 import { TooltipModule } from "primeng/tooltip";
 import { HttpClient, HttpParams } from '@angular/common/http';
@@ -16,7 +16,7 @@ import { firstValueFrom } from 'rxjs';
     CommonModule,
     ReactiveFormsModule,
     PopoverIconComponent,
-    NgSelectModule,
+    DropdownModule,
     NgxMaskDirective,
     TooltipModule,
   ],

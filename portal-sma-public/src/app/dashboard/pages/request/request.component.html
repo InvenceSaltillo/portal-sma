@@ -21,20 +21,21 @@
           <label for="serviceType" class="block text-gray-700 text-lg">
             <span class="text-red-600 text-lg font-bold">*</span> Tipo de trámite/Servicio:
           </label>
-          <select
+          <p-dropdown
             formControlName="serviceType"
-            class="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
-            autocomplete="off"
-          >
-            @if (serviceTypeService.serviceTypes()?.length) {
-              <option value="">-- Seleccione --</option>
-            }
-            @for (serviceType of serviceTypeService.serviceTypes(); track serviceType.id) {
-              <option [value]="serviceType.id">{{serviceType.name}}</option>
-            }@empty {
-              <option value="">Cargando...</option>
-            }
-          </select>
+            [options]="serviceTypeService.serviceTypes() || []"
+            optionLabel="name"
+            optionValue="id"
+            [filter]="true"
+            filterBy="name"
+            [showClear]="false"
+            [placeholder]="'-- Seleccione --'"
+            [styleClass]="'w-full text-base tramite-service-dropdown'"
+            [appendTo]="'self'"
+            emptyMessage="Cargando..."
+            emptyFilterMessage="Sin resultados"
+            [class.ng-invalid]="processForm.controls['serviceType'].invalid && processForm.controls['serviceType'].touched"
+          ></p-dropdown>
           @if (
             (processForm.hasError('required', 'serviceType')) && processForm.controls['serviceType'].touched
           ) {
@@ -47,20 +48,21 @@
           <label for="service" class="block text-gray-700 text-lg">
             <span class="text-red-600 text-lg font-bold">*</span> Trámite:
           </label>
-          <select
+          <p-dropdown
             formControlName="service"
-            class="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
-            autocomplete="off"
-          >
-            @if (serviceService.services()?.length) {
-              <option value="">-- Seleccione --</option>
-            }
-            @for (service of serviceService.services(); track service) {
-              <option [value]="service.id">{{service.name}}</option>
-            }@empty {
-              <option value="">-- Sin opción --</option>
-            }
-          </select>
+            [options]="serviceService.services() || []"
+            optionLabel="name"
+            optionValue="id"
+            [filter]="true"
+            filterBy="name"
+            [showClear]="false"
+            [placeholder]="'-- Seleccione --'"
+            [styleClass]="'w-full text-base tramite-service-dropdown'"
+            [appendTo]="'self'"
+            emptyMessage="-- Sin opción --"
+            emptyFilterMessage="Sin resultados"
+            [class.ng-invalid]="processForm.controls['service'].invalid && processForm.controls['service'].touched"
+          ></p-dropdown>
           @if (
             (processForm.hasError('required', 'service')) && processForm.controls['service'].touched
           ) {

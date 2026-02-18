@@ -2,7 +2,7 @@ import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { PopoverIconComponent } from '../../components/popover-icon/popover-icon.component';
-import { NgSelectModule } from '@ng-select/ng-select';
+import { DropdownModule } from 'primeng/dropdown';
 
 interface SelectOption {
   value: string | number;
@@ -12,7 +12,7 @@ interface SelectOption {
 @Component({
   selector: 'app-address-contact-section',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, PopoverIconComponent, NgSelectModule],
+  imports: [CommonModule, ReactiveFormsModule, PopoverIconComponent, DropdownModule],
   templateUrl: './address-contact-section.component.html',
   styleUrl: './address-contact-section.component.css',
 })

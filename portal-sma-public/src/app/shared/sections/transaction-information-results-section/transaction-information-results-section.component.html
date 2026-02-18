@@ -32,17 +32,17 @@
             />
           </div>
           @if (speciesControl) {
-            <ng-select
-              [items]="speciesOptions"
-              bindLabel="label"
-              bindValue="value"
-              [clearable]="true"
-              [searchable]="true"
+            <p-dropdown
+              [options]="speciesOptions"
+              optionLabel="label"
+              optionValue="value"
+              [showClear]="true"
+              [filter]="true"
               [virtualScroll]="true"
               [formControl]="speciesControl"
               [disabled]="isEditing()"
             >
-            </ng-select>
+            </p-dropdown>
             @if (speciesControl.invalid && (speciesControl.touched || speciesControl.dirty)) {
               <p class="text-sm text-red-500 mt-1">
                 Seleccione una especie.

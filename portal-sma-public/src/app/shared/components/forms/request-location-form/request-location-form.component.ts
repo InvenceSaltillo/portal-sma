@@ -1,6 +1,7 @@
 import { Component, OnInit, inject, output, signal } from '@angular/core';
 import { PopoverIconComponent } from '../../popover-icon/popover-icon.component';
 import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { DropdownModule } from 'primeng/dropdown';
 
 @Component({
   selector: 'app-request-location-form',
@@ -8,6 +9,7 @@ import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } 
   imports: [
     PopoverIconComponent,
     ReactiveFormsModule,
+    DropdownModule,
   ],
   templateUrl: './request-location-form.component.html',
   styles: ``

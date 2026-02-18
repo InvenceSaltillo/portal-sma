@@ -1,0 +1,100 @@
+<div class="text-3xl text-black relative p-3 border border-slate-100 rounded-md mt-4 mx-2 sm:mx-20 shadow-md">
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-6">
+    <app-request-location-section
+      [group]="requestLocationGroup"
+      stateControlName="state_id"
+      municipalityControlName="municipality_id"
+      [stateOptions]="stateOptions"
+      [municipalityOptions]="municipalityOptions"
+    />
+
+    <app-general-data-section
+      [group]="generalDataGroup"
+    />
+
+    <app-individual-person-section
+      [group]="individualPersonGroup"
+    />
+
+    <app-legal-entity-section
+      [group]="legalEntityGroup"
+    />
+
+    <app-legal-representative-section
+      [group]="legalRepresentativeGroup"
+    />
+
+    <app-authorized-person-section
+      [group]="authorizedPersonGroup"
+    />
+
+    <app-address-contact-section
+      [group]="addressContactGroup"
+      [stateOptions]="addressStateOptions"
+      [municipalityOptions]="addressMunicipalityOptions"
+    />
+
+    <app-notification-address-contact-section
+      [group]="notificationAddressContactGroup"
+      [stateOptions]="notificationStateOptions"
+      [municipalityOptions]="notificationMunicipalityOptions"
+    />
+
+    <div class="p-3 border border-slate-100 mb-4 rounded-md shadow-md bg-white" [formGroup]="transactionInformationGroup">
+      <div class="flex items-center gap-2 mb-1">
+        <h2 class="text-lg font-bold">III. Datos de Información del Trámite</h2>
+      </div>
+      <div class="flex items-start gap-2 mb-2">
+        <label class="block text-gray-700 text-lg">
+          Indique el nombre, número de registro de la UMA y la ubicación del predio donde se realizará el aprovechamiento:
+        </label>
+        <app-popover-icon
+          [position]="'top'"
+          [title]="'Datos de Información del Trámite'"
+          [id]="'migratory-birds-transaction-info'"
+          [text]="'Indique el nombre, número de registro de la UMA y la ubicación del predio donde se realizará el aprovechamiento.'"
+        />
+      </div>
+      <input
+        type="text"
+        formControlName="uma_name_registration_location"
+        class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        [class.border-red-500]="transactionInformationGroup.get('uma_name_registration_location')?.invalid && transactionInformationGroup.get('uma_name_registration_location')?.touched"
+      />
+      @if (transactionInformationGroup.get('uma_name_registration_location')?.invalid && transactionInformationGroup.get('uma_name_registration_location')?.touched) {
+        <p class="text-sm text-red-500 mt-1">Este campo es requerido.</p>
+      }
+    </div>
+
+    <app-attached-documentation-section
+      [group]="attachedDocumentationGroup"
+      [documentationItems]="documentationItemsList"
+      othersControlName="others"
+    />
+
+    <app-requirements-section
+      [group]="requirementsGroup"
+      [requirements]="requirementsList"
+    />
+
+    <app-signature-section
+      [group]="signatureGroup"
+      [signatures]="signaturesList"
+    />
+
+    <app-privacy-acceptance-section
+      [group]="privacyAcceptanceGroup"
+      controlName="privacyAccepted"
+    />
+
+    <div class="flex justify-end mt-6">
+      <button
+        type="submit"
+        class="btn-primary cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+        [disabled]="form.invalid"
+      >
+        Continuar
+      </button>
+    </div>
+  </form>
+</div>
