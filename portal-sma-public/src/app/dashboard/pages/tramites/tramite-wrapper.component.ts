@@ -268,6 +268,11 @@ export default class TramiteWrapperComponent implements OnInit, OnDestroy {
       // Solo incluir componentes que realmente existen
       const componentMap: Record<string, () => Promise<any>> = {
         'registro-renovacion-uma': () => import('./registro-renovacion-uma/registro-renovacion-uma.component'),
+        'modificacion-umma': () => import('./modificacion-umma/modificacion-umma.component'),
+        'incorporacion-prestadores-servicios': () => import('./incorporacion-prestadores-servicios/incorporacion-prestadores-servicios.component'),
+        'incorporacion-mascotas-aves-presa': () => import('./incorporacion-mascotas-aves-presa/incorporacion-mascotas-aves-presa.component'),
+        'conservacion-vida-silvestre-a': () => import('./conservacion-vida-silvestre-a/conservacion-vida-silvestre-a.component'),
+        'conservacion-vida-silvestre-b': () => import('./conservacion-vida-silvestre-b/conservacion-vida-silvestre-b.component'),
         'autorizacion-aprovechamiento-extractivo-cinegetico': () => import('./autorizacion-aprovechamiento-extractivo-cinegetico/cinegetic-extractive-authorization.component'),
         'autorizacion-aprovechamiento-extractivo-comercial': () => import('./autorizacion-aprovechamiento-extractivo-comercial/commercial-extractive-authorization.component'),
         'autorizacion-aprovechamiento-no-extractivo': () => import('./autorizacion-aprovechamiento-no-extractivo/non-extractive-authorization.component'),
@@ -275,6 +280,7 @@ export default class TramiteWrapperComponent implements OnInit, OnDestroy {
         'autorizacion-ejemplares-perjudiciales': () => import('./autorizacion-ejemplares-perjudiciales/harmful-specimens-authorization.component'),
         'autorizacion-ejemplares-perjudiciales-fuera-uma': () => import('./autorizacion-ejemplares-perjudiciales-fuera-uma/harmful-specimens-outside-uma-authorization.component'),
         'informe-resultados-perjudiciales': () => import('./informe-resultados-perjudiciales/results-report-harmful-specimens.component'),
+        'informe-actividades': () => import('./informe-actividades/conservation-sustainable-use-report.component'),
         'aviso-aprovechamiento-exoticos': () => import('./aviso-aprovechamiento-exoticos/exotic-species-exploitation-notice.component'),
         'aviso-aves-migratorias': () => import('./aviso-aves-migratorias/migratory-birds-notice.component'),
         'transferencia-derechos': () => import('./transferencia-derechos/transfer-rights.component'),

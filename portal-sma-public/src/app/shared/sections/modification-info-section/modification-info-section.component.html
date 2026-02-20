@@ -1,0 +1,187 @@
+<div class="p-3 border border-slate-100 mb-4 rounded-md shadow-md bg-white" [formGroup]="group">
+  <div class="flex items-center gap-2 mb-3">
+    <h2 class="text-lg font-bold">III. Datos de información del trámite</h2>
+    <app-popover-icon
+      [position]="'top'"
+      [title]="'Datos de información del trámite'"
+      [id]="'modification-info-section'"
+      [text]="'Indique los tipos de modificación y la información específica relacionada con la UMA.'"
+    />
+  </div>
+
+  <!-- Tipos de modificación solicitados -->
+  <div class="mb-4" [formGroup]="modificationTypesGroup">
+    <div class="flex items-start gap-2 mb-2">
+      <label class="block text-gray-700 text-sm">
+        <span class="text-red-600 text-sm font-bold">*</span> Señale el(los) tipos de modificación(es) solicitadas:
+      </label>
+      <app-popover-icon
+        [position]="'top'"
+        [title]="'Tipos de modificación'"
+        [id]="'modification-types-tooltip'"
+        [text]="'Seleccione uno o más tipos de modificación que se están solicitando para el registro de la UMA.'"
+      />
+    </div>
+
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
+      <label class="inline-flex items-center gap-1">
+        <input type="checkbox" formControlName="surface" class="rounded border-gray-300" />
+        <span>Superficie</span>
+      </label>
+      <label class="inline-flex items-center gap-1">
+        <input type="checkbox" formControlName="species" class="rounded border-gray-300" />
+        <span>Especie</span>
+      </label>
+      <label class="inline-flex items-center gap-1">
+        <input type="checkbox" formControlName="technical_manager" class="rounded border-gray-300" />
+        <span>Responsable técnico</span>
+      </label>
+      <label class="inline-flex items-center gap-1">
+        <input type="checkbox" formControlName="management_type" class="rounded border-gray-300" />
+        <span>Forma de manejo</span>
+      </label>
+      <label class="inline-flex items-center gap-1">
+        <input type="checkbox" formControlName="marking_system" class="rounded border-gray-300" />
+        <span>Sistema de marca</span>
+      </label>
+      <label class="inline-flex items-center gap-1">
+        <input type="checkbox" formControlName="holder" class="rounded border-gray-300" />
+        <span>Titularidad</span>
+      </label>
+      <label class="inline-flex items-center gap-1">
+        <input type="checkbox" formControlName="fences" class="rounded border-gray-300" />
+        <span>Cercos</span>
+      </label>
+      <label class="inline-flex items-center gap-1 md:col-span-2">
+        <input type="checkbox" formControlName="name_or_corporate_name" class="rounded border-gray-300" />
+        <span>Nombre, denominación o razón social</span>
+      </label>
+    </div>
+  </div>
+
+  <!-- Número de registro de la UMA -->
+  <div class="mb-4">
+    <div class="flex items-start gap-2 mb-1">
+      <label class="block text-gray-700 text-sm">
+        <span class="text-red-600 text-sm font-bold">*</span>
+        Indique el número de registro de la UMA que le fue asignado y a la cual se solicita modificación de datos:
+      </label>
+      <app-popover-icon
+        [position]="'top'"
+        [title]="'Número de registro de la UMA'"
+        [id]="'modification-uma-registration-number-tooltip'"
+        [text]="'Capture el número de registro oficial de la UMA para la cual se solicita la modificación de datos.'"
+      />
+    </div>
+    <textarea
+      formControlName="uma_registration_number"
+      rows="3"
+      class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-y"
+      [class.border-red-500]="getControl('uma_registration_number')?.invalid && getControl('uma_registration_number')?.touched"
+    ></textarea>
+    @if (getControl('uma_registration_number')?.invalid && getControl('uma_registration_number')?.touched) {
+      <p class="text-sm text-red-500 mt-1">Este campo es requerido.</p>
+    }
+  </div>
+
+  <!-- Nueva superficie de la UMA -->
+  <div class="mb-4">
+    <div class="flex items-start gap-2 mb-1">
+      <label class="block text-gray-700 text-sm">
+        <span class="text-red-600 text-sm font-bold">*</span>
+        Indique cuál será la nueva superficie de la UMA:
+      </label>
+      <app-popover-icon
+        [position]="'top'"
+        [title]="'Nueva superficie de la UMA'"
+        [id]="'modification-new-surface-tooltip'"
+        [text]="'Describa la nueva superficie total que tendrá la UMA después de la modificación.'"
+      />
+    </div>
+    <textarea
+      formControlName="new_surface"
+      rows="2"
+      class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-y"
+      [class.border-red-500]="getControl('new_surface')?.invalid && getControl('new_surface')?.touched"
+    ></textarea>
+    @if (getControl('new_surface')?.invalid && getControl('new_surface')?.touched) {
+      <p class="text-sm text-red-500 mt-1">Este campo es requerido.</p>
+    }
+  </div>
+
+  <!-- Nuevo titular / responsable técnico / nombre o razón social -->
+  <div class="mb-4">
+    <div class="flex items-start gap-2 mb-1">
+      <label class="block text-gray-700 text-sm">
+        <span class="text-red-600 text-sm font-bold">*</span>
+        Señale el nombre del nuevo titular, del nuevo responsable técnico o el nuevo nombre, denominación o razón social: (Indicando si desea que se le practique una visita técnica)
+      </label>
+      <app-popover-icon
+        [position]="'top'"
+        [title]="'Nuevo titular o responsable técnico'"
+        [id]="'modification-new-holder-tooltip'"
+        [text]="'Indique los datos completos del nuevo titular, responsable técnico o la nueva denominación de la UMA.'"
+      />
+    </div>
+    <textarea
+      formControlName="new_holder_or_responsible_or_name"
+      rows="3"
+      class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-y"
+      [class.border-red-500]="getControl('new_holder_or_responsible_or_name')?.invalid && getControl('new_holder_or_responsible_or_name')?.touched"
+    ></textarea>
+    @if (getControl('new_holder_or_responsible_or_name')?.invalid && getControl('new_holder_or_responsible_or_name')?.touched) {
+      <p class="text-sm text-red-500 mt-1">Este campo es requerido.</p>
+    }
+  </div>
+
+  <!-- Propuesta específica de modificación -->
+  <div class="mb-4">
+    <div class="flex items-start gap-2 mb-1">
+      <label class="block text-gray-700 text-sm">
+        <span class="text-red-600 text-sm font-bold">*</span>
+        Propuesta específica de modificación:(Cuando se trate de cambios en la especie, forma de manejo o utilización de cercos)
+      </label>
+      <app-popover-icon
+        [position]="'top'"
+        [title]="'Propuesta específica de modificación'"
+        [id]="'modification-proposal-tooltip'"
+        [text]="'Describa de manera detallada la modificación propuesta (por ejemplo, cambios de especie, forma de manejo, uso de cercos, etc.).'"
+      />
+    </div>
+    <textarea
+      formControlName="modification_proposal"
+      rows="3"
+      class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-y"
+      [class.border-red-500]="getControl('modification_proposal')?.invalid && getControl('modification_proposal')?.touched"
+    ></textarea>
+    @if (getControl('modification_proposal')?.invalid && getControl('modification_proposal')?.touched) {
+      <p class="text-sm text-red-500 mt-1">Este campo es requerido.</p>
+    }
+  </div>
+
+  <!-- Nuevo sistema de marca -->
+  <div class="mb-2">
+    <div class="flex items-start gap-2 mb-1">
+      <label class="block text-gray-700 text-sm">
+        <span class="text-red-600 text-sm font-bold">*</span>
+        Describa el nuevo sistema de marca que se va a emplear:
+      </label>
+      <app-popover-icon
+        [position]="'top'"
+        [title]="'Nuevo sistema de marca'"
+        [id]="'modification-new-marking-system-tooltip'"
+        [text]="'Explique el nuevo sistema de marca que se aplicará a los ejemplares de la UMA.'"
+      />
+    </div>
+    <textarea
+      formControlName="new_marking_system"
+      rows="3"
+      class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-y"
+      [class.border-red-500]="getControl('new_marking_system')?.invalid && getControl('new_marking_system')?.touched"
+    ></textarea>
+    @if (getControl('new_marking_system')?.invalid && getControl('new_marking_system')?.touched) {
+      <p class="text-sm text-red-500 mt-1">Este campo es requerido.</p>
+    }
+  </div>
+</div>
+

@@ -1,0 +1,351 @@
+<div class="text-3xl text-black relative p-3 border border-slate-100 rounded-md mt-4 mx-2 sm:mx-20 shadow-md">
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-6">
+
+    <!-- Lugar de Solicitud -->
+    <app-request-location-section
+      [group]="requestLocationGroup"
+      stateControlName="state_id"
+      municipalityControlName="municipality_id"
+      [stateOptions]="stateOptions"
+      [municipalityOptions]="municipalityOptions"
+    />
+
+    <!-- Datos generales -->
+    <app-general-data-section
+      [group]="generalDataGroup"
+    />
+
+    <!-- Persona física -->
+    <app-individual-person-section
+      [group]="individualPersonGroup"
+    />
+
+    <!-- Persona moral -->
+    <app-legal-entity-section
+      [group]="legalEntityGroup"
+    />
+
+    <!-- Representante legal -->
+    <app-legal-representative-section
+      [group]="legalRepresentativeGroup"
+    />
+
+    <!-- Persona(s) autorizada(s) para oír o recibir notificaciones -->
+    <app-authorized-person-section
+      [group]="authorizedPersonGroup"
+    />
+
+    <!-- Domicilio y medios de contacto -->
+    <app-address-contact-section
+      [group]="addressContactGroup"
+      [stateOptions]="addressStateOptions"
+      [municipalityOptions]="addressMunicipalityOptions"
+    />
+
+    <!-- Notificaciones - Domicilio y medios de contacto -->
+    <app-notification-address-contact-section
+      [group]="notificationAddressContactGroup"
+      [stateOptions]="notificationStateOptions"
+      [municipalityOptions]="notificationMunicipalityOptions"
+    />
+
+    <!-- III. Datos de información del trámite -->
+    <div class="p-3 border border-slate-100 mb-4 rounded-md shadow-md bg-white" [formGroup]="transactionInfoGroup">
+      <div class="flex items-center gap-2 mb-3">
+        <h2 class="text-lg font-bold">III. Datos de información del trámite</h2>
+        <app-popover-icon
+          [position]="'top'"
+          [title]="'Datos de información del trámite'"
+          [id]="'conservacion-a-info-section'"
+          [text]="'Complete los datos de la colección y el inventario de especies.'"
+        />
+      </div>
+
+      <!-- Petición que se formula -->
+      <div class="mb-4">
+        <div class="flex items-start gap-2 mb-1">
+          <label class="block text-gray-700 text-sm">
+            <span class="text-red-600 text-sm font-bold">*</span> Petición que se formula:
+          </label>
+          <app-popover-icon
+            [position]="'top'"
+            [title]="'Petición que se formula'"
+            [id]="'conservacion-a-petition-tooltip'"
+            [text]="'Seleccione Registro o Actualización.'"
+          />
+        </div>
+        <p-dropdown
+          formControlName="petition_type"
+          [options]="petitionTypeOptions"
+          optionLabel="label"
+          optionValue="value"
+          [showClear]="false"
+          [filter]="false"
+          placeholder="-- Seleccione --"
+          [styleClass]="'w-full'"
+          [appendTo]="'body'"
+          [class.border-red-500]="transactionInfoGroup.get('petition_type')?.invalid && transactionInfoGroup.get('petition_type')?.touched"
+        />
+        @if (transactionInfoGroup.get('petition_type')?.invalid && transactionInfoGroup.get('petition_type')?.touched) {
+          <p class="text-sm text-red-500 mt-1">Este campo es requerido.</p>
+        }
+      </div>
+
+      <!-- Nombre de la colección / predio / instalación -->
+      <div class="mb-4">
+        <div class="flex items-start gap-2 mb-1">
+          <label class="block text-gray-700 text-sm">
+            <span class="text-red-600 text-sm font-bold">*</span> Indique el nombre de la colección científica, parque zoológico, espectáculo público, predio o instalación, o colección privada y el número de registro:
+          </label>
+          <app-popover-icon
+            [position]="'top'"
+            [title]="'Nombre y número de registro'"
+            [id]="'conservacion-a-collection-tooltip'"
+            [text]="'Ingrese el nombre y número de registro según corresponda.'"
+          />
+        </div>
+        <textarea
+          formControlName="collection_name_and_number"
+          rows="3"
+          class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-y"
+          [class.border-red-500]="transactionInfoGroup.get('collection_name_and_number')?.invalid && transactionInfoGroup.get('collection_name_and_number')?.touched"
+        ></textarea>
+        @if (transactionInfoGroup.get('collection_name_and_number')?.invalid && transactionInfoGroup.get('collection_name_and_number')?.touched) {
+          <p class="text-sm text-red-500 mt-1">Este campo es requerido.</p>
+        }
+      </div>
+
+      <!-- Domicilio donde estarán ubicados -->
+      <div class="mb-4 p-3 border border-slate-100 rounded-md bg-slate-50">
+        <div class="flex items-center gap-2 mb-3">
+          <h3 class="text-base font-semibold">Domicilio donde estarán ubicados</h3>
+          <app-popover-icon
+            [position]="'top'"
+            [title]="'Domicilio del predio o instalación'"
+            [id]="'conservacion-a-facility-address-tooltip'"
+            [text]="'Indique el domicilio donde estarán ubicados el predio o la instalación.'"
+          />
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-4">
+          <div>
+            <label class="block text-gray-700 text-lg mb-1"><span class="text-red-600 text-lg font-bold">*</span> C.P.:</label>
+            <input type="text" formControlName="facility_postal_code" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" [class.border-red-500]="transactionInfoGroup.get('facility_postal_code')?.invalid && transactionInfoGroup.get('facility_postal_code')?.touched" />
+            @if (transactionInfoGroup.get('facility_postal_code')?.invalid && transactionInfoGroup.get('facility_postal_code')?.touched) {
+              <p class="text-sm text-red-500 mt-1">Este campo es requerido.</p>
+            }
+          </div>
+          <div>
+            <label class="block text-gray-700 text-lg mb-1"><span class="text-red-600 text-lg font-bold">*</span> Calle:</label>
+            <input type="text" formControlName="facility_street" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" [class.border-red-500]="transactionInfoGroup.get('facility_street')?.invalid && transactionInfoGroup.get('facility_street')?.touched" />
+            @if (transactionInfoGroup.get('facility_street')?.invalid && transactionInfoGroup.get('facility_street')?.touched) {
+              <p class="text-sm text-red-500 mt-1">Este campo es requerido.</p>
+            }
+          </div>
+          <div>
+            <label class="block text-gray-700 text-lg mb-1"><span class="text-red-600 text-lg font-bold">*</span> No. Ext.:</label>
+            <input type="text" formControlName="facility_external_number" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" [class.border-red-500]="transactionInfoGroup.get('facility_external_number')?.invalid && transactionInfoGroup.get('facility_external_number')?.touched" />
+            @if (transactionInfoGroup.get('facility_external_number')?.invalid && transactionInfoGroup.get('facility_external_number')?.touched) {
+              <p class="text-sm text-red-500 mt-1">Este campo es requerido.</p>
+            }
+          </div>
+          <div>
+            <label class="block text-gray-700 text-lg mb-1">No. Int.:</label>
+            <input type="text" formControlName="facility_internal_number" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+          </div>
+          <div>
+            <label class="block text-gray-700 text-lg mb-1"><span class="text-red-600 text-lg font-bold">*</span> Colonia:</label>
+            <input type="text" formControlName="facility_neighborhood" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" [class.border-red-500]="transactionInfoGroup.get('facility_neighborhood')?.invalid && transactionInfoGroup.get('facility_neighborhood')?.touched" />
+            @if (transactionInfoGroup.get('facility_neighborhood')?.invalid && transactionInfoGroup.get('facility_neighborhood')?.touched) {
+              <p class="text-sm text-red-500 mt-1">Este campo es requerido.</p>
+            }
+          </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+          <div>
+            <label class="block text-gray-700 text-lg mb-1"><span class="text-red-600 text-lg font-bold">*</span> Población:</label>
+            <input type="text" formControlName="facility_city" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" [class.border-red-500]="transactionInfoGroup.get('facility_city')?.invalid && transactionInfoGroup.get('facility_city')?.touched" />
+            @if (transactionInfoGroup.get('facility_city')?.invalid && transactionInfoGroup.get('facility_city')?.touched) {
+              <p class="text-sm text-red-500 mt-1">Este campo es requerido.</p>
+            }
+          </div>
+          <div>
+            <label class="block text-gray-700 text-lg mb-1"><span class="text-red-600 text-lg font-bold">*</span> Estado:</label>
+            <p-dropdown formControlName="facility_state_id" [options]="facilityStateOptions" optionLabel="label" optionValue="value" [showClear]="false" [filter]="true" placeholder="-- Seleccione --" [styleClass]="'w-full'" [appendTo]="'body'" [class.border-red-500]="transactionInfoGroup.get('facility_state_id')?.invalid && transactionInfoGroup.get('facility_state_id')?.touched" />
+            @if (transactionInfoGroup.get('facility_state_id')?.invalid && transactionInfoGroup.get('facility_state_id')?.touched) {
+              <p class="text-sm text-red-500 mt-1">Este campo es requerido.</p>
+            }
+          </div>
+          <div>
+            <label class="block text-gray-700 text-lg mb-1"><span class="text-red-600 text-lg font-bold">*</span> Municipio o Delegación:</label>
+            <p-dropdown formControlName="facility_municipality_id" [options]="facilityMunicipalityOptions" optionLabel="label" optionValue="value" [showClear]="false" [filter]="true" placeholder="-- Seleccione --" [styleClass]="'w-full'" [appendTo]="'body'" [class.border-red-500]="transactionInfoGroup.get('facility_municipality_id')?.invalid && transactionInfoGroup.get('facility_municipality_id')?.touched" />
+            @if (transactionInfoGroup.get('facility_municipality_id')?.invalid && transactionInfoGroup.get('facility_municipality_id')?.touched) {
+              <p class="text-sm text-red-500 mt-1">Este campo es requerido.</p>
+            }
+          </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+          <div>
+            <label class="block text-gray-700 text-lg mb-1"><span class="text-red-600 text-lg font-bold">*</span> Clave lada:</label>
+            <input type="text" formControlName="facility_area_code" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" [class.border-red-500]="transactionInfoGroup.get('facility_area_code')?.invalid && transactionInfoGroup.get('facility_area_code')?.touched" />
+            @if (transactionInfoGroup.get('facility_area_code')?.invalid && transactionInfoGroup.get('facility_area_code')?.touched) {
+              <p class="text-sm text-red-500 mt-1">Este campo es requerido.</p>
+            }
+          </div>
+          <div>
+            <label class="block text-gray-700 text-lg mb-1"><span class="text-red-600 text-lg font-bold">*</span> Teléfono:</label>
+            <input type="text" formControlName="facility_phone" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" [class.border-red-500]="transactionInfoGroup.get('facility_phone')?.invalid && transactionInfoGroup.get('facility_phone')?.touched" />
+            @if (transactionInfoGroup.get('facility_phone')?.invalid && transactionInfoGroup.get('facility_phone')?.touched) {
+              <p class="text-sm text-red-500 mt-1">Este campo es requerido.</p>
+            }
+          </div>
+          <div>
+            <label class="block text-gray-700 text-lg mb-1">Extensión:</label>
+            <input type="text" formControlName="facility_extension" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+          </div>
+          <div>
+            <label class="block text-gray-700 text-lg mb-1">Teléfono móvil:</label>
+            <input type="text" formControlName="facility_mobile_phone" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+          </div>
+        </div>
+        <div class="mb-4">
+          <label class="block text-gray-700 text-lg mb-1"><span class="text-red-600 text-lg font-bold">*</span> Correo electrónico:</label>
+          <input type="email" formControlName="facility_email" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" [class.border-red-500]="transactionInfoGroup.get('facility_email')?.invalid && transactionInfoGroup.get('facility_email')?.touched" />
+          @if (transactionInfoGroup.get('facility_email')?.invalid && transactionInfoGroup.get('facility_email')?.touched) {
+            <p class="text-sm text-red-500 mt-1">Este campo es requerido.</p>
+          }
+        </div>
+      </div>
+
+      <!-- Inventario -->
+      <div class="mb-4 p-3 border border-slate-100 rounded-md bg-slate-50">
+        <div class="flex items-center gap-2 mb-3">
+          <h3 class="text-base font-semibold">Inventario</h3>
+          <app-popover-icon
+            [position]="'top'"
+            [title]="'Inventario de especies'"
+            [id]="'conservacion-a-inventory-tooltip'"
+            [text]="'Agregue las especies con su descripción, sexo, sistema de marca y documento de legal procedencia.'"
+          />
+        </div>
+        <div class="space-y-3">
+          <div>
+            <label class="block text-gray-700 text-sm mb-1"><span class="text-red-600 font-bold">*</span> Especie:</label>
+            <p-dropdown formControlName="inventory_species" [options]="speciesOptions" optionLabel="label" optionValue="value" [showClear]="true" [filter]="true" [disabled]="isEditingInventory()" placeholder="-- Seleccione --" [styleClass]="'w-full'" [appendTo]="'body'" [class.border-red-500]="transactionInfoGroup.get('inventory_species')?.invalid && transactionInfoGroup.get('inventory_species')?.touched" />
+          </div>
+          <div>
+            <label class="block text-gray-700 text-sm mb-1"><span class="text-red-600 font-bold">*</span> Sexo:</label>
+            <p-dropdown formControlName="inventory_sex" [options]="inventorySexOptions" optionLabel="label" optionValue="value" [showClear]="false" placeholder="-- Seleccione --" [styleClass]="'w-full'" [appendTo]="'body'" [class.border-red-500]="transactionInfoGroup.get('inventory_sex')?.invalid && transactionInfoGroup.get('inventory_sex')?.touched" />
+          </div>
+          <div>
+            <label class="block text-gray-700 text-sm mb-1"><span class="text-red-600 font-bold">*</span> Descripción:</label>
+            <textarea formControlName="inventory_description" rows="2" class="w-full border border-gray-300 rounded-md px-3 py-2 resize-y" [class.border-red-500]="transactionInfoGroup.get('inventory_description')?.invalid && transactionInfoGroup.get('inventory_description')?.touched"></textarea>
+          </div>
+          <div>
+            <label class="block text-gray-700 text-sm mb-1"><span class="text-red-600 font-bold">*</span> Sistema y Número de marca:</label>
+            <textarea formControlName="inventory_marking_system" rows="2" class="w-full border border-gray-300 rounded-md px-3 py-2 resize-y" [class.border-red-500]="transactionInfoGroup.get('inventory_marking_system')?.invalid && transactionInfoGroup.get('inventory_marking_system')?.touched"></textarea>
+          </div>
+          <div>
+            <label class="block text-gray-700 text-sm mb-1"><span class="text-red-600 font-bold">*</span> Documento que acredite la legal procedencia:</label>
+            <textarea formControlName="inventory_legal_document" rows="2" class="w-full border border-gray-300 rounded-md px-3 py-2 resize-y" [class.border-red-500]="transactionInfoGroup.get('inventory_legal_document')?.invalid && transactionInfoGroup.get('inventory_legal_document')?.touched"></textarea>
+          </div>
+          <div class="flex gap-2 mt-4">
+            @if (isEditingInventory()) {
+              <button type="button" class="btn-primary flex items-center gap-2 px-4 py-2 text-sm" (click)="updateInventoryItem()">
+                <span>Actualizar</span>
+              </button>
+              <button type="button" class="bg-orange-500 hover:bg-orange-600 text-white flex items-center gap-2 px-4 py-2 rounded-md text-sm" (click)="cancelEditInventory()">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                <span>Cancelar</span>
+              </button>
+            } @else {
+              <button type="button" class="btn-primary flex items-center gap-2 px-4 py-2 text-sm" (click)="addInventoryItem()">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                <span>Agregar</span>
+              </button>
+              <button type="button" class="bg-orange-500 hover:bg-orange-600 text-white flex items-center gap-2 px-4 py-2 rounded-md text-sm" (click)="clearInventoryForm()">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                <span>Limpiar</span>
+              </button>
+            }
+          </div>
+        </div>
+        <div class="mt-4 overflow-x-auto w-full">
+          <table class="min-w-full w-full bg-white border border-gray-200 text-sm">
+            <thead>
+              <tr class="bg-gray-100 text-left">
+                <th class="px-4 py-2 border-b">Nombre común</th>
+                <th class="px-4 py-2 border-b">Nombre científico</th>
+                <th class="px-4 py-2 border-b">Descripción</th>
+                <th class="px-4 py-2 border-b">Sexo</th>
+                <th class="px-4 py-2 border-b">Sistema y número de marca</th>
+                <th class="px-4 py-2 border-b">Documento legal</th>
+                <th class="px-4 py-2 border-b w-24 text-center">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              @if (inventoryListArray.length === 0) {
+                <tr>
+                  <td colspan="7" class="px-4 py-4 text-center text-gray-500">No se encontró información</td>
+                </tr>
+              }
+              @for (row of inventoryListArray.controls; track row; let i = $index) {
+                <tr class="border-t">
+                  <td class="px-4 py-2 border-b">{{ getInventoryRow(i).get('common_name')?.value }}</td>
+                  <td class="px-4 py-2 border-b">{{ getInventoryRow(i).get('scientific_name')?.value }}</td>
+                  <td class="px-4 py-2 border-b">{{ getInventoryRow(i).get('description')?.value }}</td>
+                  <td class="px-4 py-2 border-b">{{ getSexLabel(getInventoryRow(i).get('sex')?.value) }}</td>
+                  <td class="px-4 py-2 border-b">{{ getInventoryRow(i).get('marking_system_number')?.value }}</td>
+                  <td class="px-4 py-2 border-b">{{ getInventoryRow(i).get('legal_document')?.value }}</td>
+                  <td class="px-4 py-2 border-b text-center">
+                    <div class="flex justify-center gap-2">
+                      <button type="button" class="text-blue-600 hover:text-blue-800 p-1" (click)="editInventoryItem(i)" [disabled]="isEditingInventory() && editingIndex !== i" aria-label="Editar" title="Editar">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                      </button>
+                      <button type="button" class="text-red-600 hover:text-red-800 p-1" (click)="removeInventoryItem(i)" [disabled]="isEditingInventory()" aria-label="Eliminar" title="Eliminar">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Documentación que se anexa -->
+    <app-attached-documentation-section
+      [group]="attachedDocumentationGroup"
+      [documentationItems]="documentationItems"
+    />
+
+    <!-- Requisitos -->
+    <app-requirements-section
+      [group]="requirementsGroup"
+      [requirements]="requirementsList"
+    />
+
+    <!-- Firma -->
+    <app-signature-section
+      [group]="signatureGroup"
+      [signatures]="signaturesList"
+    />
+
+    <!-- Aviso de privacidad -->
+    <app-privacy-acceptance-section
+      [group]="privacyAcceptanceGroup"
+      controlName="privacyAccepted"
+    />
+
+    <div class="flex justify-end mt-6">
+      <button
+        type="submit"
+        class="btn-primary cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+        [disabled]="form.invalid"
+      >
+        Enviar Trámite
+      </button>
+    </div>
+  </form>
+</div>

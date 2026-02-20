@@ -1,178 +1,577 @@
-<app-title-bar
-  [title]="'Registro o Renovación de Unidades de Manejo (UMA)'"
-  [subTitle]="'SEMARNAT-08-022'"
-/>
-
 <div class="text-3xl text-black relative p-3 border border-slate-100 rounded-md mt-4 mx-2 sm:mx-20 shadow-md">
   <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-6">
 
-    <!-- Sección: Datos del Predio -->
-    <div class="p-3 border border-slate-100 mb-4 rounded-md shadow-md">
-      <h2 class="text-lg font-bold mb-4">Datos del Predio</h2>
+    <!-- Lugar de solicitud -->
+    <app-request-location-section
+      [group]="requestLocationGroup"
+      stateControlName="state_id"
+      municipalityControlName="municipality_id"
+      [stateOptions]="stateOptions"
+      [municipalityOptions]="municipalityOptions"
+    />
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label class="block text-gray-700 text-lg mb-2">
-            <span class="text-red-600 text-lg font-bold">*</span> Nombre del Predio:
-          </label>
-          <input
-            type="text"
-            formControlName="nombre_predio"
-            class="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
-            placeholder="Ingrese el nombre del predio"
-          />
-          @if (form.get('nombre_predio')?.invalid && form.get('nombre_predio')?.touched) {
-            <p class="text-sm text-red-500 mt-1">Este campo es requerido</p>
-          }
-        </div>
+    <!-- Datos generales -->
+    <app-general-data-section
+      [group]="generalDataGroup"
+    />
 
-        <div>
-          <label class="block text-gray-700 text-lg mb-2">
-            <span class="text-red-600 text-lg font-bold">*</span> Superficie Total (hectáreas):
-          </label>
-          <input
-            type="number"
-            formControlName="superficie_total"
-            class="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
-            placeholder="0.00"
-            min="0"
-            step="0.01"
-          />
-          @if (form.get('superficie_total')?.invalid && form.get('superficie_total')?.touched) {
-            <p class="text-sm text-red-500 mt-1">Este campo es requerido</p>
-          }
-        </div>
+    <!-- Persona física -->
+    <app-individual-person-section
+      [group]="individualPersonGroup"
+    />
 
-        <div>
-          <label class="block text-gray-700 text-lg mb-2">
-            <span class="text-red-600 text-lg font-bold">*</span> Ubicación:
-          </label>
-          <input
-            type="text"
-            formControlName="ubicacion"
-            class="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
-            placeholder="Dirección del predio"
-          />
-          @if (form.get('ubicacion')?.invalid && form.get('ubicacion')?.touched) {
-            <p class="text-sm text-red-500 mt-1">Este campo es requerido</p>
-          }
-        </div>
+    <!-- Persona moral -->
+    <app-legal-entity-section
+      [group]="legalEntityGroup"
+    />
 
-        <div>
-          <label class="block text-gray-700 text-lg mb-2">
-            <span class="text-red-600 text-lg font-bold">*</span> Municipio:
-          </label>
-          <input
-            type="text"
-            formControlName="municipio"
-            class="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
-            placeholder="Nombre del municipio"
-          />
-          @if (form.get('municipio')?.invalid && form.get('municipio')?.touched) {
-            <p class="text-sm text-red-500 mt-1">Este campo es requerido</p>
-          }
-        </div>
-      </div>
-    </div>
+    <!-- Representante legal -->
+    <app-legal-representative-section
+      [group]="legalRepresentativeGroup"
+    />
 
-    <!-- Sección: Datos del Solicitante -->
-    <div class="p-3 border border-slate-100 mb-4 rounded-md shadow-md">
-      <h2 class="text-lg font-bold mb-4">Datos del Solicitante</h2>
+    <!-- Persona(s) autorizada(s) para oír o recibir notificaciones -->
+    <app-authorized-person-section
+      [group]="authorizedPersonGroup"
+    />
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label class="block text-gray-700 text-lg mb-2">
-            <span class="text-red-600 text-lg font-bold">*</span> Nombre Completo:
-          </label>
-          <input
-            type="text"
-            formControlName="nombre_solicitante"
-            class="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
-            placeholder="Nombre completo del solicitante"
-          />
-          @if (form.get('nombre_solicitante')?.invalid && form.get('nombre_solicitante')?.touched) {
-            <p class="text-sm text-red-500 mt-1">Este campo es requerido</p>
-          }
-        </div>
+    <!-- Domicilio y medios de contacto -->
+    <app-address-contact-section
+      [group]="addressContactGroup"
+      [stateOptions]="addressStateOptions"
+      [municipalityOptions]="addressMunicipalityOptions"
+    />
 
-        <div>
-          <label class="block text-gray-700 text-lg mb-2">RFC:</label>
-          <input
-            type="text"
-            formControlName="rfc"
-            class="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
-            placeholder="RFC (opcional)"
-            maxlength="13"
-          />
-          @if (form.get('rfc')?.invalid && form.get('rfc')?.touched) {
-            <p class="text-sm text-red-500 mt-1">RFC inválido</p>
-          }
-        </div>
+    <!-- Notificaciones - Domicilio y medios de contacto -->
+    <app-notification-address-contact-section
+      [group]="notificationAddressContactGroup"
+      [stateOptions]="notificationStateOptions"
+      [municipalityOptions]="notificationMunicipalityOptions"
+    />
 
-        <div>
-          <label class="block text-gray-700 text-lg mb-2">
-            <span class="text-red-600 text-lg font-bold">*</span> Teléfono:
-          </label>
-          <input
-            type="tel"
-            formControlName="telefono"
-            class="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
-            placeholder="Teléfono de contacto"
-          />
-          @if (form.get('telefono')?.invalid && form.get('telefono')?.touched) {
-            <p class="text-sm text-red-500 mt-1">Este campo es requerido</p>
-          }
-        </div>
-
-        <div>
-          <label class="block text-gray-700 text-lg mb-2">
-            <span class="text-red-600 text-lg font-bold">*</span> Correo Electrónico:
-          </label>
-          <input
-            type="email"
-            formControlName="email"
-            class="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
-            placeholder="correo@ejemplo.com"
-          />
-          @if (form.get('email')?.invalid && form.get('email')?.touched) {
-            <p class="text-sm text-red-500 mt-1">
-              @if (form.get('email')?.hasError('required')) {
-                Este campo es requerido
-              } @else if (form.get('email')?.hasError('email')) {
-                Correo electrónico inválido
-              }
-            </p>
-          }
-        </div>
-      </div>
-    </div>
-
-    <!-- Aceptación de Aviso de Privacidad -->
-    <div class="mt-8 rounded-md border border-slate-200 bg-slate-50 p-4">
-      <label class="inline-flex items-start gap-3">
-        <input
-          type="checkbox"
-          formControlName="privacyAccepted"
-          class="mt-1 h-5 w-5 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+    <!-- III. Datos de información del trámite -->
+    <div class="p-3 border border-slate-100 mb-4 rounded-md shadow-md bg-white" [formGroup]="transactionInfoGroup">
+      <div class="flex items-center gap-2 mb-3">
+        <h2 class="text-lg font-bold">III. Datos de información del trámite</h2>
+        <app-popover-icon
+          [position]="'top'"
+          [title]="'Datos de información del trámite'"
+          [id]="'uma-info-section'"
+          [text]="'Complete la petición, tipo de manejo y el domicilio de la UMA.'"
         />
-        <span class="text-[15px] text-slate-800">
-          Aceptar Términos de
-          <a href="#" class="text-blue-600 underline hover:text-blue-700">
-            Aviso de Privacidad
-          </a>
-        </span>
-      </label>
-      @if (form.get('privacyAccepted')?.invalid && form.get('privacyAccepted')?.touched) {
-        <p class="mt-2 text-sm text-red-600">Debes aceptar el Aviso de Privacidad</p>
+      </div>
+
+      <!-- Petición y tipo de manejo en la misma fila -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        <div>
+          <div class="flex items-start gap-2 mb-1">
+            <label class="block text-gray-700 text-sm">
+              <span class="text-red-600 text-sm font-bold">*</span> Petición que se formula:
+            </label>
+            <app-popover-icon
+              [position]="'top'"
+              [title]="'Petición que se formula'"
+              [id]="'uma-petition-tooltip'"
+              [text]="'Seleccione Registro o Renovación.'"
+            />
+          </div>
+          <p-dropdown
+            formControlName="petition_type"
+            [options]="petitionTypeOptions"
+            optionLabel="label"
+            optionValue="value"
+            [showClear]="false"
+            [filter]="false"
+            placeholder="-- Seleccione --"
+            [styleClass]="'w-full'"
+            [appendTo]="'body'"
+            [class.border-red-500]="transactionInfoGroup.get('petition_type')?.invalid && transactionInfoGroup.get('petition_type')?.touched"
+          />
+          @if (transactionInfoGroup.get('petition_type')?.invalid && transactionInfoGroup.get('petition_type')?.touched) {
+            <p class="text-sm text-red-500 mt-1">Este campo es requerido.</p>
+          }
+        </div>
+        <div>
+          <div class="flex items-start gap-2 mb-1">
+            <label class="block text-gray-700 text-sm">
+              <span class="text-red-600 text-sm font-bold">*</span> Seleccione el tipo de manejo:
+            </label>
+            <app-popover-icon
+              [position]="'top'"
+              [title]="'Tipo de manejo'"
+              [id]="'uma-management-type-tooltip'"
+              [text]="'Seleccione En vida libre o Intensivo.'"
+            />
+          </div>
+          <p-dropdown
+            formControlName="management_type"
+            [options]="managementTypeOptions"
+            optionLabel="label"
+            optionValue="value"
+            [showClear]="false"
+            [filter]="false"
+            placeholder="-- Seleccione --"
+            [styleClass]="'w-full'"
+            [appendTo]="'body'"
+            [class.border-red-500]="transactionInfoGroup.get('management_type')?.invalid && transactionInfoGroup.get('management_type')?.touched"
+          />
+          @if (transactionInfoGroup.get('management_type')?.invalid && transactionInfoGroup.get('management_type')?.touched) {
+            <p class="text-sm text-red-500 mt-1">Este campo es requerido.</p>
+          }
+        </div>
+      </div>
+
+      <!-- En caso de registro indicar -->
+      @if (transactionInfoGroup.get('petition_type')?.value === 'registro') {
+        <div class="mb-4 p-3 border border-slate-100 rounded-md bg-slate-50">
+          <div class="flex items-center gap-2 mb-3">
+            <h3 class="text-base font-semibold">En caso de registro indicar</h3>
+            <app-popover-icon
+              [position]="'top'"
+              [title]="'Datos para registro'"
+              [id]="'uma-registro-tooltip'"
+              [text]="'Indique las coordenadas y superficie cuando la petición es Registro.'"
+            />
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div>
+              <label class="block text-gray-700 text-sm mb-1">
+                <span class="text-red-600 text-sm font-bold">*</span> Coordenadas Latitud:
+              </label>
+              <input type="text" formControlName="registration_latitude" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" [class.border-red-500]="transactionInfoGroup.get('registration_latitude')?.invalid && transactionInfoGroup.get('registration_latitude')?.touched" placeholder="Ej. 19.4326" />
+              @if (transactionInfoGroup.get('registration_latitude')?.invalid && transactionInfoGroup.get('registration_latitude')?.touched) {
+                <p class="text-sm text-red-500 mt-1">Este campo es requerido.</p>
+              }
+            </div>
+            <div>
+              <label class="block text-gray-700 text-sm mb-1">
+                <span class="text-red-600 text-sm font-bold">*</span> Coordenadas Longitud:
+              </label>
+              <input type="text" formControlName="registration_longitude" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" [class.border-red-500]="transactionInfoGroup.get('registration_longitude')?.invalid && transactionInfoGroup.get('registration_longitude')?.touched" placeholder="Ej. -99.1332" />
+              @if (transactionInfoGroup.get('registration_longitude')?.invalid && transactionInfoGroup.get('registration_longitude')?.touched) {
+                <p class="text-sm text-red-500 mt-1">Este campo es requerido.</p>
+              }
+            </div>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div>
+              <div class="flex items-start gap-2 mb-1">
+                <label class="block text-gray-700 text-sm">Zona UTM:</label>
+                <app-popover-icon [position]="'top'" [title]="'Zona UTM'" [id]="'uma-utm-tooltip'" [text]="'Indique la zona UTM si aplica.'" />
+              </div>
+              <input type="text" formControlName="registration_utm_zone" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Ej. 14Q" />
+            </div>
+            <div>
+              <div class="flex items-start gap-2 mb-1">
+                <label class="block text-gray-700 text-sm">Indique la superficie en hectáreas a registrar:</label>
+                <app-popover-icon [position]="'top'" [title]="'Superficie'" [id]="'uma-surface-tooltip'" [text]="'Superficie en hectáreas a registrar.'" />
+              </div>
+              <input type="text" formControlName="registration_surface_hectares" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Ej. 150.5" />
+            </div>
+          </div>
+        </div>
       }
+
+      <!-- En caso de renovación -->
+      @if (transactionInfoGroup.get('petition_type')?.value === 'renovacion') {
+        <div class="mb-4 p-3 border border-slate-100 rounded-md bg-slate-50">
+          <div class="flex items-center gap-2 mb-3">
+            <h3 class="text-base font-semibold">En caso de renovación</h3>
+            <app-popover-icon
+              [position]="'top'"
+              [title]="'Datos para renovación'"
+              [id]="'uma-renovacion-tooltip'"
+              [text]="'Indique el número de registro de la UMA que se renueva.'"
+            />
+          </div>
+          <div class="mb-4">
+            <label class="block text-gray-700 text-sm mb-1">
+              <span class="text-red-600 text-sm font-bold">*</span> Indicar el número de registro de UMA correspondiente:
+            </label>
+            <input type="text" formControlName="renovation_uma_number" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" [class.border-red-500]="transactionInfoGroup.get('renovation_uma_number')?.invalid && transactionInfoGroup.get('renovation_uma_number')?.touched" placeholder="Número de registro UMA" />
+            @if (transactionInfoGroup.get('renovation_uma_number')?.invalid && transactionInfoGroup.get('renovation_uma_number')?.touched) {
+              <p class="text-sm text-red-500 mt-1">Este campo es requerido.</p>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- Domicilio -->
+      <div class="mb-4 p-3 border border-slate-100 rounded-md bg-slate-50">
+        <div class="flex items-center gap-2 mb-3">
+          <h3 class="text-base font-semibold">Domicilio</h3>
+          <app-popover-icon
+            [position]="'top'"
+            [title]="'Domicilio de la UMA'"
+            [id]="'uma-facility-address-tooltip'"
+            [text]="'Indique el domicilio donde se ubica la UMA.'"
+          />
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-4">
+          <div>
+            <label class="block text-gray-700 text-lg mb-1"><span class="text-red-600 text-lg font-bold">*</span> C.P.:</label>
+            <input type="text" formControlName="facility_postal_code" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" [class.border-red-500]="transactionInfoGroup.get('facility_postal_code')?.invalid && transactionInfoGroup.get('facility_postal_code')?.touched" />
+            @if (transactionInfoGroup.get('facility_postal_code')?.invalid && transactionInfoGroup.get('facility_postal_code')?.touched) {
+              <p class="text-sm text-red-500 mt-1">Este campo es requerido.</p>
+            }
+          </div>
+          <div>
+            <label class="block text-gray-700 text-lg mb-1"><span class="text-red-600 text-lg font-bold">*</span> Calle:</label>
+            <input type="text" formControlName="facility_street" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" [class.border-red-500]="transactionInfoGroup.get('facility_street')?.invalid && transactionInfoGroup.get('facility_street')?.touched" />
+            @if (transactionInfoGroup.get('facility_street')?.invalid && transactionInfoGroup.get('facility_street')?.touched) {
+              <p class="text-sm text-red-500 mt-1">Este campo es requerido.</p>
+            }
+          </div>
+          <div>
+            <label class="block text-gray-700 text-lg mb-1"><span class="text-red-600 text-lg font-bold">*</span> No. Ext.:</label>
+            <input type="text" formControlName="facility_external_number" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" [class.border-red-500]="transactionInfoGroup.get('facility_external_number')?.invalid && transactionInfoGroup.get('facility_external_number')?.touched" />
+            @if (transactionInfoGroup.get('facility_external_number')?.invalid && transactionInfoGroup.get('facility_external_number')?.touched) {
+              <p class="text-sm text-red-500 mt-1">Este campo es requerido.</p>
+            }
+          </div>
+          <div>
+            <label class="block text-gray-700 text-lg mb-1">No. Int.:</label>
+            <input type="text" formControlName="facility_internal_number" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+          </div>
+          <div>
+            <label class="block text-gray-700 text-lg mb-1"><span class="text-red-600 text-lg font-bold">*</span> Colonia:</label>
+            <input type="text" formControlName="facility_neighborhood" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" [class.border-red-500]="transactionInfoGroup.get('facility_neighborhood')?.invalid && transactionInfoGroup.get('facility_neighborhood')?.touched" />
+            @if (transactionInfoGroup.get('facility_neighborhood')?.invalid && transactionInfoGroup.get('facility_neighborhood')?.touched) {
+              <p class="text-sm text-red-500 mt-1">Este campo es requerido.</p>
+            }
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+          <div>
+            <label class="block text-gray-700 text-lg mb-1"><span class="text-red-600 text-lg font-bold">*</span> Población:</label>
+            <input type="text" formControlName="facility_city" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" [class.border-red-500]="transactionInfoGroup.get('facility_city')?.invalid && transactionInfoGroup.get('facility_city')?.touched" />
+            @if (transactionInfoGroup.get('facility_city')?.invalid && transactionInfoGroup.get('facility_city')?.touched) {
+              <p class="text-sm text-red-500 mt-1">Este campo es requerido.</p>
+            }
+          </div>
+          <div>
+            <label class="block text-gray-700 text-lg mb-1"><span class="text-red-600 text-lg font-bold">*</span> Estado:</label>
+            <p-dropdown formControlName="facility_state_id" [options]="facilityStateOptions" optionLabel="label" optionValue="value" [showClear]="false" [filter]="true" placeholder="-- Seleccione --" [styleClass]="'w-full'" [appendTo]="'body'" [class.border-red-500]="transactionInfoGroup.get('facility_state_id')?.invalid && transactionInfoGroup.get('facility_state_id')?.touched" />
+            @if (transactionInfoGroup.get('facility_state_id')?.invalid && transactionInfoGroup.get('facility_state_id')?.touched) {
+              <p class="text-sm text-red-500 mt-1">Este campo es requerido.</p>
+            }
+          </div>
+          <div>
+            <label class="block text-gray-700 text-lg mb-1"><span class="text-red-600 text-lg font-bold">*</span> Municipio o Delegación:</label>
+            <p-dropdown formControlName="facility_municipality_id" [options]="facilityMunicipalityOptions" optionLabel="label" optionValue="value" [showClear]="false" [filter]="true" placeholder="-- Seleccione --" [styleClass]="'w-full'" [appendTo]="'body'" [class.border-red-500]="transactionInfoGroup.get('facility_municipality_id')?.invalid && transactionInfoGroup.get('facility_municipality_id')?.touched" />
+            @if (transactionInfoGroup.get('facility_municipality_id')?.invalid && transactionInfoGroup.get('facility_municipality_id')?.touched) {
+              <p class="text-sm text-red-500 mt-1">Este campo es requerido.</p>
+            }
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+          <div>
+            <label class="block text-gray-700 text-lg mb-1"><span class="text-red-600 text-lg font-bold">*</span> Clave lada:</label>
+            <input type="text" formControlName="facility_area_code" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" [class.border-red-500]="transactionInfoGroup.get('facility_area_code')?.invalid && transactionInfoGroup.get('facility_area_code')?.touched" />
+            @if (transactionInfoGroup.get('facility_area_code')?.invalid && transactionInfoGroup.get('facility_area_code')?.touched) {
+              <p class="text-sm text-red-500 mt-1">Este campo es requerido.</p>
+            }
+          </div>
+          <div>
+            <label class="block text-gray-700 text-lg mb-1"><span class="text-red-600 text-lg font-bold">*</span> Teléfono:</label>
+            <input type="text" formControlName="facility_phone" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" [class.border-red-500]="transactionInfoGroup.get('facility_phone')?.invalid && transactionInfoGroup.get('facility_phone')?.touched" />
+            @if (transactionInfoGroup.get('facility_phone')?.invalid && transactionInfoGroup.get('facility_phone')?.touched) {
+              <p class="text-sm text-red-500 mt-1">Este campo es requerido.</p>
+            }
+          </div>
+          <div>
+            <label class="block text-gray-700 text-lg mb-1">Extensión:</label>
+            <input type="text" formControlName="facility_extension" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+          </div>
+          <div>
+            <label class="block text-gray-700 text-lg mb-1">Teléfono móvil:</label>
+            <input type="text" formControlName="facility_mobile_phone" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <label class="block text-gray-700 text-lg mb-1"><span class="text-red-600 text-lg font-bold">*</span> Correo electrónico:</label>
+          <input type="email" formControlName="facility_email" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" [class.border-red-500]="transactionInfoGroup.get('facility_email')?.invalid && transactionInfoGroup.get('facility_email')?.touched" />
+          @if (transactionInfoGroup.get('facility_email')?.invalid && transactionInfoGroup.get('facility_email')?.touched) {
+            <p class="text-sm text-red-500 mt-1">Este campo es requerido.</p>
+          }
+        </div>
+      </div>
     </div>
 
-    <!-- Botón de envío -->
+    <!-- Agregar Formatos Adicionales -->
+    <div class="p-3 border-2 border-amber-300 rounded-md mb-4 bg-amber-50/50">
+      <h3 class="text-base font-semibold mb-3">Agregar Formatos Adicionales</h3>
+      <div class="flex flex-col gap-2 text-sm">
+        <label class="inline-flex items-center gap-2 cursor-pointer">
+          <input type="radio" formControlName="additionalFormatType" value="ninguno" class="rounded-full border-gray-300 text-blue-600 focus:ring-blue-500" />
+          <span>Ninguno</span>
+        </label>
+        <label class="inline-flex items-center gap-2 cursor-pointer">
+          <input type="radio" formControlName="additionalFormatType" value="carta_uma" class="rounded-full border-gray-300 text-blue-600 focus:ring-blue-500" />
+          <span>Carta Adhesión PM Tipo UMA</span>
+        </label>
+        <label class="inline-flex items-center gap-2 cursor-pointer">
+          <input type="radio" formControlName="additionalFormatType" value="carta_predio_federal" class="rounded-full border-gray-300 text-blue-600 focus:ring-blue-500" />
+          <span>Carta Adhesión PM Tipo Predio Federal</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- I. Datos de información del trámite (Carta UMA) -->
+    @if (form.get('additionalFormatType')?.value === 'carta_uma') {
+      <div class="p-3 border border-slate-100 mb-4 rounded-md shadow-md bg-white" [formGroup]="additionalFormatCartaUmaGroup">
+        <div class="flex items-center gap-2 mb-3">
+          <h2 class="text-lg font-bold">I. Datos de información del trámite</h2>
+          <app-popover-icon [position]="'top'" [title]="'Datos del formato Carta Adhesión PM Tipo UMA'" [id]="'carta-uma-info'" [text]="'Complete los datos para la carta adhesión tipo UMA.'" />
+        </div>
+
+        <div class="mb-4 p-3 border border-slate-100 rounded-md bg-slate-50">
+          <div class="flex items-center gap-2 mb-2">
+            <h3 class="text-base font-semibold">Lugar de Solicitud</h3>
+            <app-popover-icon [position]="'top'" [title]="'Lugar de Solicitud'" [id]="'carta-uma-lugar'" [text]="'Estado y municipio donde se presenta la solicitud.'" />
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-gray-700 text-sm mb-1"><span class="text-red-600 font-bold">*</span> Estado:</label>
+              <p-dropdown formControlName="lugar_state_id" [options]="formatLugarStateOptions" optionLabel="label" optionValue="value" [showClear]="false" [filter]="true" placeholder="-- Seleccione --" [styleClass]="'w-full'" [appendTo]="'body'" />
+            </div>
+            <div>
+              <label class="block text-gray-700 text-sm mb-1"><span class="text-red-600 font-bold">*</span> Municipio:</label>
+              <p-dropdown formControlName="lugar_municipality_id" [options]="formatLugarMunicipalityOptions" optionLabel="label" optionValue="value" [showClear]="false" [filter]="true" placeholder="-- Seleccione --" [styleClass]="'w-full'" [appendTo]="'body'" />
+            </div>
+          </div>
+        </div>
+
+        <div class="mb-4 p-3 border border-slate-100 rounded-md bg-slate-50">
+          <h3 class="text-base font-semibold mb-2">Persona física</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-gray-700 text-sm mb-1"><span class="text-red-600 font-bold">*</span> Nombre(s):</label>
+              <input type="text" formControlName="nombre" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+            <div>
+              <label class="block text-gray-700 text-sm mb-1"><span class="text-red-600 font-bold">*</span> Apellido paterno:</label>
+              <input type="text" formControlName="apellido_paterno" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+            <div>
+              <label class="block text-gray-700 text-sm mb-1"><span class="text-red-600 font-bold">*</span> Apellido materno:</label>
+              <input type="text" formControlName="apellido_materno" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+            <div>
+              <label class="block text-gray-700 text-sm mb-1"><span class="text-red-600 font-bold">*</span> Identificación oficial:</label>
+              <input type="text" formControlName="identificacion_oficial" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+            <div class="md:col-span-2">
+              <label class="block text-gray-700 text-sm mb-1"><span class="text-red-600 font-bold">*</span> Expedida por:</label>
+              <input type="text" formControlName="expedida_por" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+          </div>
+        </div>
+
+        <div class="mb-4 p-3 border border-slate-100 rounded-md bg-slate-50">
+          <h3 class="text-base font-semibold mb-2">Persona moral</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-gray-700 text-sm mb-1"><span class="text-red-600 font-bold">*</span> Denominación o Razón social:</label>
+              <input type="text" formControlName="denominacion_razon_social" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+            <div>
+              <label class="block text-gray-700 text-sm mb-1"><span class="text-red-600 font-bold">*</span> Número de acta constitutiva:</label>
+              <input type="text" formControlName="numero_acta_constitutiva" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+            <div class="md:col-span-2">
+              <label class="block text-gray-700 text-sm mb-1"><span class="text-red-600 font-bold">*</span> Acta constitutiva:</label>
+              <input type="text" formControlName="acta_constitutiva" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+          </div>
+        </div>
+
+        <div class="mb-4 p-3 border border-slate-100 rounded-md bg-slate-50">
+          <p class="text-sm text-slate-700 mb-3 bg-blue-50 p-2 rounded">En mi carácter de titular o representante legal de la unidad de manejo para la conservación de la vida silvestre (UMA)</p>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div>
+              <label class="block text-gray-700 text-sm mb-1"><span class="text-red-600 font-bold">*</span> Denominada:</label>
+              <input type="text" formControlName="uma_denominada" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+            <div>
+              <label class="block text-gray-700 text-sm mb-1"><span class="text-red-600 font-bold">*</span> Número de Registro:</label>
+              <input type="text" formControlName="uma_numero_registro" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+            <div>
+              <label class="block text-gray-700 text-sm mb-1"><span class="text-red-600 font-bold">*</span> Estado:</label>
+              <p-dropdown formControlName="uma_state_id" [options]="formatUnitStateOptions" optionLabel="label" optionValue="value" [showClear]="false" [filter]="true" placeholder="-- Seleccione --" [styleClass]="'w-full'" [appendTo]="'body'" />
+            </div>
+            <div>
+              <label class="block text-gray-700 text-sm mb-1"><span class="text-red-600 font-bold">*</span> Municipio o Delegación:</label>
+              <p-dropdown formControlName="uma_municipality_id" [options]="formatUnitMunicipalityOptions" optionLabel="label" optionValue="value" [showClear]="false" [filter]="true" placeholder="-- Seleccione --" [styleClass]="'w-full'" [appendTo]="'body'" />
+            </div>
+          </div>
+          <div class="mb-4">
+            <label class="block text-gray-700 text-sm mb-1"><span class="text-red-600 font-bold">*</span> De conformidad con lo establecido en el artículo 39 de la Ley General de Vida Silvestre tendrá como objetivos específicos los siguientes:</label>
+            <textarea formControlName="objetivos_especificos" rows="4" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y"></textarea>
+          </div>
+          <div>
+            <label class="block text-gray-700 text-sm mb-1"><span class="text-red-600 font-bold">*</span> Con fundamento en los artículos 30 fracción II y 46 del Reglamento de la Ley General de Vida Silvestre, solicito la aprobación del plan de manejo de la UMA antes señalada, mediante la adhesión al plan de manejo tipo de:</label>
+            <textarea formControlName="plan_manejo_tipo" rows="4" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y" placeholder="Indique el tipo de plan de manejo al que se adhiere"></textarea>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- I. Datos de información del trámite (Carta Predio Federal) -->
+    @if (form.get('additionalFormatType')?.value === 'carta_predio_federal') {
+      <div class="p-3 border border-slate-100 mb-4 rounded-md shadow-md bg-white" [formGroup]="additionalFormatCartaPredioFederalGroup">
+        <div class="flex items-center gap-2 mb-3">
+          <h2 class="text-lg font-bold">I. Datos de información del trámite</h2>
+          <app-popover-icon [position]="'top'" [title]="'Datos del formato Carta Adhesión PM Tipo Predio Federal'" [id]="'carta-pfc-info'" [text]="'Complete los datos para la carta adhesión tipo Predio Federal.'" />
+        </div>
+
+        <div class="mb-4 p-3 border border-slate-100 rounded-md bg-slate-50">
+          <div class="flex items-center gap-2 mb-2">
+            <h3 class="text-base font-semibold">Lugar de Solicitud</h3>
+            <app-popover-icon [position]="'top'" [title]="'Lugar de Solicitud'" [id]="'carta-pfc-lugar'" [text]="'Estado y municipio donde se presenta la solicitud.'" />
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-gray-700 text-sm mb-1"><span class="text-red-600 font-bold">*</span> Estado:</label>
+              <p-dropdown formControlName="lugar_state_id" [options]="formatLugarStateOptions" optionLabel="label" optionValue="value" [showClear]="false" [filter]="true" placeholder="-- Seleccione --" [styleClass]="'w-full'" [appendTo]="'body'" />
+            </div>
+            <div>
+              <label class="block text-gray-700 text-sm mb-1"><span class="text-red-600 font-bold">*</span> Municipio:</label>
+              <p-dropdown formControlName="lugar_municipality_id" [options]="formatLugarMunicipalityOptions" optionLabel="label" optionValue="value" [showClear]="false" [filter]="true" placeholder="-- Seleccione --" [styleClass]="'w-full'" [appendTo]="'body'" />
+            </div>
+          </div>
+        </div>
+
+        <div class="mb-4 p-3 border border-slate-100 rounded-md bg-slate-50">
+          <h3 class="text-base font-semibold mb-2">Persona física</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-gray-700 text-sm mb-1"><span class="text-red-600 font-bold">*</span> Nombre(s):</label>
+              <input type="text" formControlName="nombre" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+            <div>
+              <label class="block text-gray-700 text-sm mb-1"><span class="text-red-600 font-bold">*</span> Apellido paterno:</label>
+              <input type="text" formControlName="apellido_paterno" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+            <div>
+              <label class="block text-gray-700 text-sm mb-1"><span class="text-red-600 font-bold">*</span> Apellido materno:</label>
+              <input type="text" formControlName="apellido_materno" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+            <div>
+              <label class="block text-gray-700 text-sm mb-1"><span class="text-red-600 font-bold">*</span> Identificación oficial:</label>
+              <input type="text" formControlName="identificacion_oficial" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+            <div class="md:col-span-2">
+              <label class="block text-gray-700 text-sm mb-1"><span class="text-red-600 font-bold">*</span> Expedida por:</label>
+              <input type="text" formControlName="expedida_por" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+          </div>
+        </div>
+
+        <div class="mb-4 p-3 border border-slate-100 rounded-md bg-slate-50">
+          <h3 class="text-base font-semibold mb-2">Persona moral</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-gray-700 text-sm mb-1"><span class="text-red-600 font-bold">*</span> Denominación o Razón social:</label>
+              <input type="text" formControlName="denominacion_razon_social" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+            <div>
+              <label class="block text-gray-700 text-sm mb-1"><span class="text-red-600 font-bold">*</span> Número de acta constitutiva:</label>
+              <input type="text" formControlName="numero_acta_constitutiva" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+            <div class="md:col-span-2">
+              <label class="block text-gray-700 text-sm mb-1"><span class="text-red-600 font-bold">*</span> Acta constitutiva:</label>
+              <input type="text" formControlName="acta_constitutiva" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+          </div>
+        </div>
+
+        <div class="mb-4 p-3 border border-slate-100 rounded-md bg-slate-50">
+          <p class="text-sm text-slate-700 mb-3 bg-blue-50 p-2 rounded">En mi carácter de titular o representante legal del predio federal sujeto a manejo para la conservación y aprovechamiento sustentable de la vida silvestre (PFC).</p>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div>
+              <label class="block text-gray-700 text-sm mb-1"><span class="text-red-600 font-bold">*</span> Denominado:</label>
+              <input type="text" formControlName="pfc_denominado" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+            <div>
+              <label class="block text-gray-700 text-sm mb-1"><span class="text-red-600 font-bold">*</span> Número de Control:</label>
+              <input type="text" formControlName="pfc_numero_control" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+            <div>
+              <label class="block text-gray-700 text-sm mb-1"><span class="text-red-600 font-bold">*</span> Estado:</label>
+              <p-dropdown formControlName="pfc_state_id" [options]="formatUnitStateOptions" optionLabel="label" optionValue="value" [showClear]="false" [filter]="true" placeholder="-- Seleccione --" [styleClass]="'w-full'" [appendTo]="'body'" />
+            </div>
+            <div>
+              <label class="block text-gray-700 text-sm mb-1"><span class="text-red-600 font-bold">*</span> Municipio o Delegación:</label>
+              <p-dropdown formControlName="pfc_municipality_id" [options]="formatUnitMunicipalityOptions" optionLabel="label" optionValue="value" [showClear]="false" [filter]="true" placeholder="-- Seleccione --" [styleClass]="'w-full'" [appendTo]="'body'" />
+            </div>
+          </div>
+          <p class="text-sm text-slate-700 mb-3 bg-blue-50 p-2 rounded">Con fundamento en el artículo 98 fracción I del Reglamento de la Ley General de Vida Silvestre, solicito la aprobación del plan de manejo del PFC antes señalado, mediante la adhesión al plan de manejo tipo de:</p>
+          <div>
+            <label class="block text-gray-700 text-sm mb-1"><span class="text-red-600 font-bold">*</span> Especie/Grupo Especies:</label>
+            <input type="text" formControlName="especie_grupo_especies" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Requisitos -->
+    <app-requirements-section
+      [group]="requirementsGroup"
+      [requirements]="requirementsList"
+    />
+
+    <!-- Firma -->
+    <app-signature-section
+      [group]="signatureGroup"
+      [signatures]="signaturesList"
+    />
+
+    <!-- Firma del responsable técnico -->
+    <div class="p-3 border border-slate-100 mb-4 rounded-md shadow-md bg-white" [formGroup]="signatureTechnicalResponsibleGroup">
+      <div class="flex items-center gap-2 mb-3">
+        <h2 class="text-lg font-bold">FIRMA DEL RESPONSABLE TECNICO</h2>
+        <app-popover-icon
+          [position]="'top'"
+          [title]="'Firma del responsable técnico'"
+          [id]="'signature-technical-responsible'"
+          [text]="'Debe subir la firma en formato jpg, png para realizar la solicitud de Trámite.'"
+        />
+      </div>
+
+      <div class="bg-blue-50 border border-blue-200 rounded-md p-3 mb-4 flex items-start gap-2">
+        <svg class="h-5 w-5 text-blue-600 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+        </svg>
+        <p class="text-sm text-blue-800">
+          Debe subir la firma en formato <span class="font-semibold">jpg, png</span> para realizar la solicitud de Trámite.
+        </p>
+      </div>
+
+      <app-signature-item
+        [group]="signatureTechnicalResponsibleGroup"
+        controlName="signature_file"
+        title="Foto de la Firma"
+        description="Esta firma es la que aparecerá en la Solicitud de Trámite."
+      />
+    </div>
+
+    <!-- Aviso de privacidad -->
+    <app-privacy-acceptance-section
+      [group]="privacyAcceptanceGroup"
+      controlName="privacyAccepted"
+    />
+
     <div class="flex justify-end mt-6">
       <button
         type="submit"
-        [disabled]="loading || form.invalid"
         class="btn-primary cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+        [disabled]="loading || form.invalid"
       >
         @if (loading) {
           <span>Enviando...</span>

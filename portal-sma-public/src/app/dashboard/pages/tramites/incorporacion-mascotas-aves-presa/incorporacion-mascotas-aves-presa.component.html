@@ -1,0 +1,122 @@
+<div class="text-3xl text-black relative p-3 border border-slate-100 rounded-md mt-4 mx-2 sm:mx-20 shadow-md">
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-6">
+
+    <!-- Lugar de Solicitud -->
+    <app-request-location-section
+      [group]="requestLocationGroup"
+      stateControlName="state_id"
+      municipalityControlName="municipality_id"
+      [stateOptions]="stateOptions"
+      [municipalityOptions]="municipalityOptions"
+    />
+
+    <!-- Datos generales -->
+    <app-general-data-section
+      [group]="generalDataGroup"
+    />
+
+    <!-- Persona física -->
+    <app-individual-person-section
+      [group]="individualPersonGroup"
+    />
+
+    <!-- Persona moral -->
+    <app-legal-entity-section
+      [group]="legalEntityGroup"
+    />
+
+    <!-- Representante legal -->
+    <app-legal-representative-section
+      [group]="legalRepresentativeGroup"
+    />
+
+    <!-- Persona(s) autorizada(s) para oír o recibir notificaciones -->
+    <app-authorized-person-section
+      [group]="authorizedPersonGroup"
+    />
+
+    <!-- Domicilio y medios de contacto -->
+    <app-address-contact-section
+      [group]="addressContactGroup"
+      [stateOptions]="addressStateOptions"
+      [municipalityOptions]="addressMunicipalityOptions"
+    />
+
+    <!-- Notificaciones - Domicilio y medios de contacto -->
+    <app-notification-address-contact-section
+      [group]="notificationAddressContactGroup"
+      [stateOptions]="notificationStateOptions"
+      [municipalityOptions]="notificationMunicipalityOptions"
+    />
+
+    <!-- III. Datos de Información del Trámite -->
+    <div class="p-3 border border-slate-100 mb-4 rounded-md shadow-md bg-white" [formGroup]="transactionInfoGroup">
+      <div class="flex items-center gap-2 mb-3">
+        <h2 class="text-lg font-bold">III. Datos de Información del Trámite</h2>
+        <app-popover-icon
+          [position]="'top'"
+          [title]="'Datos de información del trámite'"
+          [id]="'mascotas-aves-info-section'"
+          [text]="'Indique la petición que se formula para este trámite.'"
+        />
+      </div>
+      <div class="mb-4">
+        <div class="flex items-start gap-2 mb-1">
+          <label class="block text-gray-700 text-sm">
+            <span class="text-red-600 text-sm font-bold">*</span> Petición que se formula:
+          </label>
+          <app-popover-icon
+            [position]="'top'"
+            [title]="'Petición que se formula'"
+            [id]="'mascotas-aves-petition-tooltip'"
+            [text]="'Seleccione si la petición corresponde a Mascota o Ave de presa.'"
+          />
+        </div>
+        <p-dropdown
+          formControlName="petition_type"
+          [options]="petitionTypeOptions"
+          optionLabel="label"
+          optionValue="value"
+          [showClear]="false"
+          [filter]="false"
+          placeholder="-- Seleccione --"
+          [styleClass]="'w-full'"
+          [appendTo]="'body'"
+          [class.border-red-500]="transactionInfoGroup.get('petition_type')?.invalid && transactionInfoGroup.get('petition_type')?.touched"
+        />
+        @if (transactionInfoGroup.get('petition_type')?.invalid && transactionInfoGroup.get('petition_type')?.touched) {
+          <p class="text-sm text-red-500 mt-1">Este campo es requerido.</p>
+        }
+      </div>
+    </div>
+
+    <!-- Requisitos -->
+    <app-requirements-section
+      [group]="requirementsGroup"
+      [requirements]="requirementsList"
+    />
+
+    <!-- Firma -->
+    <app-signature-section
+      [group]="signatureGroup"
+      [signatures]="signaturesList"
+    />
+
+    <!-- Aviso de privacidad -->
+    <app-privacy-acceptance-section
+      [group]="privacyAcceptanceGroup"
+      controlName="privacyAccepted"
+    />
+
+    <div class="flex justify-end mt-6">
+      <button
+        type="submit"
+        class="btn-primary cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+        [disabled]="form.invalid"
+      >
+        Enviar Trámite
+      </button>
+    </div>
+  </form>
+</div>
+

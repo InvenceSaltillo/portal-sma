@@ -176,6 +176,16 @@
       />
     </div>
 
+    <app-requirements-section
+      [group]="requirementsGroup"
+      [requirements]="requirementsList"
+    />
+
+    <app-signature-section
+      [group]="signatureGroup"
+      [signatures]="signaturesList"
+    />
+
     <app-privacy-acceptance-section
       [group]="privacyAcceptanceGroup"
       controlName="privacyAccepted"
