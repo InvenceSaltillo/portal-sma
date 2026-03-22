@@ -1,0 +1,189 @@
+<p-table
+  #pTable
+  [value]="valueForTable"
+  [rowTrackBy]="rowTrackBy"
+  [loading]="loading"
+  [showLoader]="false"
+  [sortMode]="sortMode"
+  [resetPageOnSort]="resetPageOnSort"
+  [paginator]="paginator"
+  [rows]="rows"
+  [rowsPerPageOptions]="rowsPerPageOptions"
+  [paginatorPosition]="paginatorPosition"
+  [alwaysShowPaginator]="alwaysShowPaginator"
+  [showCurrentPageReport]="showCurrentPageReport"
+  [currentPageReportTemplate]="currentPageReportTemplate"
+  [showFirstLastIcon]="showFirstLastIcon"
+  [paginatorLocale]="paginatorLocale"
+  [paginatorDropdownAppendTo]="paginatorDropdownAppendTo"
+  [paginatorStyleClass]="paginatorStyleClass"
+  [stripedRows]="stripedRows"
+  [showGridlines]="showGridlines"
+  [responsiveLayout]="responsiveLayout"
+  [filterDelay]="filterDelay"
+  [filterLocale]="filterLocale"
+  [styleClass]="styleClass"
+  [tableStyle]="tableStyle"
+>
+  <ng-template pTemplate="header">
+    <tr>
+      @if (showRowNumberColumn) {
+        <th
+          scope="col"
+          class="w-12 min-w-[2.75rem] whitespace-nowrap text-center text-sm font-medium text-gray-500 dark:text-gray-400"
+        >
+          {{ rowNumberColumnHeader }}
+        </th>
+      }
+      @for (col of columns; track col.field) {
+        @if (isColumnSortable(col)) {
+          <th [pSortableColumn]="sortKey(col)" scope="col" class="whitespace-nowrap">
+            <div class="inline-flex items-center gap-2">
+              {{ col.header }}
+              <p-sortIcon [field]="sortKey(col)" />
+            </div>
+          </th>
+        } @else {
+          <th scope="col">{{ col.header }}</th>
+        }
+      }
+      @if (showActionsColumn) {
+        <th scope="col" class="w-px whitespace-nowrap text-center">
+          {{ actionsColumnHeader }}
+        </th>
+      }
+    </tr>
+    @if (showColumnFilterRow) {
+      <tr class="data-table-filter-row">
+        @if (showRowNumberColumn) {
+          <th scope="col" class="w-12"></th>
+        }
+        @for (col of columns; track col.field) {
+          <th scope="col" class="align-top font-normal">
+            @if (isColumnFilterable(col)) {
+              @if (isSelectColumnFilter(col)) {
+                <p-columnFilter
+                  [field]="filterFieldKey(col)"
+                  type="text"
+                  display="row"
+                  [matchMode]="filterMatchModeFor(col)"
+                  [placeholder]="filterPlaceholderFor(col)"
+                  [showMenu]="false"
+                  [showClearButton]="true"
+                  [showApplyButton]="false"
+                  [showMatchModes]="false"
+                  [showOperator]="false"
+                >
+                  <ng-template
+                    pTemplate="filter"
+                    let-value
+                    let-filter="filterCallback"
+                  >
+                    <p-select
+                      [options]="selectFilterOptions(col)"
+                      [ngModel]="value"
+                      (ngModelChange)="filter($event)"
+                      optionLabel="label"
+                      optionValue="value"
+                      [showClear]="true"
+                      [placeholder]="filterPlaceholderFor(col)"
+                      appendTo="body"
+                      styleClass="w-full min-w-0"
+                    />
+                  </ng-template>
+                </p-columnFilter>
+              } @else {
+                <p-columnFilter
+                  [field]="filterFieldKey(col)"
+                  [type]="filterTypeFor(col)"
+                  display="row"
+                  [matchMode]="filterMatchModeFor(col)"
+                  [placeholder]="filterPlaceholderFor(col)"
+                  [showMenu]="false"
+                  [showClearButton]="true"
+                  [showApplyButton]="filterShowApplyFor(col)"
+                  [showMatchModes]="false"
+                  [showOperator]="false"
+                />
+              }
+            }
+          </th>
+        }
+        @if (showActionsColumn) {
+          <th scope="col" class="w-px"></th>
+        }
+      </tr>
+    }
+  </ng-template>
+
+  <ng-template pTemplate="body" let-row let-rowIndex="rowIndex">
+    <tr>
+      @if (showRowNumberColumn) {
+        <td
+          class="text-center align-middle text-sm tabular-nums text-gray-600 dark:text-gray-400"
+        >
+          {{ rowDisplayIndex(pTable, rowIndex) }}
+        </td>
+      }
+      @for (col of columns; track col.field) {
+        <td>{{ cellValue(row, col.field) }}</td>
+      }
+      @if (showActionsColumn) {
+        <td class="w-px text-center align-middle">
+          <p-button
+            type="button"
+            [icon]="actionsTriggerIcon"
+            [rounded]="true"
+            [text]="true"
+            severity="secondary"
+            [attr.aria-label]="actionsTriggerAriaLabel"
+            [title]="actionsTriggerAriaLabel"
+            (onClick)="openRowActionsMenu($event, row)"
+          />
+        </td>
+      }
+    </tr>
+  </ng-template>
+
+  <ng-template pTemplate="loadingbody">
+    @for (_ of skeletonRowIndexes; track $index) {
+      <tr class="align-middle">
+        @if (showRowNumberColumn) {
+          <td class="w-12 text-center align-middle">
+            <span class="text-xs tabular-nums text-gray-400">{{ $index + 1 }}</span>
+          </td>
+        }
+        @for (col of columns; track col.field) {
+          <td>
+            <p-skeleton
+              height="0.85rem"
+              [width]="skeletonWidth(col)"
+              borderRadius="6px"
+              styleClass="max-w-full"
+            />
+          </td>
+        }
+        @if (showActionsColumn) {
+          <td class="w-px text-center">
+            <p-skeleton width="2rem" height="2rem" borderRadius="9999px" />
+          </td>
+        }
+      </tr>
+    }
+  </ng-template>
+
+  <ng-template pTemplate="emptymessage">
+    <tr>
+      <td [attr.colspan]="totalColumnCount || 1" class="text-center">
+        {{ emptyMessage }}
+      </td>
+    </tr>
+  </ng-template>
+</p-table>
+
+<p-menu
+  #rowActionsMenu
+  [model]="actionsMenuModel"
+  [popup]="true"
+  [appendTo]="actionsMenuAppendTo"
+/>

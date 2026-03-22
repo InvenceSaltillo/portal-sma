@@ -6,30 +6,36 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="relative">
-      <input
-        [type]="type"
-        [id]="id"
-        [name]="name"
-        [placeholder]="placeholder"
-        [value]="value"
-        [min]="min"
-        [max]="max"
-        [step]="step"
-        [disabled]="disabled"
-        [ngClass]="inputClasses"
-        (input)="onInput($event)"
-      />
+    <div class="w-full">
+      <!-- Hint fuera del relative: evita que overlays (p. ej. icono ojo en el padre) usen mal top-1/2 -->
+      <div class="relative w-full">
+        <input
+          [type]="type"
+          [id]="id"
+          [name]="name"
+          [attr.autocomplete]="autocomplete || null"
+          [placeholder]="placeholder"
+          [value]="value"
+          [min]="min"
+          [max]="max"
+          [step]="step"
+          [disabled]="disabled"
+          [ngClass]="inputClasses"
+          (input)="onInput($event)"
+        />
+      </div>
 
       @if (hint) {
-      <p class="mt-1.5 text-xs"
-        [ngClass]="{
-          'text-error-500': error,
-          'text-success-500': success,
-          'text-gray-500': !error && !success
-        }">
-        {{ hint }}
-      </p>
+        <p
+          class="mt-1.5 text-xs"
+          [ngClass]="{
+            'text-error-500': error,
+            'text-success-500': success,
+            'text-gray-500': !error && !success
+          }"
+        >
+          {{ hint }}
+        </p>
       }
     </div>
   `,
@@ -49,6 +55,8 @@ export class InputFieldComponent {
   @Input() error: boolean = false;
   @Input() hint?: string;
   @Input() className: string = '';
+  /** p. ej. email, current-password */
+  @Input() autocomplete?: string;
 
   @Output() valueChange = new EventEmitter<string | number>();
 

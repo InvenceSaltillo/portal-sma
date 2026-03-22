@@ -4,6 +4,7 @@ import { NotFoundComponent } from './pages/other-page/not-found/not-found.compon
 import { CalendarComponent } from './pages/calendar/calendar.component';
 import { HomeComponent } from './pages/home/home.component';
 import { ProcedureTypeComponent } from './pages/catalog/procedure-type/procedure-type.component';
+import { ProcedureTypeNewComponent } from './pages/catalog/procedure-type-new/procedure-type-new.component';
 import { RequirementComponent } from './pages/catalog/requirement/requirement.component';
 import { ProcedureComponent } from './pages/catalog/procedure/procedure.component';
 import { ManagementPlanTopicComponent } from './pages/catalog/management-plan-topic/management-plan-topic.component';
@@ -81,6 +82,16 @@ export const routes: Routes = [
         pathMatch: 'full',
         title:
           'Portal SMA - Agenda',
+      },
+      {
+        path: 'catalog/procedure-types/new',
+        component: ProcedureTypeNewComponent,
+        title: 'Portal SMA - Nuevo tipo de trámite',
+      },
+      {
+        path: 'catalog/procedure-types/:id/edit',
+        component: ProcedureTypeNewComponent,
+        title: 'Portal SMA - Editar tipo de trámite',
       },
       {
         path: 'catalog/procedure-types',

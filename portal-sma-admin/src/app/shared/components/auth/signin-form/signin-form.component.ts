@@ -27,6 +27,8 @@ export class SigninFormComponent {
   email = '';
   password = '';
   errorMessage = '';
+  emailError = '';
+  passwordError = '';
   submitting = false;
 
   constructor(
@@ -39,11 +41,42 @@ export class SigninFormComponent {
     this.showPassword = !this.showPassword;
   }
 
+  /**
+   * Validación en cliente: no llama a Supabase si falta correo, formato o contraseña.
+   */
+  private validateForm(): boolean {
+    this.emailError = '';
+    this.passwordError = '';
+
+    const email = this.email.trim();
+    let valid = true;
+
+    if (!email) {
+      this.emailError = 'El correo electrónico es obligatorio.';
+      valid = false;
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      this.emailError = 'Ingresa un correo electrónico válido.';
+      valid = false;
+    }
+
+    if (!this.password || !String(this.password).trim()) {
+      this.passwordError = 'La contraseña es obligatoria.';
+      valid = false;
+    }
+
+    return valid;
+  }
+
   async onSignIn() {
     if (this.submitting) {
       return;
     }
     this.errorMessage = '';
+
+    if (!this.validateForm()) {
+      return;
+    }
+
     this.submitting = true;
     try {
       const { error } = await this.auth.login(
@@ -70,11 +103,13 @@ export class SigninFormComponent {
 
   onEmailChange(value: string | number) {
     this.email = String(value);
+    this.emailError = '';
     this.errorMessage = '';
   }
 
   onPasswordChange(value: string | number) {
     this.password = String(value);
+    this.passwordError = '';
     this.errorMessage = '';
   }
 }
