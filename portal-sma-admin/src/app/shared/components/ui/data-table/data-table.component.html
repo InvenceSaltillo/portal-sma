@@ -1,3 +1,16 @@
+@if (showGlobalFilter) {
+  <div class="mb-3">
+    <label class="sr-only" for="data-table-global-filter">Buscar en la tabla</label>
+    <input
+      id="data-table-global-filter"
+      type="search"
+      class="w-full min-w-0 max-w-md rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm placeholder:text-gray-400 focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 dark:placeholder:text-gray-500"
+      [attr.placeholder]="globalFilterPlaceholder || defaultFilterPlaceholder"
+      (input)="onGlobalFilterInput($event)"
+      autocomplete="off"
+    />
+  </div>
+}
 <p-table
   #pTable
   [value]="valueForTable"
@@ -24,6 +37,12 @@
   [filterLocale]="filterLocale"
   [styleClass]="styleClass"
   [tableStyle]="tableStyle"
+  [globalFilterFields]="showGlobalFilter ? globalFilterFields : undefined"
+  [selectionMode]="showSelectionColumn ? 'multiple' : undefined"
+  [selection]="showSelectionColumn ? (selection ?? []) : undefined"
+  (selectionChange)="onTableSelectionChange($event)"
+  [dataKey]="showSelectionColumn ? effectiveSelectionDataKey() : undefined"
+  [selectionPageOnly]="showSelectionColumn ? selectionPageOnly : undefined"
 >
   <ng-template pTemplate="header">
     <tr>
@@ -33,6 +52,32 @@
           class="w-12 min-w-[2.75rem] whitespace-nowrap text-center text-sm font-medium text-gray-500 dark:text-gray-400"
         >
           {{ rowNumberColumnHeader }}
+        </th>
+      }
+      @if (showSelectionColumn) {
+        <th
+          scope="col"
+          class="w-[7.5rem] min-w-[6rem] px-1 text-center align-middle"
+        >
+          @if (selectionColumnHeader.trim()) {
+            <span
+              class="whitespace-nowrap text-xs font-medium text-gray-600 dark:text-gray-400"
+            >
+              {{ selectionColumnHeader }}
+            </span>
+          }
+        </th>
+      }
+      @if (showExtraCheckboxColumn) {
+        <th
+          scope="col"
+          class="w-[7.5rem] min-w-[6rem] px-1 text-center align-bottom"
+        >
+          <span
+            class="whitespace-nowrap text-xs font-medium text-gray-600 dark:text-gray-400"
+          >
+            {{ extraCheckboxColumnHeader }}
+          </span>
         </th>
       }
       @for (col of columns; track col.field) {
@@ -57,6 +102,12 @@
       <tr class="data-table-filter-row">
         @if (showRowNumberColumn) {
           <th scope="col" class="w-12"></th>
+        }
+        @if (showSelectionColumn) {
+          <th scope="col" class="w-[7.5rem]"></th>
+        }
+        @if (showExtraCheckboxColumn) {
+          <th scope="col" class="w-[7.5rem]"></th>
         }
         @for (col of columns; track col.field) {
           <th scope="col" class="align-top font-normal">
@@ -117,12 +168,32 @@
   </ng-template>
 
   <ng-template pTemplate="body" let-row let-rowIndex="rowIndex">
-    <tr>
+    <tr
+      [class.cursor-pointer]="rowClickable"
+      [class.data-table-row-clickable]="rowClickable"
+      (click)="onBodyRowClick($event, row)"
+    >
       @if (showRowNumberColumn) {
         <td
           class="text-center align-middle text-sm tabular-nums text-gray-600 dark:text-gray-400"
         >
           {{ rowDisplayIndex(pTable, rowIndex) }}
+        </td>
+      }
+      @if (showSelectionColumn) {
+        <td class="w-[7.5rem] text-center align-middle">
+          <p-tableCheckbox [value]="row" />
+        </td>
+      }
+      @if (showExtraCheckboxColumn) {
+        <td class="w-[7.5rem] text-center align-middle">
+          <p-checkbox
+            [inputId]="extraCheckboxInputId(row)"
+            [binary]="true"
+            [ngModel]="extraCheckboxChecked(row)"
+            (ngModelChange)="onExtraCheckboxModelChange(row, $event)"
+            [disabled]="!rowIsPrimarySelected(row)"
+          />
         </td>
       }
       @for (col of columns; track col.field) {
@@ -152,6 +223,12 @@
           <td class="w-12 text-center align-middle">
             <span class="text-xs tabular-nums text-gray-400">{{ $index + 1 }}</span>
           </td>
+        }
+        @if (showSelectionColumn) {
+          <td class="w-[7.5rem]"></td>
+        }
+        @if (showExtraCheckboxColumn) {
+          <td class="w-[7.5rem]"></td>
         }
         @for (col of columns; track col.field) {
           <td>

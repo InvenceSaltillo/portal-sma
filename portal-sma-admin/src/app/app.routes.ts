@@ -6,14 +6,23 @@ import { HomeComponent } from './pages/home/home.component';
 import { ProcedureTypeComponent } from './pages/catalog/procedure-type/procedure-type.component';
 import { ProcedureTypeNewComponent } from './pages/catalog/procedure-type-new/procedure-type-new.component';
 import { RequirementComponent } from './pages/catalog/requirement/requirement.component';
+import { RequirementNewComponent } from './pages/catalog/requirement-new/requirement-new.component';
 import { ProcedureComponent } from './pages/catalog/procedure/procedure.component';
+import { ProcedureNewComponent } from './pages/catalog/procedure-new/procedure-new.component';
 import { ManagementPlanTopicComponent } from './pages/catalog/management-plan-topic/management-plan-topic.component';
+import { ManagementPlanTopicNewComponent } from './pages/catalog/management-plan-topic-new/management-plan-topic-new.component';
 import { ManagementPlanSubtopicComponent } from './pages/catalog/management-plan-subtopic/management-plan-subtopic.component';
+import { ManagementPlanSubtopicNewComponent } from './pages/catalog/management-plan-subtopic-new/management-plan-subtopic-new.component';
 import { PropertyRegimeComponent } from './pages/catalog/property-regime/property-regime.component';
+import { PropertyRegimeNewComponent } from './pages/catalog/property-regime-new/property-regime-new.component';
 import { TenureTypeComponent } from './pages/catalog/tenure-type/tenure-type.component';
+import { TenureTypeNewComponent } from './pages/catalog/tenure-type-new/tenure-type-new.component';
 import { LegalDocumentTypeComponent } from './pages/catalog/legal-document-type/legal-document-type.component';
+import { LegalDocumentTypeNewComponent } from './pages/catalog/legal-document-type-new/legal-document-type-new.component';
 import { DocumentTemplateComponent } from './pages/catalog/document-template/document-template.component';
+import { DocumentTemplateNewComponent } from './pages/catalog/document-template-new/document-template-new.component';
 import { SpeciesComponent } from './pages/catalog/species/species.component';
+import { SpeciesNewComponent } from './pages/catalog/species-new/species-new.component';
 import { ProcedureAdditionalFieldComponent } from './pages/catalog/procedure-additional-field/procedure-additional-field.component';
 import { WildlifeManagementUnitComponent } from './pages/catalog/wildlife-management-unit/wildlife-management-unit.component';
 import { AgendaAdministrationComponent } from './pages/single-window/agenda-administration/agenda-administration.component';
@@ -99,9 +108,29 @@ export const routes: Routes = [
         title: 'Portal SMA - Tipo de Trámites',
       },
       {
+        path: 'catalog/requirements/new',
+        component: RequirementNewComponent,
+        title: 'Portal SMA - Nuevo requisito',
+      },
+      {
+        path: 'catalog/requirements/:id/edit',
+        component: RequirementNewComponent,
+        title: 'Portal SMA - Editar requisito',
+      },
+      {
         path: 'catalog/requirements',
         component: RequirementComponent,
         title: 'Portal SMA - Requisitos',
+      },
+      {
+        path: 'catalog/procedures/new',
+        component: ProcedureNewComponent,
+        title: 'Portal SMA - Nuevo trámite',
+      },
+      {
+        path: 'catalog/procedures/:id/edit',
+        component: ProcedureNewComponent,
+        title: 'Portal SMA - Editar trámite',
       },
       {
         path: 'catalog/procedures',
@@ -109,14 +138,44 @@ export const routes: Routes = [
         title: 'Portal SMA - Trámites',
       },
       {
+        path: 'catalog/management-plan-topics/new',
+        component: ManagementPlanTopicNewComponent,
+        title: 'Portal SMA - Nuevo tema de plan de manejo',
+      },
+      {
+        path: 'catalog/management-plan-topics/:id/edit',
+        component: ManagementPlanTopicNewComponent,
+        title: 'Portal SMA - Editar tema de plan de manejo',
+      },
+      {
         path: 'catalog/management-plan-topics',
         component: ManagementPlanTopicComponent,
         title: 'Portal SMA - Temas de Plan de Manejo',
       },
       {
+        path: 'catalog/management-plan-subtopics/new',
+        component: ManagementPlanSubtopicNewComponent,
+        title: 'Portal SMA - Nuevo subtema de plan de manejo',
+      },
+      {
+        path: 'catalog/management-plan-subtopics/:id/edit',
+        component: ManagementPlanSubtopicNewComponent,
+        title: 'Portal SMA - Editar subtema de plan de manejo',
+      },
+      {
         path: 'catalog/management-plan-subtopics',
         component: ManagementPlanSubtopicComponent,
-        title: 'Portal SMA - Subtema de Plan de Manejo',
+        title: 'Portal SMA - Subtemas de Plan de Manejo',
+      },
+      {
+        path: 'catalog/property-regimes/new',
+        component: PropertyRegimeNewComponent,
+        title: 'Portal SMA - Nuevo régimen de propiedad',
+      },
+      {
+        path: 'catalog/property-regimes/:id/edit',
+        component: PropertyRegimeNewComponent,
+        title: 'Portal SMA - Editar régimen de propiedad',
       },
       {
         path: 'catalog/property-regimes',
@@ -124,9 +183,29 @@ export const routes: Routes = [
         title: 'Portal SMA - Régimen de Propiedad',
       },
       {
+        path: 'catalog/tenure-types/new',
+        component: TenureTypeNewComponent,
+        title: 'Portal SMA - Nuevo tipo de tenencia',
+      },
+      {
+        path: 'catalog/tenure-types/:id/edit',
+        component: TenureTypeNewComponent,
+        title: 'Portal SMA - Editar tipo de tenencia',
+      },
+      {
         path: 'catalog/tenure-types',
         component: TenureTypeComponent,
         title: 'Portal SMA - Tipo de Tenencia',
+      },
+      {
+        path: 'catalog/legal-document-types/new',
+        component: LegalDocumentTypeNewComponent,
+        title: 'Portal SMA - Nuevo tipo de documento legal',
+      },
+      {
+        path: 'catalog/legal-document-types/:id/edit',
+        component: LegalDocumentTypeNewComponent,
+        title: 'Portal SMA - Editar tipo de documento legal',
       },
       {
         path: 'catalog/legal-document-types',
@@ -134,9 +213,29 @@ export const routes: Routes = [
         title: 'Portal SMA - Tipo de Documento Legal',
       },
       {
+        path: 'catalog/document-templates/new',
+        component: DocumentTemplateNewComponent,
+        title: 'Portal SMA - Nueva plantilla de documento',
+      },
+      {
+        path: 'catalog/document-templates/:id/edit',
+        component: DocumentTemplateNewComponent,
+        title: 'Portal SMA - Editar plantilla de documento',
+      },
+      {
         path: 'catalog/document-templates',
         component: DocumentTemplateComponent,
-        title: 'Portal SMA - Plantilla de Documentos',
+        title: 'Portal SMA - Plantillas de documentos',
+      },
+      {
+        path: 'catalog/species/new',
+        component: SpeciesNewComponent,
+        title: 'Portal SMA - Nueva especie',
+      },
+      {
+        path: 'catalog/species/:id/edit',
+        component: SpeciesNewComponent,
+        title: 'Portal SMA - Editar especie',
       },
       {
         path: 'catalog/species',

@@ -1,10 +1,245 @@
 <div
   class="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03]"
 >
-  <h1 class="text-2xl font-semibold text-gray-800 dark:text-white/90">
-    Campos Adicionales por Trámite
-  </h1>
-  <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
-    Configuración de campos dinámicos asociados a cada trámite.
-  </p>
+  <div
+    class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between"
+  >
+    <div>
+      <h1 class="text-2xl font-semibold text-gray-800 dark:text-white/90">
+        Campos adicionales por trámite
+      </h1>
+      <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+        @if (selectedProcedure()) {
+          Campos configurables e importación Excel para el trámite seleccionado.
+        } @else {
+          Elige un trámite de la lista para definir sus campos adicionales.
+        }
+      </p>
+    </div>
+    <div class="flex flex-wrap items-center gap-2 shrink-0">
+      @if (selectedProcedure()) {
+        <p-button
+          type="button"
+          label="Elegir otro trámite"
+          icon="pi pi-arrow-left"
+          severity="secondary"
+          [outlined]="true"
+          styleClass="shrink-0"
+          (onClick)="clearProcedureSelection()"
+        />
+      }
+      @if (!selectedProcedure()) {
+        <p-button
+          type="button"
+          label="Actualizar"
+          icon="pi pi-refresh"
+          [loading]="loadingProcedures()"
+          [disabled]="loadingProcedures()"
+          severity="secondary"
+          [outlined]="true"
+          styleClass="shrink-0"
+          (onClick)="refreshProcedures()"
+        />
+      }
+    </div>
+  </div>
+
+  @if (!clientId) {
+    <div
+      class="mt-8 rounded-lg border border-error-200 bg-error-50 px-4 py-3 text-sm text-error-700 dark:border-error-500/30 dark:bg-error-500/10 dark:text-error-400"
+      role="alert"
+    >
+      No se encontró el cliente asociado a tu usuario. Vuelve a iniciar sesión o
+      contacta al administrador.
+    </div>
+  } @else if (!selectedProcedure()) {
+    @if (loadProceduresError()) {
+      <div
+        class="mt-6 rounded-lg border border-error-200 bg-error-50 px-4 py-3 text-sm text-error-700 dark:border-error-500/30 dark:bg-error-500/10 dark:text-error-400"
+        role="alert"
+      >
+        {{ loadProceduresError() }}
+      </div>
+    }
+
+    <p class="mt-6 text-sm font-medium text-gray-700 dark:text-gray-300">
+      Trámites
+      <span class="font-normal text-gray-500 dark:text-gray-400">
+        (clic en una fila para configurar campos)
+      </span>
+    </p>
+    <div class="mt-3 w-full min-w-0">
+      <app-data-table
+        [columns]="procedureColumns()"
+        [value]="procedureRows()"
+        [loading]="loadingProcedures()"
+        [rowActions]="[]"
+        [rowClickable]="true"
+        (rowClick)="onProcedureRowClick($event)"
+      />
+    </div>
+  } @else {
+    <div class="mt-6 space-y-2">
+      <p class="text-sm text-gray-600 dark:text-gray-400">
+        Trámite:
+        <span class="font-semibold text-gray-900 dark:text-white">{{
+          selectedProcedure()!.name
+        }}</span>
+      </p>
+    </div>
+
+    @if (loadFieldsError()) {
+      <div
+        class="mt-4 rounded-lg border border-error-200 bg-error-50 px-4 py-3 text-sm text-error-700 dark:border-error-500/30 dark:bg-error-500/10 dark:text-error-400"
+        role="alert"
+      >
+        {{ loadFieldsError() }}
+      </div>
+    }
+
+    @if (fieldFormError()) {
+      <div
+        class="mt-4 rounded-lg border border-error-200 bg-error-50 px-4 py-3 text-sm text-error-700 dark:border-error-500/30 dark:bg-error-500/10 dark:text-error-400"
+        role="alert"
+      >
+        {{ fieldFormError() }}
+      </div>
+    }
+
+    <section
+      class="procedure-addl-field-form mt-8 rounded-xl border border-sky-200/80 dark:border-sky-900/40"
+    >
+      <div
+        class="procedure-addl-field-form-header rounded-t-xl border-b border-sky-200/80 bg-sky-50 px-4 py-3 text-sm font-semibold text-sky-950 dark:border-sky-900/50 dark:bg-sky-950/30 dark:text-sky-100"
+      >
+        Nuevo campo
+      </div>
+      <form
+        class="space-y-5 p-4"
+        [formGroup]="fieldForm"
+        (ngSubmit)="submitFieldForm()"
+        novalidate
+      >
+        <div>
+          <app-label for="paf-name">
+            Nombre <span class="text-error-500">*</span>
+          </app-label>
+          <app-input-field
+            id="paf-name"
+            name="field_name"
+            type="text"
+            placeholder="Nombre del campo"
+            autocomplete="off"
+            [value]="fieldForm.controls.name.value ?? ''"
+            (valueChange)="onFieldNameChange($event)"
+            [error]="fieldForm.controls.name.invalid && fieldForm.controls.name.touched"
+            [hint]="fieldNameHint()"
+          />
+        </div>
+
+        <div>
+          <app-label for="paf-desc">
+            Descripción <span class="text-error-500">*</span>
+          </app-label>
+          <app-text-area
+            id="paf-desc"
+            placeholder="Descripción del campo"
+            [rows]="3"
+            [hint]="fieldDescriptionHint()"
+            [error]="
+              fieldForm.controls.description.invalid &&
+              fieldForm.controls.description.touched
+            "
+            [value]="fieldForm.controls.description.value ?? ''"
+            (valueChange)="onFieldDescriptionChange($event)"
+          />
+        </div>
+
+        <label
+          class="flex cursor-pointer items-center gap-3 text-sm font-medium text-gray-800 dark:text-gray-200"
+        >
+          <input
+            type="checkbox"
+            formControlName="is_date"
+            class="size-4 rounded border-gray-300 text-brand-600 focus:ring-brand-500"
+          />
+          ¿Es una fecha?
+        </label>
+
+        <label
+          class="flex cursor-pointer items-center gap-3 text-sm font-medium text-gray-800 dark:text-gray-200"
+        >
+          <input
+            type="checkbox"
+            formControlName="is_required"
+            class="size-4 rounded border-gray-300 text-brand-600 focus:ring-brand-500"
+          />
+          ¿Es obligatorio?
+        </label>
+
+        <div>
+          <app-label for="paf-excel">
+            Columna de excel <span class="text-error-500">*</span>
+          </app-label>
+          <app-input-field
+            id="paf-excel"
+            name="excel_column"
+            type="text"
+            placeholder="P.ej. A"
+            autocomplete="off"
+            [value]="fieldForm.controls.excel_column.value ?? ''"
+            (valueChange)="onExcelColumnChange($event)"
+            [error]="
+              fieldForm.controls.excel_column.invalid &&
+              fieldForm.controls.excel_column.touched
+            "
+            [hint]="excelColumnHint()"
+          />
+        </div>
+
+        <div class="flex flex-wrap items-center gap-3 pt-1">
+          <p-button
+            type="submit"
+            label="Guardar"
+            icon="pi pi-check"
+            [loading]="savingField()"
+            [disabled]="savingField()"
+          />
+          <p-button
+            type="button"
+            label="Limpiar"
+            icon="pi pi-times"
+            severity="secondary"
+            [outlined]="true"
+            [disabled]="savingField()"
+            (onClick)="clearFieldForm()"
+          />
+        </div>
+      </form>
+    </section>
+
+    <section
+      class="procedure-addl-field-table mt-8 rounded-xl border border-sky-200/80 dark:border-sky-900/40"
+    >
+      <div
+        class="procedure-addl-field-table-header rounded-t-xl border-b border-sky-200/80 bg-sky-50 px-4 py-3 text-sm font-semibold text-sky-950 dark:border-sky-900/50 dark:bg-sky-950/30 dark:text-sky-100"
+      >
+        Campos configurados
+      </div>
+      <div class="p-4 pt-4">
+        <app-data-table
+          [columns]="fieldColumns"
+          [value]="fieldRows()"
+          [loading]="loadingFields()"
+          [rowActions]="fieldRowActions"
+          [columnFilter]="false"
+          [sortable]="false"
+          [showRowNumberColumn]="false"
+          emptyMessage="No se encontró información con los parámetros seleccionados"
+        />
+      </div>
+    </section>
+  }
+
+  <p-confirmDialog appendTo="body" />
 </div>

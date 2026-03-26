@@ -21,7 +21,9 @@
     tabindex="0"
     (keydown.enter)="onBrowseClick()"
     (keydown.space)="onBrowseClick()"
-    aria-label="Arrastra y suelta tu archivo PDF o haz clic para seleccionar"
+    [attr.aria-label]="
+      'Arrastra y suelta tu archivo o haz clic para seleccionar. Formatos: ' + accept
+    "
   >
     <div class="flex items-center justify-between gap-3">
       <div class="flex items-center gap-3">
@@ -57,7 +59,7 @@
       #fileInput
       type="file"
       class="sr-only"
-      accept="application/pdf"
+      [attr.accept]="accept"
       (change)="onFileSelected($event)"
     />
   </div>
@@ -95,7 +97,7 @@
         <div>Este archivo es obligatorio.</div>
       }
       @if (control?.errors?.['fileType']) {
-        <div>Solo se permite PDF.</div>
+        <div>El archivo no coincide con los formatos permitidos para este requisito.</div>
       }
       @if (control?.errors?.['fileSize']) {
         <div>El archivo excede {{ maxSizeMB }} MB.</div>

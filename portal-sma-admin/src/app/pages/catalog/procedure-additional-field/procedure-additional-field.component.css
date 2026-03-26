@@ -1,0 +1,9 @@
+.procedure-addl-field-form,
+.procedure-addl-field-table {
+  background-color: rgb(255 255 255 / 0.9);
+}
+
+:host-context(.dark) .procedure-addl-field-form,
+:host-context(.dark) .procedure-addl-field-table {
+  background-color: rgb(17 24 39 / 0.4);
+}

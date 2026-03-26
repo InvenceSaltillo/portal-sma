@@ -2,6 +2,24 @@
  * Controller para servicios (trámites)
  */
 
+const SERVICE_BASE_SELECT = `
+        id,
+        name,
+        description,
+        notes,
+        is_uma_related,
+        uma_limit_scope,
+        is_active,
+        service_type_id,
+        client_id,
+        created_at,
+        updated_at,
+        service_types (
+          id,
+          name
+        )
+      `;
+
 /**
  * Obtener todos los servicios
  * GET /api/services
@@ -12,20 +30,7 @@ export const getAllServices = async (req, res, next) => {
 
     let query = req.supabase
       .from('services')
-      .select(`
-        id,
-        name,
-        description,
-        is_active,
-        service_type_id,
-        client_id,
-        created_at,
-        updated_at,
-        service_types (
-          id,
-          name
-        )
-      `);
+      .select(SERVICE_BASE_SELECT);
 
     // Filtros opcionales
     if (client_id) {
@@ -60,20 +65,7 @@ export const getServiceById = async (req, res, next) => {
 
     const { data, error } = await req.supabase
       .from('services')
-      .select(`
-        id,
-        name,
-        description,
-        is_active,
-        service_type_id,
-        client_id,
-        created_at,
-        updated_at,
-        service_types (
-          id,
-          name
-        )
-      `)
+      .select(SERVICE_BASE_SELECT)
       .eq('id', id)
       .single();
 
@@ -101,20 +93,7 @@ export const getServicesByType = async (req, res, next) => {
 
     let query = req.supabase
       .from('services')
-      .select(`
-        id,
-        name,
-        description,
-        is_active,
-        service_type_id,
-        client_id,
-        created_at,
-        updated_at,
-        service_types (
-          id,
-          name
-        )
-      `)
+      .select(SERVICE_BASE_SELECT)
       .eq('service_type_id', typeId);
 
     if (client_id) {

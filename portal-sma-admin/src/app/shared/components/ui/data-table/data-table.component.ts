@@ -1,15 +1,23 @@
-import { Component, Input, viewChild } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  Output,
+  viewChild,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import type { MenuItem } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
+import { CheckboxModule } from 'primeng/checkbox';
 import { MenuModule, Menu } from 'primeng/menu';
 import { SelectModule } from 'primeng/select';
 import { Skeleton } from 'primeng/skeleton';
-import { TableModule } from 'primeng/table';
+import { Table, TableModule } from 'primeng/table';
 import type {
   DataTableColumn,
   DataTableColumnFilterType,
   DataTableRowAction,
+  DataTableRowActionSeverity,
 } from './data-table.types';
 
 /**
@@ -19,7 +27,15 @@ import type {
 @Component({
   selector: 'app-data-table',
   standalone: true,
-  imports: [TableModule, Skeleton, FormsModule, SelectModule, ButtonModule, MenuModule],
+  imports: [
+    TableModule,
+    Skeleton,
+    FormsModule,
+    SelectModule,
+    ButtonModule,
+    MenuModule,
+    CheckboxModule,
+  ],
   templateUrl: './data-table.component.html',
   styles: `
     :host {
@@ -42,10 +58,17 @@ import type {
       width: 100%;
       min-width: 0;
     }
+    :host ::ng-deep .p-datatable-tbody > tr.data-table-row-clickable:hover {
+      background-color: rgb(249 250 251);
+    }
+    :host-context(.dark) ::ng-deep .p-datatable-tbody > tr.data-table-row-clickable:hover {
+      background-color: rgb(255 255 255 / 0.04);
+    }
   `,
 })
 export class DataTableComponent {
   private readonly rowActionsMenuRef = viewChild<Menu>('rowActionsMenu');
+  private readonly pTableRef = viewChild<Table>('pTable');
 
   /** Definición de columnas. */
   @Input({ required: true }) columns: DataTableColumn[] = [];
@@ -64,6 +87,50 @@ export class DataTableComponent {
 
   /** `scroll` | `stack` — por defecto stack en móvil. */
   @Input() responsiveLayout: 'scroll' | 'stack' = 'stack';
+
+  // ——— Selección de filas (checkboxes PrimeNG) ———
+
+  /** Sin selección vs varias filas con `p-tableCheckbox`. */
+  @Input() selectionMode: 'none' | 'multiple' = 'none';
+
+  /**
+   * Filas seleccionadas (mismo tipo que `value`; deben ser referencias a objetos del arreglo `value`).
+   * Con `selectionMode === 'multiple'`, suele ser un arreglo (puede estar vacío).
+   */
+  @Input() selection: Record<string, unknown>[] | null = null;
+
+  @Output() selectionChange = new EventEmitter<Record<string, unknown>[] | null>();
+
+  /**
+   * Campo único por fila para `dataKey` de Prime (obligatorio con selección por checkbox).
+   * Si no se define, se usa `rowTrackByField` o `id`.
+   */
+  @Input() selectionDataKey: string | null = null;
+
+  /**
+   * Si es `true`, el checkbox del encabezado solo afecta la página actual del paginador.
+   */
+  @Input() selectionPageOnly = false;
+
+  /**
+   * Texto del encabezado de la columna de selección (p. ej. "Seleccione").
+   * No hay checkbox en el encabezado: no se ofrece “seleccionar todas las filas”.
+   */
+  @Input() selectionColumnHeader = '';
+
+  /**
+   * Segunda columna de checkbox (p. ej. "Obligatorio"), independiente de la selección de fila.
+   * El booleano vive en `value[][extraCheckboxField]`.
+   */
+  @Input() extraCheckboxColumnHeader = '';
+
+  /** Campo booleano en cada fila para la segunda columna de checkbox. */
+  @Input() extraCheckboxField = '_extraCheckbox';
+
+  @Output() extraCheckboxChange = new EventEmitter<{
+    row: Record<string, unknown>;
+    value: boolean;
+  }>();
 
   /** Clases del contenedor p-table (PrimeNG). */
   @Input() styleClass = 'p-datatable-sm w-full';
@@ -101,6 +168,15 @@ export class DataTableComponent {
 
   /** Placeholder por defecto de los inputs de filtro. */
   @Input() defaultFilterPlaceholder = 'Filtrar…';
+
+  /**
+   * Campos incluidos en el filtro global de Prime (`filterGlobal`, modo `contains`).
+   * Si el arreglo no está vacío, se muestra un buscador encima de la tabla.
+   */
+  @Input() globalFilterFields: string[] = [];
+
+  /** Placeholder del buscador global. */
+  @Input() globalFilterPlaceholder = '';
 
   // ——— Paginación (cliente; `value` completo en memoria) ———
 
@@ -165,6 +241,13 @@ export class DataTableComponent {
 
   /** Ancla del overlay del menú (evita recortes con `overflow`). */
   @Input() actionsMenuAppendTo: 'body' | null = 'body';
+
+  /**
+   * Si es `true`, un clic en la fila (fuera de botones, enlaces o checkboxes) emite `rowClick`.
+   */
+  @Input() rowClickable = false;
+
+  @Output() rowClick = new EventEmitter<Record<string, unknown>>();
 
   // ——— Columna de numeración (conteo / #) ———
 
@@ -240,9 +323,76 @@ export class DataTableComponent {
     );
   }
 
+  get showGlobalFilter(): boolean {
+    return this.globalFilterFields.length > 0;
+  }
+
+  onGlobalFilterInput(event: Event): void {
+    const el = event.target as HTMLInputElement | null;
+    const value = el?.value ?? '';
+    this.pTableRef()?.filterGlobal(value, 'contains');
+  }
+
   /** Columna extra de menú de acciones. */
   get showActionsColumn(): boolean {
     return this.rowActions.length > 0;
+  }
+
+  get showSelectionColumn(): boolean {
+    return this.selectionMode === 'multiple';
+  }
+
+  get showExtraCheckboxColumn(): boolean {
+    return this.extraCheckboxColumnHeader.trim().length > 0;
+  }
+
+  /** `dataKey` efectivo para Prime cuando hay selección. */
+  effectiveSelectionDataKey(): string {
+    const fromInput = this.selectionDataKey?.trim();
+    if (fromInput) {
+      return fromInput;
+    }
+    const fromTrack = this.rowTrackByField?.trim();
+    if (fromTrack) {
+      return fromTrack;
+    }
+    return 'id';
+  }
+
+  onTableSelectionChange(value: unknown): void {
+    if (!this.showSelectionColumn) {
+      return;
+    }
+    const arr = Array.isArray(value)
+      ? (value as Record<string, unknown>[])
+      : value == null
+        ? null
+        : [value as Record<string, unknown>];
+    this.selectionChange.emit(arr);
+  }
+
+  rowIsPrimarySelected(row: Record<string, unknown>): boolean {
+    const key = this.effectiveSelectionDataKey();
+    const v = row[key];
+    const sel = this.selection ?? [];
+    return sel.some((s) => s[key] === v);
+  }
+
+  extraCheckboxChecked(row: Record<string, unknown>): boolean {
+    return row[this.extraCheckboxField] === true;
+  }
+
+  onExtraCheckboxModelChange(
+    row: Record<string, unknown>,
+    checked: boolean
+  ): void {
+    this.extraCheckboxChange.emit({ row, value: checked });
+  }
+
+  extraCheckboxInputId(row: Record<string, unknown>): string {
+    const key = this.effectiveSelectionDataKey();
+    const id = row[key];
+    return `dt-extra-cb-${String(id ?? 'row')}`;
   }
 
   /** Para `colspan` en mensaje vacío. */
@@ -250,12 +400,29 @@ export class DataTableComponent {
     return (
       this.columns.length +
       (this.showActionsColumn ? 1 : 0) +
-      (this.showRowNumberColumn ? 1 : 0)
+      (this.showRowNumberColumn ? 1 : 0) +
+      (this.showSelectionColumn ? 1 : 0) +
+      (this.showExtraCheckboxColumn ? 1 : 0)
     );
   }
 
   /** Modelo del `p-menu` popup (se reconstruye al abrir por fila). */
   actionsMenuModel: MenuItem[] = [];
+
+  onBodyRowClick(event: Event, row: Record<string, unknown>): void {
+    if (!this.rowClickable) {
+      return;
+    }
+    const t = event.target as HTMLElement | null;
+    if (
+      t?.closest(
+        'button, a, input, textarea, select, label, .p-checkbox, .p-tablecheckbox, [data-row-click-ignore]'
+      )
+    ) {
+      return;
+    }
+    this.rowClick.emit(row);
+  }
 
   openRowActionsMenu(event: Event, row: Record<string, unknown>): void {
     event.preventDefault();
@@ -274,10 +441,12 @@ export class DataTableComponent {
         continue;
       }
       const disabled = action.disabled?.(row) === true;
+      const styleClass = this.rowActionStyleClass(action);
       items.push({
         label: action.label,
         icon: action.icon,
         disabled,
+        ...(styleClass ? { styleClass } : {}),
         command: () => {
           if (!disabled) {
             action.command?.(row);
@@ -286,6 +455,18 @@ export class DataTableComponent {
       });
     }
     return items;
+  }
+
+  /** Clases en el `p-menuitem` (Prime aplica `item.styleClass` al ítem del menú). */
+  private rowActionStyleClass(action: DataTableRowAction): string | undefined {
+    const parts: string[] = [];
+    if (action.severity) {
+      parts.push(severityToMenuClass(action.severity));
+    }
+    if (action.styleClass?.trim()) {
+      parts.push(action.styleClass.trim());
+    }
+    return parts.length > 0 ? parts.join(' ') : undefined;
   }
 
   isColumnFilterable(col: DataTableColumn): boolean {
@@ -368,5 +549,21 @@ export type {
   DataTableColumnFilter,
   DataTableColumnFilterType,
   DataTableRowAction,
+  DataTableRowActionSeverity,
   DataTableSelectOption,
 } from './data-table.types';
+
+function severityToMenuClass(severity: DataTableRowActionSeverity): string {
+  switch (severity) {
+    case 'danger':
+      return 'dt-row-action-danger';
+    case 'warning':
+      return 'dt-row-action-warning';
+    case 'success':
+      return 'dt-row-action-success';
+    case 'info':
+      return 'dt-row-action-info';
+    default:
+      return '';
+  }
+}

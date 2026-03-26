@@ -1,0 +1,718 @@
+<div class="min-w-0 text-gray-800 dark:text-white/90">
+  @if (recordLoading()) {
+    <div class="flex justify-center py-16">
+      <p-progressSpinner styleClass="w-12 h-12" strokeWidth="4" />
+    </div>
+  } @else if (editLoadError()) {
+    <div
+      class="rounded-xl border border-error-200 bg-error-50 px-4 py-3 text-sm text-error-700 dark:border-error-500/30 dark:bg-error-500/10 dark:text-error-400"
+      role="alert"
+    >
+      {{ editLoadError() }}
+      <div class="mt-4">
+        <p-button
+          label="Volver al catálogo"
+          severity="secondary"
+          [outlined]="true"
+          routerLink="/catalog/document-templates"
+          size="small"
+        />
+      </div>
+    </div>
+  } @else if (formUiReady()) {
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="mx-auto max-w-6xl space-y-10 pb-12">
+      <!-- Migas (estilo Stitch, colores proyecto) -->
+      <nav
+        class="mb-2 flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400"
+        aria-label="Migas de navegación"
+      >
+        <a
+          routerLink="/catalog/document-templates"
+          class="transition-colors hover:text-brand-700 dark:hover:text-brand-300"
+          >Plantillas</a
+        >
+        <i class="pi pi-angle-right text-[10px] text-gray-400" aria-hidden="true"></i>
+        <span class="text-brand-700 dark:text-brand-300">{{
+          isEditMode() ? 'Editar' : 'Nueva'
+        }}</span>
+      </nav>
+
+      <header class="mb-2">
+        <h1 class="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white md:text-4xl">
+          {{ pageTitle() }}
+        </h1>
+        <p class="mt-2 max-w-2xl text-base font-normal text-gray-600 dark:text-gray-400 md:text-lg">
+          {{ pageSubtitle() }}
+        </p>
+      </header>
+
+      <!-- Bento: contenido principal + columna archivo / acciones (desktop) -->
+      <div class="grid grid-cols-1 gap-8 lg:grid-cols-12">
+        <div class="space-y-8 lg:col-span-8">
+          <!-- Información básica -->
+          <section
+            class="rounded-xl border border-gray-200 bg-white p-6 shadow-theme-sm dark:border-gray-800 dark:bg-white/[0.03] md:p-8"
+          >
+            <div class="mb-6 flex items-center gap-3">
+              <span
+                class="flex h-10 w-10 items-center justify-center rounded-lg bg-brand-100 text-brand-800 dark:bg-brand-900/50 dark:text-brand-200"
+              >
+                <i class="pi pi-file-edit text-lg" aria-hidden="true"></i>
+              </span>
+              <h2 class="text-lg font-bold text-gray-900 dark:text-white">Información básica</h2>
+            </div>
+            <div class="space-y-6">
+              <div>
+                <app-label for="dt-name" className="!mb-2 !text-xs !font-bold !uppercase !tracking-wider !text-gray-600 dark:!text-gray-400">
+                  Nombre de la plantilla <span class="text-error-500">*</span>
+                </app-label>
+                <app-input-field
+                  id="dt-name"
+                  placeholder="Ej. Reporte de predio"
+                  className="!rounded-lg !border-gray-200 !bg-gray-50 dark:!border-gray-700 dark:!bg-gray-900/40"
+                  [hint]="nameHint()"
+                  [error]="nameCtrl.invalid && nameCtrl.touched"
+                  [value]="nameCtrl.value ?? ''"
+                  (valueChange)="nameCtrl.setValue(asString($event))"
+                />
+              </div>
+              <div>
+                <app-label for="dt-desc" className="!mb-2 !text-xs !font-bold !uppercase !tracking-wider !text-gray-600 dark:!text-gray-400">
+                  Descripción <span class="text-error-500">*</span>
+                </app-label>
+                <app-text-area
+                  id="dt-desc"
+                  placeholder="Describe el propósito y uso de esta plantilla…"
+                  [rows]="4"
+                  className="!rounded-lg !border-gray-200 !bg-gray-50 dark:!border-gray-700 dark:!bg-gray-900/40"
+                  [hint]="descriptionHint() ?? ''"
+                  [error]="descriptionCtrl.invalid && descriptionCtrl.touched"
+                  (valueChange)="descriptionCtrl.setValue($event)"
+                  [value]="descriptionCtrl.value ?? ''"
+                />
+              </div>
+            </div>
+          </section>
+
+          <!-- Configuración de campos (plan + imagen) -->
+          <section
+            class="rounded-xl border border-gray-200 bg-white p-6 shadow-theme-sm dark:border-gray-800 dark:bg-white/[0.03] md:p-8"
+          >
+            <div class="mb-6 flex items-center gap-3">
+              <span
+                class="flex h-10 w-10 items-center justify-center rounded-lg bg-brand-100 text-brand-800 dark:bg-brand-900/50 dark:text-brand-200"
+              >
+                <i class="pi pi-sliders-h text-lg" aria-hidden="true"></i>
+              </span>
+              <h2 class="text-lg font-bold text-gray-900 dark:text-white">Configuración de campos</h2>
+            </div>
+            <div class="space-y-4">
+              <div
+                class="rounded-xl border border-transparent bg-gray-50 p-4 transition-all hover:border-gray-200 dark:bg-gray-900/40 dark:hover:border-gray-700"
+              >
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                  <div class="flex flex-wrap items-center gap-4">
+                    <app-checkbox
+                      [checked]="form.controls.include_management_plan.value"
+                      (checkedChange)="form.controls.include_management_plan.setValue($event)"
+                      label="Incluir Plan de Manejo"
+                    />
+                  </div>
+                  @if (form.controls.include_management_plan.value) {
+                    <span
+                      class="rounded-full bg-brand-100 px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-brand-800 dark:bg-brand-900/60 dark:text-brand-200"
+                      >Activo</span
+                    >
+                  } @else {
+                    <span
+                      class="rounded-full bg-gray-200 px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-gray-600 dark:bg-gray-700 dark:text-gray-300"
+                      >Inactivo</span
+                    >
+                  }
+                </div>
+                <div
+                  class="mt-4 sm:pl-14"
+                  [class.pointer-events-none]="!form.controls.include_management_plan.value"
+                  [class.opacity-40]="!form.controls.include_management_plan.value"
+                >
+                  <app-label for="dt-mp-key" className="!mb-2 !text-xs !font-semibold !text-gray-600 dark:!text-gray-400"
+                    >Clave de plan de manejo</app-label
+                  >
+                  <app-input-field
+                    id="dt-mp-key"
+                    placeholder="Clave del Plan"
+                    className="!rounded-lg !border-gray-200 !bg-white dark:!border-gray-700 dark:!bg-gray-950/50"
+                    [disabled]="submitting() || !form.controls.include_management_plan.value"
+                    [value]="form.controls.management_plan_merge_key.value ?? ''"
+                    (valueChange)="form.controls.management_plan_merge_key.setValue(asString($event))"
+                  />
+                </div>
+              </div>
+
+              <div
+                class="rounded-xl border border-transparent bg-gray-50 p-4 transition-all hover:border-gray-200 dark:bg-gray-900/40 dark:hover:border-gray-700"
+              >
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                  <div class="flex flex-wrap items-center gap-4">
+                    <app-checkbox
+                      [checked]="form.controls.include_property_image.value"
+                      (checkedChange)="form.controls.include_property_image.setValue($event)"
+                      label="Incluir Imagen de Predio"
+                    />
+                  </div>
+                  @if (form.controls.include_property_image.value) {
+                    <span
+                      class="rounded-full bg-brand-100 px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-brand-800 dark:bg-brand-900/60 dark:text-brand-200"
+                      >Activo</span
+                    >
+                  } @else {
+                    <span
+                      class="rounded-full bg-gray-200 px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-gray-600 dark:bg-gray-700 dark:text-gray-300"
+                      >Inactivo</span
+                    >
+                  }
+                </div>
+                <div
+                  class="mt-4 sm:pl-14"
+                  [class.pointer-events-none]="!form.controls.include_property_image.value"
+                  [class.opacity-40]="!form.controls.include_property_image.value"
+                >
+                  <app-label for="dt-img-key" className="!mb-2 !text-xs !font-semibold !text-gray-600 dark:!text-gray-400"
+                    >Clave de Imagen de Predio</app-label
+                  >
+                  <app-input-field
+                    id="dt-img-key"
+                    placeholder="Clave de la Imagen del Polígono del Predio"
+                    className="!rounded-lg !border-gray-200 !bg-white dark:!border-gray-700 dark:!bg-gray-950/50"
+                    [disabled]="submitting() || !form.controls.include_property_image.value"
+                    [value]="form.controls.property_image_merge_key.value ?? ''"
+                    (valueChange)="form.controls.property_image_merge_key.setValue(asString($event))"
+                  />
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <!-- Columna: archivo + estado (sidebar en lg) -->
+        <div class="space-y-8 lg:col-span-4">
+          <section
+            class="relative overflow-hidden rounded-xl border border-gray-200 bg-white p-6 shadow-theme-sm dark:border-gray-800 dark:bg-white/[0.03] md:p-8"
+          >
+            <div
+              class="pointer-events-none absolute -right-16 -top-16 h-32 w-32 rounded-full bg-brand-500/10 blur-3xl dark:bg-brand-400/10"
+              aria-hidden="true"
+            ></div>
+            <div class="relative flex flex-col items-center text-center">
+              <div
+                class="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100 text-brand-600 dark:bg-gray-800 dark:text-brand-300"
+              >
+                <i class="pi pi-cloud-upload text-3xl" aria-hidden="true"></i>
+              </div>
+              <h2 class="mb-1 text-lg font-bold text-gray-900 dark:text-white">Subir archivo base</h2>
+              <p class="mb-6 text-sm text-gray-600 dark:text-gray-400">
+                Documento <span class="font-semibold">.docx</span> que sirve como plantilla.
+              </p>
+              <input
+                #docxFileInput
+                type="file"
+                class="sr-only"
+                accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                (change)="onDocxFileSelected($event)"
+              />
+              <p-button
+                type="button"
+                label="Seleccionar archivo"
+                icon="pi pi-upload"
+                styleClass="w-full !font-bold !justify-center"
+                severity="primary"
+                [disabled]="submitting()"
+                (onClick)="openDocxPicker()"
+              />
+              @if (isEditMode() && form.controls.docx_storage_path.value) {
+                <p-button
+                  type="button"
+                  label="Ver archivo"
+                  icon="pi pi-eye"
+                  styleClass="mt-2 w-full !justify-center"
+                  severity="secondary"
+                  [outlined]="true"
+                  [disabled]="submitting()"
+                  (onClick)="viewStoredDocx()"
+                />
+              }
+              <div
+                class="mt-4 w-full rounded-lg border border-dashed border-gray-300 bg-gray-50 px-3 py-2.5 text-left text-sm text-gray-600 dark:border-gray-600 dark:bg-gray-900/50 dark:text-gray-300"
+              >
+                @if (docxDisplayName()) {
+                  <span class="block truncate font-medium text-gray-900 dark:text-white" [title]="docxDisplayName()">{{
+                    docxDisplayName()
+                  }}</span>
+                } @else {
+                  <span class="text-gray-500">Ningún archivo seleccionado</span>
+                }
+              </div>
+              <div
+                class="mt-4 flex w-full items-start gap-2 rounded-lg border border-orange-200 bg-orange-50/80 p-3 text-left dark:border-orange-900/40 dark:bg-orange-950/20"
+              >
+                <i class="pi pi-info-circle mt-0.5 text-sm text-orange-700 dark:text-orange-400" aria-hidden="true"></i>
+                <p class="text-[11px] leading-relaxed text-orange-950 dark:text-orange-100/90">
+                  <strong>Restricción:</strong> solo archivos <strong>.docx</strong>. La ruta se guarda al confirmar la
+                  plantilla.
+                </p>
+              </div>
+              @if (docxMissingHighlight()) {
+                <div
+                  class="mt-3 w-full rounded-lg border border-error-500 bg-error-50 p-3 text-left ring-2 ring-error-300 dark:border-error-500 dark:bg-error-500/10 dark:ring-error-600"
+                  role="alert"
+                >
+                  <p class="text-sm font-medium text-error-600 dark:text-error-400">
+                    Debes subir o conservar un archivo .docx antes de guardar.
+                  </p>
+                </div>
+              }
+            </div>
+          </section>
+
+          <section
+            class="space-y-6 rounded-xl border border-gray-200 bg-white p-6 shadow-theme-sm dark:border-gray-800 dark:bg-white/[0.03] md:p-8"
+          >
+            <div class="flex items-center gap-3">
+              <span
+                class="flex h-10 w-10 items-center justify-center rounded-lg bg-brand-100 text-brand-800 dark:bg-brand-900/50 dark:text-brand-200"
+              >
+                <i class="pi pi-verified text-lg" aria-hidden="true"></i>
+              </span>
+              <h2 class="text-lg font-bold text-gray-900 dark:text-white">Estado</h2>
+            </div>
+            <app-checkbox
+              [checked]="form.controls.is_active.value"
+              (checkedChange)="onActiveChange($event)"
+              label="Plantilla activa"
+            />
+            <p class="text-xs text-gray-500 dark:text-gray-400">
+              Si está activa, la plantilla estará disponible en el catálogo para su uso.
+            </p>
+          </section>
+        </div>
+      </div>
+
+      <!-- Dictamen -->
+      <section
+        class="space-y-6 rounded-xl border border-gray-200 bg-white p-6 shadow-theme-sm dark:border-gray-800 dark:bg-white/[0.03] md:p-8"
+      >
+          <div class="mb-2 flex items-center gap-3">
+            <i class="pi pi-chart-line text-xl text-brand-600 dark:text-brand-400" aria-hidden="true"></i>
+            <h2 class="text-lg font-bold text-gray-900 dark:text-white">Dictámen de evaluación</h2>
+          </div>
+          <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+            <div class="space-y-2">
+              <app-checkbox
+                [checked]="form.controls.include_dictamen_evaluation_key.value"
+                (checkedChange)="form.controls.include_dictamen_evaluation_key.setValue($event)"
+                label="Incluir Clave Dictamen Evaluación"
+              />
+              <app-label for="dt-dict-ev" className="!text-xs !font-bold !uppercase !tracking-wider !text-gray-600 dark:!text-gray-400"
+                >Clave de Dictámen de Evaluación</app-label
+              >
+              <app-input-field
+                id="dt-dict-ev"
+                placeholder="Clave del Dictámen de Evaluación"
+                className="!rounded-lg !border-gray-200 !bg-gray-50 dark:!border-gray-700 dark:!bg-gray-900/40"
+                [disabled]="submitting() || !form.controls.include_dictamen_evaluation_key.value"
+                [value]="form.controls.dictamen_evaluation_merge_key.value ?? ''"
+                (valueChange)="form.controls.dictamen_evaluation_merge_key.setValue(asString($event))"
+              />
+            </div>
+            <div class="space-y-2">
+              <app-checkbox
+                [checked]="form.controls.include_dictamen_date_key.value"
+                (checkedChange)="form.controls.include_dictamen_date_key.setValue($event)"
+                label="Incluir Clave Fecha Dictámen"
+              />
+              <app-label for="dt-dict-fecha" className="!text-xs !font-bold !uppercase !tracking-wider !text-gray-600 dark:!text-gray-400"
+                >Clave de Fecha de Dictámen</app-label
+              >
+              <app-input-field
+                id="dt-dict-fecha"
+                placeholder="Clave de Fecha de Dictámen de Evaluación"
+                className="!rounded-lg !border-gray-200 !bg-gray-50 dark:!border-gray-700 dark:!bg-gray-900/40"
+                [disabled]="submitting() || !form.controls.include_dictamen_date_key.value"
+                [value]="form.controls.dictamen_date_merge_key.value ?? ''"
+                (valueChange)="form.controls.dictamen_date_merge_key.setValue(asString($event))"
+              />
+            </div>
+            <div class="space-y-2 md:col-span-2">
+              <app-checkbox
+                [checked]="form.controls.include_dictamen_evaluator_key.value"
+                (checkedChange)="form.controls.include_dictamen_evaluator_key.setValue($event)"
+                label="Incluir Clave Dictamen Evaluador"
+              />
+              <app-label for="dt-dict-eval" className="!text-xs !font-bold !uppercase !tracking-wider !text-gray-600 dark:!text-gray-400"
+                >Clave de Dictámen Evaluador</app-label
+              >
+              <app-input-field
+                id="dt-dict-eval"
+                placeholder="Clave del Dictámen Evaluador"
+                className="!rounded-lg !border-gray-200 !bg-gray-50 dark:!border-gray-700 dark:!bg-gray-900/40"
+                [disabled]="submitting() || !form.controls.include_dictamen_evaluator_key.value"
+                [value]="form.controls.dictamen_evaluator_merge_key.value ?? ''"
+                (valueChange)="form.controls.dictamen_evaluator_merge_key.setValue(asString($event))"
+              />
+            </div>
+          </div>
+      </section>
+
+      <!-- Secciones + tabla + marcadores -->
+      <section
+        class="rounded-xl border border-gray-200 bg-white p-6 shadow-theme-sm dark:border-gray-800 dark:bg-white/[0.03] md:p-8"
+      >
+        <div class="mb-8 flex items-center gap-3">
+          <i class="pi pi-list text-xl text-brand-600 dark:text-brand-400" aria-hidden="true"></i>
+          <h2 class="text-lg font-bold text-gray-900 dark:text-white">Secciones</h2>
+        </div>
+
+        <div class="grid grid-cols-1 gap-10 md:grid-cols-12">
+          <div class="space-y-6 md:col-span-4">
+            <div>
+              <app-label for="sec-draft-name" className="!mb-2 !text-xs !font-bold !uppercase !tracking-wider !text-gray-600 dark:!text-gray-400"
+                >Nombre</app-label
+              >
+              <app-input-field
+                id="sec-draft-name"
+                placeholder="Título de la sección"
+                className="!rounded-lg !border-gray-200 !bg-gray-50 dark:!border-gray-700 dark:!bg-gray-900/40"
+                [value]="sectionDraftName()"
+                (valueChange)="sectionDraftName.set(asString($event))"
+              />
+            </div>
+            <div class="rounded-lg border-l-4 border-brand-500 bg-brand-25 p-5 dark:border-brand-400 dark:bg-brand-950/30">
+              <p class="text-sm italic text-brand-900 dark:text-brand-100/90">
+                Define nombres claros para cada segmento. Facilita localizar los datos en el documento generado.
+              </p>
+            </div>
+          </div>
+          <div class="space-y-2 md:col-span-8">
+            <app-label for="sec-draft-inst" className="!mb-2 !text-xs !font-bold !uppercase !tracking-wider !text-gray-600 dark:!text-gray-400"
+              >Instrucciones de llenado</app-label
+            >
+            <app-text-area
+              id="sec-draft-inst"
+              [rows]="5"
+              placeholder="Indica cómo debe completar esta sección quien llena el trámite…"
+              className="!rounded-lg !border-gray-200 !bg-gray-50 dark:!border-gray-700 dark:!bg-gray-900/40"
+              [value]="sectionDraftInstructions()"
+              (valueChange)="sectionDraftInstructions.set($event)"
+            />
+            <div class="mt-2 flex flex-wrap justify-end gap-2">
+              <p-button
+                type="button"
+                label="Guardar"
+                icon="pi pi-check"
+                size="small"
+                severity="primary"
+                [disabled]="submitting()"
+                (onClick)="saveSectionDraft()"
+              />
+              <p-button
+                type="button"
+                label="Limpiar"
+                icon="pi pi-refresh"
+                size="small"
+                severity="secondary"
+                [outlined]="true"
+                [disabled]="submitting()"
+                (onClick)="clearSectionDraft()"
+              />
+            </div>
+          </div>
+        </div>
+
+        @if (sectionDraftError()) {
+          <p class="mt-4 text-sm text-error-600 dark:text-error-400" role="alert">{{ sectionDraftError() }}</p>
+        }
+
+        <div class="mt-10 space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-2 px-1">
+            <h3 class="text-xs font-bold uppercase tracking-widest text-gray-600 dark:text-gray-400">
+              Índice de secciones
+            </h3>
+          </div>
+          <div
+            class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-theme-sm dark:border-gray-800 dark:bg-white/[0.02]"
+          >
+            <div class="overflow-x-auto">
+              <table class="doc-template-sections-table w-full border-collapse text-left text-sm">
+                <thead>
+                  <tr>
+                    <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider">Nombre</th>
+                    <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider">Descripción</th>
+                    <th class="min-w-[5.5rem] px-2 py-4 text-right text-xs font-bold uppercase tracking-wider">
+                      Acciones
+                    </th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
+                  @if (sections.length === 0) {
+                    <tr>
+                      <td colspan="3" class="px-6 py-10 text-center text-gray-500 dark:text-gray-400">
+                        No se encontró información con los parámetros seleccionados
+                      </td>
+                    </tr>
+                  } @else {
+                    @for (ctrl of sections.controls; track $index; let i = $index) {
+                      <tr
+                        class="cursor-pointer transition-colors hover:bg-gray-50 dark:hover:bg-gray-800/50"
+                        [class.doc-section-row-selected]="selectedSectionIndexForFields() === i"
+                        (click)="onSectionTableRowClick(i)"
+                      >
+                        <td class="px-6 py-4">
+                          <div class="flex items-center gap-3">
+                            <span class="h-2 w-2 shrink-0 rounded-full bg-brand-500"></span>
+                            <span class="font-semibold text-gray-900 dark:text-white">{{
+                              ctrl.get('name')?.value || '—'
+                            }}</span>
+                          </div>
+                        </td>
+                        <td class="px-6 py-4 text-gray-600 dark:text-gray-400">
+                          {{ ctrl.get('fill_instructions')?.value || '—' }}
+                        </td>
+                        <td class="px-4 py-4 text-right" (click)="$event.stopPropagation()">
+                          <div class="inline-flex items-center justify-end gap-1">
+                            <p-button
+                              type="button"
+                              icon="pi pi-pencil"
+                              severity="secondary"
+                              [text]="true"
+                              [rounded]="true"
+                              size="small"
+                              aria-label="Editar sección"
+                              [disabled]="submitting()"
+                              (onClick)="openSectionDataModal(i, $event)"
+                            />
+                            <p-button
+                              type="button"
+                              icon="pi pi-trash"
+                              severity="danger"
+                              [text]="true"
+                              [rounded]="true"
+                              size="small"
+                              aria-label="Eliminar sección"
+                              [disabled]="submitting()"
+                              (onClick)="deleteSectionRow(i, $event)"
+                            />
+                          </div>
+                        </td>
+                      </tr>
+                    }
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="doc-template-form-actions">
+        <hr class="doc-template-form-actions-divider" />
+        <div class="doc-template-form-actions-row">
+          <p-button
+            type="submit"
+            [label]="saveButtonLabel()"
+            icon="pi pi-check"
+            size="small"
+            severity="primary"
+            [disabled]="submitting()"
+          />
+          <p-button
+            type="button"
+            label="Cancelar"
+            icon="pi pi-times"
+            size="small"
+            severity="secondary"
+            [outlined]="true"
+            [disabled]="submitting()"
+            routerLink="/catalog/document-templates"
+          />
+        </div>
+      </div>
+
+      @if (submitError()) {
+        <div
+          class="rounded-xl border border-error-200 bg-error-50 px-4 py-3 text-sm text-error-700 dark:border-error-500/30 dark:bg-error-500/10 dark:text-error-400"
+          role="alert"
+        >
+          {{ submitError() }}
+        </div>
+      }
+
+      <p-dialog
+        [header]="sectionDataModalTitle()"
+        [visible]="sectionDataModalOpen()"
+        (visibleChange)="onSectionDataModalVisibleChange($event)"
+        [modal]="true"
+        [closable]="true"
+        [draggable]="false"
+        [dismissableMask]="true"
+        [style]="{ width: 'min(36rem, 95vw)' }"
+        styleClass="document-template-section-data-dialog"
+        appendTo="body"
+      >
+        @let modalIdx = sectionDataModalIndex();
+        @if (modalIdx !== null) {
+          <div [formGroup]="form" class="space-y-4">
+            <p class="text-xs text-gray-500 dark:text-gray-400">
+              La clave debe coincidir con el texto entre corchetes en el .docx (p. ej.
+              <code class="text-xs">[nombreespecie]</code>).
+            </p>
+
+            <div
+              class="rounded-lg border border-gray-200 bg-gray-50/80 p-4 dark:border-gray-700 dark:bg-gray-900/30"
+            >
+              <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div>
+                  <app-label
+                    for="sec-data-draft-key"
+                    className="!mb-2 !text-xs !font-bold !uppercase !tracking-wider !text-gray-600 dark:!text-gray-400"
+                    >Clave (marcador)</app-label
+                  >
+                  <app-input-field
+                    id="sec-data-draft-key"
+                    placeholder="[nombreespecie]"
+                    className="!rounded-lg !border-gray-200 !bg-white dark:!border-gray-700 dark:!bg-gray-900/40"
+                    [disabled]="submitting()"
+                    [value]="sectionDataFieldDraftKey()"
+                    (valueChange)="sectionDataFieldDraftKey.set(normalizeMergeKeyInput($event))"
+                  />
+                </div>
+                <div>
+                  <app-label
+                    for="sec-data-draft-desc"
+                    className="!mb-2 !text-xs !font-bold !uppercase !tracking-wider !text-gray-600 dark:!text-gray-400"
+                    >Descripción</app-label
+                  >
+                  <app-input-field
+                    id="sec-data-draft-desc"
+                    placeholder="Ej. nombre común"
+                    className="!rounded-lg !border-gray-200 !bg-white dark:!border-gray-700 dark:!bg-gray-900/40"
+                    [disabled]="submitting()"
+                    [value]="sectionDataFieldDraftDesc()"
+                    (valueChange)="sectionDataFieldDraftDesc.set(asString($event))"
+                  />
+                </div>
+              </div>
+              <div class="mt-4 flex flex-wrap justify-end gap-2">
+                <p-button
+                  type="button"
+                  label="Guardar"
+                  icon="pi pi-check"
+                  size="small"
+                  severity="primary"
+                  [disabled]="submitting()"
+                  (onClick)="saveSectionDataFieldDraft()"
+                />
+                <p-button
+                  type="button"
+                  label="Limpiar"
+                  icon="pi pi-refresh"
+                  size="small"
+                  severity="secondary"
+                  [outlined]="true"
+                  [disabled]="submitting()"
+                  (onClick)="clearSectionDataFieldDraft()"
+                />
+              </div>
+            </div>
+            @if (sectionDataFieldDraftError()) {
+              <p class="text-sm text-error-600 dark:text-error-400" role="alert">
+                {{ sectionDataFieldDraftError() }}
+              </p>
+            }
+
+            <div formArrayName="sections">
+              <div [formGroupName]="modalIdx">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                  <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Marcadores</span>
+                  <p-button
+                    type="button"
+                    label="Añadir dato"
+                    icon="pi pi-plus"
+                    size="small"
+                    severity="secondary"
+                    [outlined]="true"
+                    [disabled]="submitting()"
+                    (onClick)="addFieldToModalSection()"
+                  />
+                </div>
+                <div class="mt-4 overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.02]">
+                  <div class="max-h-[50vh] overflow-auto">
+                    <table class="w-full border-collapse text-left text-sm">
+                      <thead>
+                        <tr class="bg-gray-50 text-gray-600 dark:bg-gray-900/40 dark:text-gray-300">
+                          <th class="px-4 py-3 text-xs font-bold uppercase tracking-wider">Clave</th>
+                          <th class="px-4 py-3 text-xs font-bold uppercase tracking-wider">Descripción</th>
+                          <th class="w-14 px-2 py-3 text-right text-xs font-bold uppercase tracking-wider">Acciones</th>
+                        </tr>
+                      </thead>
+                      <tbody class="divide-y divide-gray-100 dark:divide-gray-800" formArrayName="fields">
+                        @for (fCtrl of sectionFields(modalIdx).controls; track $index; let j = $index) {
+                          <tr [formGroupName]="j" class="align-top">
+                            <td class="px-4 py-3">
+                              <app-input-field
+                                [id]="'fld-key-modal-' + modalIdx + '-' + j"
+                                placeholder="[nombreespecie]"
+                                className="!rounded-lg"
+                                [value]="(fCtrl.get('merge_key')?.value ?? '')"
+                                (valueChange)="fCtrl.get('merge_key')!.setValue(normalizeMergeKeyInput($event))"
+                              />
+                            </td>
+                            <td class="px-4 py-3">
+                              <app-input-field
+                                [id]="'fld-desc-modal-' + modalIdx + '-' + j"
+                                placeholder="Ej. nombre común"
+                                className="!rounded-lg"
+                                [value]="(fCtrl.get('description')?.value ?? '')"
+                                (valueChange)="fCtrl.get('description')!.setValue(asString($event))"
+                              />
+                            </td>
+                            <td class="px-2 py-3 text-right">
+                              <p-button
+                                type="button"
+                                icon="pi pi-trash"
+                                severity="danger"
+                                [text]="true"
+                                [rounded]="true"
+                                size="small"
+                                aria-label="Eliminar dato"
+                                [disabled]="submitting()"
+                                (onClick)="removeFieldFromModalSection(j)"
+                              />
+                            </td>
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+                @if (sectionFields(modalIdx).length === 0) {
+                  <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                    Sin datos en esta sección. Usa «Añadir dato».
+                  </p>
+                }
+              </div>
+            </div>
+          </div>
+        }
+        <ng-template pTemplate="footer">
+          <p-button
+            type="button"
+            label="Cerrar"
+            severity="secondary"
+            [outlined]="true"
+            (onClick)="closeSectionDataModal()"
+          />
+        </ng-template>
+      </p-dialog>
+    </form>
+  }
+</div>

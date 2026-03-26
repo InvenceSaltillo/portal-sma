@@ -5,7 +5,7 @@
       [position]="'top'"
       [title]="'Requisitos'"
       [id]="'requirements-section'"
-      [text]="'Debe subir todos los requisitos en Formato PDF para realizar la solicitud de Trámite.'"
+      [text]="'Cada requisito indica los formatos aceptados (PDF, imagen, SHP/Excel, etc.). Respete el tipo indicado en cada ítem.'"
     />
   </div>
 
@@ -15,7 +15,7 @@
       <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
     </svg>
     <p class="text-sm text-blue-800">
-      Debe subir todos los requisitos en <span class="font-semibold">Formato PDF</span> para realizar la solicitud de Trámite.
+      Revise cada requisito: pueden pedirse <span class="font-semibold">PDF</span>, <span class="font-semibold">imagen</span> o <span class="font-semibold">SHP / Excel</span>, según corresponda al trámite.
       <svg class="inline-block h-4 w-4 ml-1" viewBox="0 0 24 24" fill="currentColor">
         <path d="M14 2H6a2 2 0 0 0-2 2v16c0 1.1.9 2 2 2h12a2 2 0 0 0 2-2V8l-6-6Z"/>
       </svg>
@@ -29,6 +29,7 @@
       [controlName]="requirement.controlName"
       [title]="requirement.title"
       [legalReference]="requirement.legalReference"
+      [accept]="requirement.accept ?? 'application/pdf'"
       [maxSizeMB]="maxSizeMB"
     />
   }

@@ -12,6 +12,7 @@ import { AddressContactSectionComponent } from '../../../../shared/sections/addr
 import { NotificationAddressContactSectionComponent } from '../../../../shared/sections/notification-address-contact-section/notification-address-contact-section.component';
 import { ModificationInfoSectionComponent } from '../../../../shared/sections/modification-info-section/modification-info-section.component';
 import { AttachedDocumentationSectionComponent, DocumentationItem } from '../../../../shared/sections/attached-documentation-section/attached-documentation-section.component';
+import { REQUIREMENT_ACCEPT_SHP_EXCEL } from '../../../../shared/constants/requirement-file-accept';
 import { RequirementsSectionComponent, Requirement } from '../../../../shared/sections/requirements-section/requirements-section.component';
 import { SignatureSectionComponent, Signature } from '../../../../shared/sections/signature-section/signature-section.component';
 import { PrivacyAcceptanceSectionComponent } from '../../../../shared/sections/privacy-acceptance-section/privacy-acceptance-section.component';
@@ -261,6 +262,7 @@ export default class ModificacionUmmaComponent implements OnInit {
         'Archivo .SHP o Excel (cuando se trate de un registro de UMA o modificación en la superficie)',
       legalReference:
         'Artículos 29 y 79 del Reglamento de la Ley General de Vida Silvestre, publicado en el DOF el 30 de noviembre de 2006.',
+      accept: REQUIREMENT_ACCEPT_SHP_EXCEL,
     },
     {
       controlName: 'official_id_document',

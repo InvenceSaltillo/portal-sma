@@ -2,6 +2,32 @@ import { Component, Input, OnInit, OnDestroy, ViewChild, ElementRef } from '@ang
 import { CommonModule } from '@angular/common';
 import { FormGroup, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 
+/** Comprueba si el archivo cumple la lista `accept` (tipos MIME, wildcard tipo image/* y extensiones .ext). */
+export function fileMatchesAcceptList(file: File, acceptStr: string): boolean {
+  const tokens = acceptStr
+    .split(',')
+    .map((t) => t.trim())
+    .filter(Boolean);
+  if (tokens.length === 0) return false;
+  const name = file.name.toLowerCase();
+  const mime = file.type.toLowerCase();
+  for (const raw of tokens) {
+    const token = raw.trim();
+    if (!token) continue;
+    if (token.startsWith('.')) {
+      if (name.endsWith(token.toLowerCase())) return true;
+      continue;
+    }
+    if (token.endsWith('/*')) {
+      const base = token.slice(0, -1).toLowerCase();
+      if (mime.startsWith(base)) return true;
+      continue;
+    }
+    if (mime === token.toLowerCase()) return true;
+  }
+  return false;
+}
+
 @Component({
   selector: 'app-requirement-item',
   standalone: true,
@@ -15,6 +41,8 @@ export class RequirementItemComponent implements OnInit, OnDestroy {
   @Input({ required: true }) title!: string;
   @Input({ required: true }) legalReference!: string;
   @Input() maxSizeMB: number = 10;
+  /** Lista `accept` HTML (coma-separada), ej. `application/pdf` o extensiones + MIME. */
+  @Input() accept: string = 'application/pdf';
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
 
   isDragging = false;
@@ -85,13 +113,12 @@ export class RequirementItemComponent implements OnInit, OnDestroy {
   }
 
   private handleFiles(files: File[]): void {
-    const accept = ['application/pdf'];
     const maxBytes = this.maxSizeMB * 1024 * 1024;
 
     const file = files[0]; // Solo un archivo
     if (!file) return;
 
-    const okType = accept.includes(file.type);
+    const okType = fileMatchesAcceptList(file, this.accept);
     const okSize = file.size <= maxBytes;
 
     if (!okType) {

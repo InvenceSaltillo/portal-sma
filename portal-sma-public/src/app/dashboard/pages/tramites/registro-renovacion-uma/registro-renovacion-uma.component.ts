@@ -15,6 +15,7 @@ import { AddressContactSectionComponent } from '../../../../shared/sections/addr
 import { NotificationAddressContactSectionComponent } from '../../../../shared/sections/notification-address-contact-section/notification-address-contact-section.component';
 import { SignatureSectionComponent, Signature } from '../../../../shared/sections/signature-section/signature-section.component';
 import { SignatureItemComponent } from '../../../../shared/sections/signature-item/signature-item.component';
+import { REQUIREMENT_ACCEPT_SHP_EXCEL } from '../../../../shared/constants/requirement-file-accept';
 import { RequirementsSectionComponent, Requirement } from '../../../../shared/sections/requirements-section/requirements-section.component';
 import { PrivacyAcceptanceSectionComponent } from '../../../../shared/sections/privacy-acceptance-section/privacy-acceptance-section.component';
 import { SupabaseService } from '../../../../services/supabase.service';
@@ -334,6 +335,7 @@ export default class RegistroRenovacionUmaComponent implements OnInit {
       title: 'Archivo .SHP o Excel (Cuando se trate de un Registro de UMA o Modificación en la Superficie)',
       legalReference:
         'Artículo 30, Fracción III, Reglamento de la Ley General de Vida Silvestre, publicado en el DOF el 30 de noviembre de 2006.',
+      accept: REQUIREMENT_ACCEPT_SHP_EXCEL,
     },
     {
       controlName: 'documentacion_renovacion',

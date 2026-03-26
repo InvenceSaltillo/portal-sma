@@ -1,10 +1,56 @@
 <div
   class="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03]"
 >
-  <h1 class="text-2xl font-semibold text-gray-800 dark:text-white/90">
-    Tipo de Documento Legal
-  </h1>
-  <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
-    Clasificación de documentos legales utilizados en trámites.
-  </p>
+  <div
+    class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between"
+  >
+    <div>
+      <h1 class="text-2xl font-semibold text-gray-800 dark:text-white/90">
+        Tipo de Documento Legal
+      </h1>
+      <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+        Catálogo de tipos de documento legal
+      </p>
+    </div>
+    <div class="flex flex-wrap items-center gap-2 shrink-0">
+      <p-button
+        type="button"
+        label="Nuevo"
+        icon="pi pi-plus"
+        styleClass="shrink-0"
+        routerLink="/catalog/legal-document-types/new"
+      />
+      <p-button
+        type="button"
+        label="Actualizar"
+        icon="pi pi-refresh"
+        [loading]="loading()"
+        [disabled]="loading()"
+        severity="secondary"
+        [outlined]="true"
+        styleClass="shrink-0"
+        (onClick)="refresh()"
+      />
+    </div>
+  </div>
+
+  @if (loadError(); as err) {
+    <div
+      class="mt-4 rounded-lg border border-error-200 bg-error-50 px-4 py-3 text-sm text-error-700 dark:border-error-500/30 dark:bg-error-500/10 dark:text-error-400"
+      role="alert"
+    >
+      {{ err }}
+    </div>
+  }
+
+  <div class="mt-8 w-full min-w-0">
+    <app-data-table
+      [columns]="docTypeColumns"
+      [value]="docTypeRows()"
+      [loading]="loading()"
+      [rowActions]="docTypeRowActions"
+    />
+  </div>
+
+  <p-confirmDialog appendTo="body" />
 </div>

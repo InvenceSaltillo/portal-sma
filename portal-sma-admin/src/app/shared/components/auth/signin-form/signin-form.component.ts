@@ -24,8 +24,8 @@ export class SigninFormComponent {
   showPassword = false;
   isChecked = false;
 
-  email = '';
-  password = '';
+  email = 'riojasmx@gmail.com';
+  password = '12345678';
   errorMessage = '';
   emailError = '';
   passwordError = '';

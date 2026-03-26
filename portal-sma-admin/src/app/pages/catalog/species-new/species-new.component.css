@@ -1,0 +1,7 @@
+.species-aprovechamiento-section {
+  background-color: rgb(255 255 255 / 0.9);
+}
+
+:host-context(.dark) .species-aprovechamiento-section {
+  background-color: rgb(17 24 39 / 0.4);
+}

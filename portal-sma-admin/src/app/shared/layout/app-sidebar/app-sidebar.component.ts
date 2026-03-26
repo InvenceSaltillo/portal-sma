@@ -48,7 +48,7 @@ export class AppSidebarComponent {
         { name: "Requisitos", path: "/catalog/requirements" },
         { name: "Trámites", path: "/catalog/procedures" },
         { name: "Temas de Plan de Manejo", path: "/catalog/management-plan-topics" },
-        { name: "Subtema de Plan de Manejo", path: "/catalog/management-plan-subtopics" },
+        { name: "Subtemas de Plan de Manejo", path: "/catalog/management-plan-subtopics" },
         { name: "Régimen de Propiedad", path: "/catalog/property-regimes" },
         { name: "Tipo de Tenencia", path: "/catalog/tenure-types" },
         { name: "Tipo de Documento Legal", path: "/catalog/legal-document-types" },

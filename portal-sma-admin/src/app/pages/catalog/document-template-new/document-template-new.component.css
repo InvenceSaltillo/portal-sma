@@ -1,0 +1,133 @@
+/* Tabla de secciones: encabezado suave (tokens portal-sma-admin) */
+.doc-template-sections-table thead tr {
+  background-color: #f2f4f7;
+  color: #475467;
+}
+
+html.dark .doc-template-sections-table thead tr {
+  background-color: #1d2939;
+  color: #98a2b3;
+}
+
+.doc-template-sections-table tbody tr.doc-section-row-selected {
+  background-color: #ecf7f3;
+}
+
+html.dark .doc-template-sections-table tbody tr.doc-section-row-selected {
+  background-color: rgba(0, 34, 26, 0.45);
+}
+
+/* Spinner visible en overlay de guardado */
+:host ::ng-deep .doc-template-submit-overlay .p-progress-spinner {
+  color: var(--color-brand-600) !important;
+}
+
+html.dark :host ::ng-deep .doc-template-submit-overlay .p-progress-spinner {
+  color: var(--color-brand-300) !important;
+}
+
+:host ::ng-deep .doc-template-submit-overlay .p-progress-spinner svg {
+  display: block;
+}
+
+:host ::ng-deep .doc-template-submit-overlay .p-progress-spinner-circle {
+  stroke: currentColor !important;
+  fill: none !important;
+  /* PrimeNG anima el color del stroke; aquí lo fijamos para que no se "pierda" */
+  animation: p-progressspinner-dash 1.5s ease-in-out infinite !important;
+}
+
+/* Barra final móvil */
+.doc-template-form-actions {
+  margin-top: 2rem;
+  padding-top: 1rem;
+}
+
+.doc-template-form-actions-divider {
+  height: 2px;
+  width: 100%;
+  margin-bottom: 1rem;
+  background-color: #3dad7e;
+  border: none;
+}
+
+.doc-template-form-actions-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+:host ::ng-deep .doc-template-btn-guardar.p-button {
+  min-width: 6.5rem;
+  color: #ffffff !important;
+  background: #00422d !important;
+  border: 2px solid #7cc8a8 !important;
+  border-radius: 3px;
+  font-weight: 600;
+}
+
+:host ::ng-deep .doc-template-btn-guardar.p-button:not(:disabled):hover {
+  background: #005238 !important;
+  border-color: #b0dfcb !important;
+}
+
+:host ::ng-deep .doc-template-btn-guardar.p-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+:host ::ng-deep .doc-template-btn-cancelar.p-button {
+  min-width: 6.5rem;
+  color: #ffffff !important;
+  background: #dc6803 !important;
+  border: 1px solid #1d2939 !important;
+  border-radius: 3px;
+  font-weight: 600;
+}
+
+:host ::ng-deep .doc-template-btn-cancelar.p-button:not(:disabled):hover {
+  background: #b54708 !important;
+}
+
+:host ::ng-deep .doc-template-btn-cancelar.p-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* Columna derecha (desktop): primario proyecto */
+:host ::ng-deep .doc-template-btn-guardar-lg.p-button {
+  color: #ffffff !important;
+  background: #005238 !important;
+  border: none !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 99, 65, 0.25);
+}
+
+:host ::ng-deep .doc-template-btn-guardar-lg.p-button:not(:disabled):hover {
+  background: #006341 !important;
+  filter: brightness(1.05);
+}
+
+:host ::ng-deep .doc-template-btn-guardar-lg.p-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+:host ::ng-deep .doc-template-btn-cancelar-lg.p-button {
+  color: #475467 !important;
+  background: transparent !important;
+}
+
+:host ::ng-deep .doc-template-btn-cancelar-lg.p-button:not(:disabled):hover {
+  color: #101828 !important;
+  background: #f2f4f7 !important;
+}
+
+html.dark :host ::ng-deep .doc-template-btn-cancelar-lg.p-button {
+  color: #98a2b3 !important;
+}
+
+html.dark :host ::ng-deep .doc-template-btn-cancelar-lg.p-button:not(:disabled):hover {
+  color: #ffffff !important;
+  background: #1d2939 !important;
+}

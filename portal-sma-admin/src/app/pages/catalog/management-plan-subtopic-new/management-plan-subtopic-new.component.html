@@ -1,0 +1,174 @@
+<div
+  class="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03]"
+>
+  <div
+    class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between"
+  >
+    <div>
+      <h1 class="text-2xl font-semibold text-gray-800 dark:text-white/90">
+        {{ pageTitle() }}
+      </h1>
+      <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+        {{ pageSubtitle() }}
+      </p>
+    </div>
+    <p-button
+      type="button"
+      label="Volver al listado"
+      icon="pi pi-arrow-left"
+      severity="secondary"
+      [outlined]="true"
+      styleClass="shrink-0"
+      routerLink="/catalog/management-plan-subtopics"
+    />
+  </div>
+
+  @if (!clientId) {
+    <div
+      class="mt-8 rounded-lg border border-error-200 bg-error-50 px-4 py-3 text-sm text-error-700 dark:border-error-500/30 dark:bg-error-500/10 dark:text-error-400"
+      role="alert"
+    >
+      No se encontró el cliente asociado a tu usuario. Vuelve a iniciar sesión o
+      contacta al administrador.
+    </div>
+  } @else if (recordLoading()) {
+    <div
+      class="mt-12 flex flex-col items-center justify-center gap-4 text-sm text-gray-500 dark:text-gray-400"
+    >
+      <p-progressSpinner
+        strokeWidth="4"
+        styleClass="size-12"
+        ariaLabel="Cargando"
+      />
+      <span>Cargando datos…</span>
+    </div>
+  } @else if (editLoadError()) {
+    <div
+      class="mt-8 rounded-lg border border-error-200 bg-error-50 px-4 py-3 text-sm text-error-700 dark:border-error-500/30 dark:bg-error-500/10 dark:text-error-400"
+      role="alert"
+    >
+      {{ editLoadError() }}
+    </div>
+  } @else if (formUiReady()) {
+    @if (topicsLoadError()) {
+      <div
+        class="mt-6 rounded-lg border border-warning-200 bg-warning-50 px-4 py-3 text-sm text-warning-800 dark:border-warning-500/30 dark:bg-warning-500/10 dark:text-warning-200"
+        role="status"
+      >
+        {{ topicsLoadError() }}
+      </div>
+    }
+
+    @if (submitError()) {
+      <div
+        class="mt-6 rounded-lg border border-error-200 bg-error-50 px-4 py-3 text-sm text-error-700 dark:border-error-500/30 dark:bg-error-500/10 dark:text-error-400"
+        role="alert"
+      >
+        {{ submitError() }}
+      </div>
+    }
+
+    @if (topicsEmpty() && !isEditMode()) {
+      <div
+        class="mt-6 rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-700 dark:border-gray-700 dark:bg-gray-900/40 dark:text-gray-300"
+        role="status"
+      >
+        No hay temas de plan de manejo registrados.
+        <a
+          routerLink="/catalog/management-plan-topics/new"
+          class="ml-1 font-medium text-brand-600 underline dark:text-brand-400"
+          >Crear un tema</a
+        >
+        antes de agregar subtemas.
+      </div>
+    }
+
+    <form
+      class="mt-8 max-w-xl space-y-6"
+      [formGroup]="form"
+      (ngSubmit)="onSubmit()"
+      novalidate
+    >
+      <div class="min-w-0">
+        <app-label for="mps-topic">
+          Tema <span class="text-error-500">*</span>
+        </app-label>
+        <p-select
+          inputId="mps-topic"
+          formControlName="topic_id"
+          [options]="topicOptions()"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="-- SELECCIONE --"
+          [showClear]="false"
+          appendTo="body"
+          styleClass="w-full min-w-0"
+          [class.p-invalid]="topicIdInvalid()"
+          [disabled]="submitting() || (topicsEmpty() && !isEditMode())"
+        />
+        @if (topicIdInvalid()) {
+          <p class="mt-1.5 text-xs text-error-500">Selecciona un tema.</p>
+        }
+      </div>
+
+      <div>
+        <app-label for="mps-orden">
+          Orden <span class="text-error-500">*</span>
+        </app-label>
+        <app-input-field
+          id="mps-orden"
+          name="orden"
+          type="number"
+          min="0"
+          [step]="1"
+          placeholder="0"
+          autocomplete="off"
+          [value]="ordenCtrl.value"
+          (valueChange)="onOrdenChange($event)"
+          [error]="ordenCtrl.invalid && ordenCtrl.touched"
+          [hint]="ordenHint()"
+        />
+        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+          Número de orden dentro del tema (debe ser único por tema).
+        </p>
+      </div>
+
+      <div>
+        <app-label for="mps-descripcion">
+          Descripción <span class="text-error-500">*</span>
+        </app-label>
+        <app-text-area
+          id="mps-descripcion"
+          placeholder="Describe el subtema…"
+          [rows]="4"
+          [hint]="descripcionHint()"
+          [error]="descripcionCtrl.invalid && descripcionCtrl.touched"
+          [value]="descripcionCtrl.value"
+          (valueChange)="onDescripcionChange($event)"
+        />
+        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+          Obligatoria. Hasta {{ descMaxLength }} caracteres.
+        </p>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-3 pt-2">
+        <p-button
+          type="submit"
+          [label]="saveButtonLabel()"
+          icon="pi pi-check"
+          [loading]="submitting()"
+          [disabled]="submitting() || (topicsEmpty() && !isEditMode())"
+        />
+        <p-button
+          type="button"
+          label="Cancelar"
+          icon="pi pi-times"
+          severity="secondary"
+          [outlined]="true"
+          [disabled]="submitting()"
+          routerLink="/catalog/management-plan-subtopics"
+        />
+      </div>
+    </form>
+  }
+</div>

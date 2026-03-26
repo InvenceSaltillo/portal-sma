@@ -1,6 +1,8 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
+import { ConfirmationService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import {
   DataTableComponent,
   type DataTableColumn,
@@ -20,14 +22,16 @@ import {
 @Component({
   selector: 'app-procedure-type',
   standalone: true,
-  imports: [DataTableComponent, ButtonModule, RouterLink],
+  imports: [DataTableComponent, ButtonModule, RouterLink, ConfirmDialogModule],
   templateUrl: './procedure-type.component.html',
   styleUrl: './procedure-type.component.css',
+  providers: [ConfirmationService],
 })
 export class ProcedureTypeComponent implements OnInit {
   private readonly serviceTypesApi = inject(ServiceTypesService);
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly confirmationService = inject(ConfirmationService);
 
   /** Menú de acciones por fila (columna opcional en `app-data-table`). */
   readonly procedureTypeRowActions: DataTableRowAction[] = [
@@ -43,6 +47,14 @@ export class ProcedureTypeComponent implements OnInit {
             'edit',
           ]);
         }
+      },
+    },
+    {
+      label: 'Eliminar',
+      icon: 'pi pi-trash',
+      severity: 'danger',
+      command: (row: Record<string, unknown>) => {
+        this.requestDeleteProcedureType(row);
       },
     },
   ];
@@ -104,6 +116,49 @@ export class ProcedureTypeComponent implements OnInit {
     await this.loadServiceTypes();
   }
 
+  private requestDeleteProcedureType(row: Record<string, unknown>): void {
+    const id = row['id'];
+    const name = String(row['name'] ?? '').trim() || '(sin nombre)';
+    if (id == null || id === '') {
+      return;
+    }
+
+    this.confirmationService.confirm({
+      message: `¿Eliminar el tipo de trámite «${name}»? Esta acción no se puede deshacer.`,
+      header: 'Confirmar eliminación',
+      icon: 'pi pi-exclamation-triangle',
+      acceptLabel: 'Eliminar',
+      rejectLabel: 'Cancelar',
+      acceptButtonStyleClass: 'p-button-danger',
+      rejectButtonStyleClass: 'p-button-secondary',
+      accept: () => {
+        void this.deleteProcedureType(String(id));
+      },
+    });
+  }
+
+  private async deleteProcedureType(id: string): Promise<void> {
+    const clientId = this.auth.currentUser()?.client_id;
+    if (!clientId) {
+      this.loadError.set(
+        'No se encontró el cliente asociado a tu usuario. No se puede eliminar.'
+      );
+      return;
+    }
+
+    this.loadError.set(null);
+    this.loading.set(true);
+    const { error } = await this.serviceTypesApi.deleteForClient(id, clientId);
+    this.loading.set(false);
+
+    if (error) {
+      this.loadError.set(mapDeleteError(error));
+      return;
+    }
+
+    await this.loadServiceTypes();
+  }
+
   private async loadServiceTypes(): Promise<void> {
     this.loadError.set(null);
     const user = this.auth.currentUser();
@@ -152,4 +207,21 @@ function mapSupabaseListError(err: { message?: string; code?: string }): string 
     return 'No tienes permiso para ver los tipos de trámite.';
   }
   return err.message || 'No se pudo cargar el catálogo.';
+}
+
+function mapDeleteError(err: { message?: string; code?: string }): string {
+  const msg = (err.message ?? '').toLowerCase();
+  const code = err.code ?? '';
+
+  if (msg.includes('permission denied') || msg.includes('rls')) {
+    return 'No tienes permiso para eliminar este tipo de trámite.';
+  }
+  if (
+    code === '23503' ||
+    msg.includes('foreign key') ||
+    msg.includes('violates foreign key')
+  ) {
+    return 'No se puede eliminar: hay trámites u otros datos que dependen de este tipo.';
+  }
+  return err.message || 'No se pudo eliminar el registro.';
 }

@@ -19,12 +19,49 @@ import storageRoutes from './routes/storage.js';
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+/** Orígenes permitidos en CORS (desarrollo: localhost y 127.0.0.1 suelen ser distintos para el navegador). */
+function parseCorsOrigins() {
+  const raw = process.env.CORS_ORIGIN;
+  if (raw && String(raw).trim()) {
+    return String(raw)
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean);
+  }
+  return [
+    'http://localhost:4200',
+    'http://127.0.0.1:4200',
+    'http://localhost:4300',
+    'http://127.0.0.1:4300',
+  ];
+}
+
+const allowedCorsOrigins = parseCorsOrigins();
+
 // Middleware de seguridad
-app.use(helmet());
-app.use(cors({
-  origin: process.env.CORS_ORIGIN || 'http://localhost:4200',
-  credentials: true
-}));
+// Sin cross-origin en CORP, el navegador puede bloquear la respuesta aunque CORS esté bien (Angular muestra status 0).
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+  })
+);
+app.use(
+  cors({
+    origin(origin, callback) {
+      if (!origin) {
+        return callback(null, true);
+      }
+      if (allowedCorsOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      console.warn(
+        `[CORS] Origen no permitido: ${origin}. Configura CORS_ORIGIN en .env (coma para varios). Permitidos: ${allowedCorsOrigins.join(', ')}`
+      );
+      callback(null, false);
+    },
+    credentials: true,
+  })
+);
 
 // Rate limiting
 const limiter = rateLimit({

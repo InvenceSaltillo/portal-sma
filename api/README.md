@@ -29,7 +29,11 @@ cp .env.example .env
 - `SUPABASE_URL`: URL de tu proyecto Supabase
 - `SUPABASE_ANON_KEY`: Clave anónima de Supabase
 - `PORT`: Puerto del servidor (default: 3000)
-- `CORS_ORIGIN`: Origen permitido para CORS (default: http://localhost:4200)
+- `CORS_ORIGIN`: Orígenes permitidos para CORS, **separados por coma** si hay varios.  
+  Si no defines la variable, por defecto se permiten `http://localhost:4200`, `http://127.0.0.1:4200`, `4300` (útil si el portal público usa otro puerto).  
+  **Importante:** `http://localhost:4200` y `http://127.0.0.1:4200` son orígenes distintos para el navegador; usa el mismo host con el que abras el front.
+
+Si ves en el navegador errores tipo **Http failure … status 0** al llamar a la API, suele ser CORS u orígenes distintos; revisa la consola del servidor (mensaje `[CORS]`) y ajusta `CORS_ORIGIN`.
 
 ## Ejecución
 

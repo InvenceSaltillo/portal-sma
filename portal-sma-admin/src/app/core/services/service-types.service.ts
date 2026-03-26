@@ -117,4 +117,20 @@ export class ServiceTypesService {
       error,
     };
   }
+
+  /**
+   * Elimina por `id` solo si el registro pertenece al `client_id` (RLS + doble filtro).
+   */
+  async deleteForClient(
+    id: string,
+    clientId: string
+  ): Promise<{ error: PostgrestError | null }> {
+    const { error } = await this.auth.client
+      .from('service_types')
+      .delete()
+      .eq('id', id)
+      .eq('client_id', clientId);
+
+    return { error };
+  }
 }

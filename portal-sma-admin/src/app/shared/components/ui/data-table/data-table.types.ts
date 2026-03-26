@@ -43,10 +43,27 @@ export interface DataTableColumnFilter {
  * Opción del menú de acciones por fila (`p-menu` popup).
  * El padre define el arreglo; `command` recibe la fila actual.
  */
+/** Tono visual del ítem en el menú (texto + icono). */
+export type DataTableRowActionSeverity =
+  | 'danger'
+  | 'warning'
+  | 'success'
+  | 'info';
+
 export interface DataTableRowAction {
   label: string;
   /** Clase PrimeIcons, p. ej. `pi pi-pencil`. */
   icon?: string;
+  /**
+   * Semántica de color (clases globales `dt-row-action-*` en `styles.css`;
+   * el menú suele renderizarse en `body`).
+   */
+  severity?: DataTableRowActionSeverity;
+  /**
+   * Clases extra en el `p-menuitem` (además de las de `severity`).
+   * Ej.: `!text-brand-600` con Tailwind.
+   */
+  styleClass?: string;
   /** Si devuelve `false`, la opción no se muestra para esa fila. */
   visible?: (row: Record<string, unknown>) => boolean;
   /** Si devuelve `true`, la opción aparece deshabilitada. */
