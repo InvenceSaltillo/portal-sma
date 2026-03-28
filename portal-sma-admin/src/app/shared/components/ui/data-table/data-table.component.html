@@ -1,10 +1,10 @@
 @if (showGlobalFilter) {
-  <div class="mb-3">
+  <div class="mb-3 w-full min-w-0">
     <label class="sr-only" for="data-table-global-filter">Buscar en la tabla</label>
     <input
       id="data-table-global-filter"
       type="search"
-      class="w-full min-w-0 max-w-md rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm placeholder:text-gray-400 focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 dark:placeholder:text-gray-500"
+      class="w-full min-w-0 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm placeholder:text-gray-400 focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 dark:placeholder:text-gray-500"
       [attr.placeholder]="globalFilterPlaceholder || defaultFilterPlaceholder"
       (input)="onGlobalFilterInput($event)"
       autocomplete="off"
@@ -54,6 +54,11 @@
           {{ rowNumberColumnHeader }}
         </th>
       }
+      @if (showActionsColumn) {
+        <th scope="col" class="w-px whitespace-nowrap text-center">
+          {{ actionsColumnHeader }}
+        </th>
+      }
       @if (showSelectionColumn) {
         <th
           scope="col"
@@ -82,26 +87,29 @@
       }
       @for (col of columns; track col.field) {
         @if (isColumnSortable(col)) {
-          <th [pSortableColumn]="sortKey(col)" scope="col" class="whitespace-nowrap">
+          <th
+            [pSortableColumn]="sortKey(col)"
+            scope="col"
+            class="whitespace-nowrap"
+            [ngClass]="col.headerClass"
+          >
             <div class="inline-flex items-center gap-2">
               {{ col.header }}
               <p-sortIcon [field]="sortKey(col)" />
             </div>
           </th>
         } @else {
-          <th scope="col">{{ col.header }}</th>
+          <th scope="col" [ngClass]="col.headerClass">{{ col.header }}</th>
         }
-      }
-      @if (showActionsColumn) {
-        <th scope="col" class="w-px whitespace-nowrap text-center">
-          {{ actionsColumnHeader }}
-        </th>
       }
     </tr>
     @if (showColumnFilterRow) {
       <tr class="data-table-filter-row">
         @if (showRowNumberColumn) {
           <th scope="col" class="w-12"></th>
+        }
+        @if (showActionsColumn) {
+          <th scope="col" class="w-px"></th>
         }
         @if (showSelectionColumn) {
           <th scope="col" class="w-[7.5rem]"></th>
@@ -110,7 +118,7 @@
           <th scope="col" class="w-[7.5rem]"></th>
         }
         @for (col of columns; track col.field) {
-          <th scope="col" class="align-top font-normal">
+          <th scope="col" class="min-w-0 align-top font-normal">
             @if (isColumnFilterable(col)) {
               @if (isSelectColumnFilter(col)) {
                 <p-columnFilter
@@ -160,9 +168,6 @@
             }
           </th>
         }
-        @if (showActionsColumn) {
-          <th scope="col" class="w-px"></th>
-        }
       </tr>
     }
   </ng-template>
@@ -178,6 +183,20 @@
           class="text-center align-middle text-sm tabular-nums text-gray-600 dark:text-gray-400"
         >
           {{ rowDisplayIndex(pTable, rowIndex) }}
+        </td>
+      }
+      @if (showActionsColumn) {
+        <td class="w-px text-center align-middle">
+          <p-button
+            type="button"
+            [icon]="actionsTriggerIcon"
+            [rounded]="true"
+            [text]="true"
+            severity="secondary"
+            [attr.aria-label]="actionsTriggerAriaLabel"
+            [title]="actionsTriggerAriaLabel"
+            (onClick)="openRowActionsMenu($event, row)"
+          />
         </td>
       }
       @if (showSelectionColumn) {
@@ -197,21 +216,7 @@
         </td>
       }
       @for (col of columns; track col.field) {
-        <td>{{ cellValue(row, col.field) }}</td>
-      }
-      @if (showActionsColumn) {
-        <td class="w-px text-center align-middle">
-          <p-button
-            type="button"
-            [icon]="actionsTriggerIcon"
-            [rounded]="true"
-            [text]="true"
-            severity="secondary"
-            [attr.aria-label]="actionsTriggerAriaLabel"
-            [title]="actionsTriggerAriaLabel"
-            (onClick)="openRowActionsMenu($event, row)"
-          />
-        </td>
+        <td [ngClass]="col.cellClass">{{ cellValue(row, col.field) }}</td>
       }
     </tr>
   </ng-template>
@@ -224,6 +229,11 @@
             <span class="text-xs tabular-nums text-gray-400">{{ $index + 1 }}</span>
           </td>
         }
+        @if (showActionsColumn) {
+          <td class="w-px text-center">
+            <p-skeleton width="2rem" height="2rem" borderRadius="9999px" />
+          </td>
+        }
         @if (showSelectionColumn) {
           <td class="w-[7.5rem]"></td>
         }
@@ -231,18 +241,13 @@
           <td class="w-[7.5rem]"></td>
         }
         @for (col of columns; track col.field) {
-          <td>
+          <td [ngClass]="col.cellClass">
             <p-skeleton
               height="0.85rem"
               [width]="skeletonWidth(col)"
               borderRadius="6px"
               styleClass="max-w-full"
             />
-          </td>
-        }
-        @if (showActionsColumn) {
-          <td class="w-px text-center">
-            <p-skeleton width="2rem" height="2rem" borderRadius="9999px" />
           </td>
         }
       </tr>

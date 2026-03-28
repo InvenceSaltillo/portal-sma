@@ -5,6 +5,7 @@
 const SERVICE_BASE_SELECT = `
         id,
         name,
+        legal_basis,
         description,
         notes,
         is_uma_related,

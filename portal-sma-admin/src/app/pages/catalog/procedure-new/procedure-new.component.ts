@@ -13,8 +13,16 @@ import {
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { map } from 'rxjs/operators';
 import { ButtonModule } from 'primeng/button';
+import { DatePicker } from 'primeng/datepicker';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { NgxSpinnerService } from 'ngx-spinner';
 import { SelectModule } from 'primeng/select';
+import { DocumentTemplatesService } from '../../../core/services/document-templates.service';
+import {
+  ServiceDocumentDetailsService,
+  type ServiceDocumentDetailLinkedRow,
+  type ServiceDocumentDetailType,
+} from '../../../core/services/service-document-details.service';
 import { AuthService } from '../../../core/auth/auth.service';
 import {
   ProceduresService,
@@ -34,6 +42,7 @@ import {
 import {
   dateForMexicoCalendarFilter,
   dbInstantToSortTimestamp,
+  formatDbDateMexico,
   formatDbDateTimeMexico,
 } from '../../../core/utils/db-datetime-mexico';
 import { InputFieldComponent } from '../../../shared/components/form/input/input-field.component';
@@ -41,11 +50,32 @@ import { LabelComponent } from '../../../shared/components/form/label/label.comp
 import { SwitchComponent } from '../../../shared/components/form/input/switch.component';
 
 const NAME_MAX = 255;
+const LEGAL_BASIS_MAX = 8000;
 const DESC_MAX = 4000;
 const NOTES_MAX = 4000;
 
 /** Campo en filas de la tabla de requisitos del trámite (checkbox Obligatorio). */
 const PROCEDURE_REQ_OBLIGATORIO_FIELD = '_obligatorio';
+
+/** Fila de la tabla «Detalles del trámite» (UI + persistencia). */
+export interface ProcedureDetailTableRow {
+  id: string;
+  document_template_id: string;
+  template_name: string;
+  detail_type: ServiceDocumentDetailType;
+  valid_from: string;
+  valid_to: string;
+}
+
+const PROCEDURE_DETAIL_TYPE_OPTIONS: {
+  label: string;
+  value: ServiceDocumentDetailType;
+}[] = [
+  { label: 'Car\u00e1tula', value: 'caratula' },
+  { label: 'Resolutivo aprobado', value: 'resolutivo_aprobado' },
+  { label: 'Resolutivo rechazado', value: 'resolutivo_rechazado' },
+  { label: 'Resolutivo suspendido', value: 'resolutivo_suspendido' },
+];
 
 const PROCEDURE_REQUIREMENT_TABLE_COLUMNS: DataTableColumn[] = [
   {
@@ -88,6 +118,7 @@ export interface ProcedureTypeOption {
     SwitchComponent,
     ProgressSpinnerModule,
     SelectModule,
+    DatePicker,
     DataTableComponent,
   ],
   templateUrl: './procedure-new.component.html',
@@ -99,12 +130,16 @@ export class ProcedureNewComponent {
   private readonly proceduresApi = inject(ProceduresService);
   private readonly serviceTypesApi = inject(ServiceTypesService);
   private readonly requirementsApi = inject(RequirementsService);
+  private readonly documentTemplatesApi = inject(DocumentTemplatesService);
+  private readonly serviceDocumentDetailsApi = inject(ServiceDocumentDetailsService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
+  private readonly spinner = inject(NgxSpinnerService);
 
   private routeHandleSeq = 0;
 
   readonly nameMaxLength = NAME_MAX;
+  readonly legalBasisMaxLength = LEGAL_BASIS_MAX;
   readonly descMaxLength = DESC_MAX;
   readonly notesMaxLength = NOTES_MAX;
 
@@ -117,6 +152,14 @@ export class ProcedureNewComponent {
         Validators.pattern(/\S/),
       ],
     ],
+    legal_basis: [
+      '',
+      [
+        Validators.required,
+        Validators.maxLength(LEGAL_BASIS_MAX),
+        Validators.pattern(/\S/),
+      ],
+    ],
     description: ['', [Validators.maxLength(DESC_MAX)]],
     notes: ['', [Validators.maxLength(NOTES_MAX)]],
     service_type_id: ['', Validators.required],
@@ -124,6 +167,16 @@ export class ProcedureNewComponent {
     uma_limit_scope: this.fb.control<UmaLimitScope | null>(null),
     is_active: this.fb.nonNullable.control(true),
   });
+
+  /** Borrador para agregar filas a «Detalles del trámite». */
+  readonly detailDraftForm = this.fb.group({
+    valid_from: this.fb.control<Date | null>(null),
+    valid_to: this.fb.control<Date | null>(null),
+    document_template_id: this.fb.control<string>(''),
+    detail_type: this.fb.control<ServiceDocumentDetailType | ''>(''),
+  });
+
+  readonly procedureDetailTypeOptions = PROCEDURE_DETAIL_TYPE_OPTIONS;
 
   readonly editId = signal<string | null>(null);
   readonly typeOptions = signal<ProcedureTypeOption[]>([]);
@@ -176,10 +229,10 @@ export class ProcedureNewComponent {
     const filtered = this.procedureRequirementRowsForTable().length;
     const q = this.requirementTitleSearch().trim();
     if (total === 0) {
-      return 'No hay requisitos en el catálogo de tu cliente. Crea entradas en Requisitos antes de asociarlas aqu?.';
+      return 'No hay requisitos en el cat\u00e1logo de tu cliente. Crea entradas en Requisitos antes de asociarlas aqu\u00ed.';
     }
     if (filtered === 0 && q !== '') {
-      return 'Ning?n requisito coincide con la b?squeda.';
+      return 'Ning\u00fan requisito coincide con la b\u00fasqueda.';
     }
     return 'No hay registros para mostrar.';
   });
@@ -207,6 +260,18 @@ export class ProcedureNewComponent {
   );
   readonly procedureRequirementsLoading = signal(false);
   readonly procedureRequirementsError = signal<string | null>(null);
+  /** Aviso si no se pudieron cargar vínculos guardados pero el catálogo sí está disponible. */
+  readonly procedureRequirementsLinkWarning = signal<string | null>(null);
+
+  readonly documentTemplateOptions = signal<{ label: string; value: string }[]>(
+    []
+  );
+  readonly procedureDetailRows = signal<ProcedureDetailTableRow[]>([]);
+  readonly procedureDocumentTemplatesError = signal<string | null>(null);
+  readonly procedureDocumentDetailsWarning = signal<string | null>(null);
+  readonly procedureDetailsLoading = signal(false);
+  /** Mensaje de validación al pulsar «Agregar» en detalles (no confundir con error de guardado). */
+  readonly procedureDetailDraftError = signal<string | null>(null);
 
   /** Nombre del campo de fila para el checkbox "Obligatorio" (template). */
   readonly procedureReqObligatorioField = PROCEDURE_REQ_OBLIGATORIO_FIELD;
@@ -253,6 +318,10 @@ export class ProcedureNewComponent {
 
   get nameCtrl() {
     return this.form.controls.name;
+  }
+
+  get legalBasisCtrl() {
+    return this.form.controls.legal_basis;
   }
 
   get descriptionCtrl() {
@@ -324,6 +393,7 @@ export class ProcedureNewComponent {
     this.formUiReady.set(false);
     this.form.reset({
       name: '',
+      legal_basis: '',
       description: '',
       notes: '',
       service_type_id: '',
@@ -332,6 +402,7 @@ export class ProcedureNewComponent {
       is_active: true,
     });
     this.syncUmaLimitScopeControl();
+    this.resetProcedureDetailsUi();
 
     const clientId = this.clientId;
     if (!clientId) {
@@ -340,6 +411,7 @@ export class ProcedureNewComponent {
         this.procedureRequirementRows.set([]);
         this.selectedProcedureRequirements.set([]);
         this.procedureRequirementsError.set(null);
+        this.procedureRequirementsLinkWarning.set(null);
         this.procedureRequirementsLoading.set(false);
       }
       return;
@@ -360,6 +432,7 @@ export class ProcedureNewComponent {
       );
       this.procedureRequirementRows.set([]);
       this.selectedProcedureRequirements.set([]);
+      this.procedureDetailRows.set([]);
       return;
     }
 
@@ -369,7 +442,7 @@ export class ProcedureNewComponent {
 
     if (id == null || id === '') {
       this.formUiReady.set(true);
-      void this.loadProcedureRequirementsPicker(clientId, null, seq);
+      void this.loadProcedureRequirementsAndDetails(clientId, null, seq);
       return;
     }
 
@@ -403,6 +476,7 @@ export class ProcedureNewComponent {
 
     this.form.patchValue({
       name: data.name,
+      legal_basis: data.legal_basis ?? '',
       description: data.description ?? '',
       notes: data.notes ?? '',
       service_type_id: data.service_type_id,
@@ -412,7 +486,215 @@ export class ProcedureNewComponent {
     });
     this.syncUmaLimitScopeControl();
     this.formUiReady.set(true);
-    void this.loadProcedureRequirementsPicker(clientId, id, seq);
+    void this.loadProcedureRequirementsAndDetails(clientId, id, seq);
+  }
+
+  private resetProcedureDetailsUi(): void {
+    this.detailDraftForm.reset({
+      valid_from: null,
+      valid_to: null,
+      document_template_id: '',
+      detail_type: '',
+    });
+    this.documentTemplateOptions.set([]);
+    this.procedureDetailRows.set([]);
+    this.procedureDocumentTemplatesError.set(null);
+    this.procedureDocumentDetailsWarning.set(null);
+    this.procedureDetailsLoading.set(false);
+    this.procedureDetailDraftError.set(null);
+  }
+
+  private async loadProcedureRequirementsAndDetails(
+    clientId: string,
+    serviceId: string | null,
+    seq: number
+  ): Promise<void> {
+    await Promise.all([
+      this.loadProcedureRequirementsPicker(clientId, serviceId, seq),
+      this.loadProcedureDetailsPanel(clientId, serviceId, seq),
+    ]);
+  }
+
+  private async loadProcedureDetailsPanel(
+    clientId: string,
+    serviceId: string | null,
+    seq: number
+  ): Promise<void> {
+    this.procedureDetailsLoading.set(true);
+    this.procedureDocumentTemplatesError.set(null);
+    this.procedureDocumentDetailsWarning.set(null);
+
+    const templatesPromise = this.documentTemplatesApi.listByClientId(clientId);
+    const detailsPromise =
+      serviceId != null && serviceId !== ''
+        ? this.serviceDocumentDetailsApi.listLinkedToService(serviceId)
+        : Promise.resolve({
+            data: [] as ServiceDocumentDetailLinkedRow[],
+            error: null,
+          });
+
+    const [tplRes, detRes] = await Promise.all([
+      templatesPromise,
+      detailsPromise,
+    ]);
+
+    if (seq !== this.routeHandleSeq) {
+      return;
+    }
+
+    this.procedureDetailsLoading.set(false);
+
+    if (tplRes.error) {
+      this.procedureDocumentTemplatesError.set(
+        mapDocumentTemplatesLoadError(tplRes.error)
+      );
+      this.documentTemplateOptions.set([]);
+      this.procedureDetailRows.set([]);
+      return;
+    }
+
+    this.documentTemplateOptions.set(
+      (tplRes.data ?? []).map((t) => ({ label: t.name, value: t.id }))
+    );
+
+    let detailRows = detRes.data ?? [];
+    if (serviceId && detRes.error) {
+      if (isRecoverableLinkedAssociationsLoadError(detRes.error)) {
+        this.procedureDocumentDetailsWarning.set(
+          'No se pudieron cargar los detalles guardados de este tr\u00e1mite. Puedes volver a definirlos y guardar.'
+        );
+        detailRows = [];
+      } else {
+        this.procedureDocumentTemplatesError.set(
+          mapProcedureDocumentDetailsLoadError(detRes.error)
+        );
+        this.procedureDetailRows.set([]);
+        return;
+      }
+    }
+
+    const mapped: ProcedureDetailTableRow[] = [];
+    for (const row of detailRows) {
+      const m = this.mapLinkedDetailToTableRow(row);
+      if (m) {
+        mapped.push(m);
+      }
+    }
+    this.procedureDetailRows.set(mapped);
+  }
+
+  private mapLinkedDetailToTableRow(
+    row: ServiceDocumentDetailLinkedRow
+  ): ProcedureDetailTableRow | null {
+    if (!isValidServiceDocumentDetailType(row.detail_type)) {
+      return null;
+    }
+    const dt = row.document_templates;
+    const tpl = Array.isArray(dt) ? dt[0] : dt;
+    const name = tpl?.name?.trim() ? tpl.name : '\u2014';
+    return {
+      id: row.id,
+      document_template_id: row.document_template_id,
+      template_name: name,
+      detail_type: row.detail_type,
+      valid_from: row.valid_from,
+      valid_to: row.valid_to,
+    };
+  }
+
+  detailTypeLabel(t: ServiceDocumentDetailType): string {
+    const o = PROCEDURE_DETAIL_TYPE_OPTIONS.find((x) => x.value === t);
+    return o?.label ?? t;
+  }
+
+  formatDetailDate(isoDate: string): string {
+    return formatDbDateMexico(`${isoDate}T12:00:00`);
+  }
+
+  addProcedureDetailRow(): void {
+    this.procedureDetailDraftError.set(null);
+    const draft = this.detailDraftForm.getRawValue();
+    const from = draft.valid_from;
+    const to = draft.valid_to;
+    const templateId = String(draft.document_template_id ?? '').trim();
+    const detailType = draft.detail_type;
+
+    if (!(from instanceof Date) || Number.isNaN(from.getTime())) {
+      this.procedureDetailDraftError.set(
+        'Indica la fecha de inicio de vigencia.'
+      );
+      return;
+    }
+    if (!(to instanceof Date) || Number.isNaN(to.getTime())) {
+      this.procedureDetailDraftError.set('Indica la fecha de fin de vigencia.');
+      return;
+    }
+    if (templateId === '') {
+      this.procedureDetailDraftError.set('Selecciona una plantilla.');
+      return;
+    }
+    if (!detailType || !isValidServiceDocumentDetailType(detailType)) {
+      this.procedureDetailDraftError.set('Selecciona un tipo de documento.');
+      return;
+    }
+
+    const validFrom = toIsoDateLocal(from);
+    const validTo = toIsoDateLocal(to);
+    if (validTo < validFrom) {
+      this.procedureDetailDraftError.set(
+        'La fecha de fin de vigencia no puede ser anterior a la de inicio.'
+      );
+      return;
+    }
+
+    const opt = this.documentTemplateOptions().find(
+      (o) => o.value === templateId
+    );
+    const templateName = opt?.label?.trim() ? opt.label : '\u2014';
+
+    this.procedureDetailRows.update((rows) => [
+      ...rows,
+      {
+        id: globalThis.crypto.randomUUID(),
+        document_template_id: templateId,
+        template_name: templateName,
+        detail_type: detailType,
+        valid_from: validFrom,
+        valid_to: validTo,
+      },
+    ]);
+    this.procedureDetailDraftError.set(null);
+    this.clearProcedureDetailDraft();
+  }
+
+  clearProcedureDetailDraft(): void {
+    this.procedureDetailDraftError.set(null);
+    this.detailDraftForm.reset({
+      valid_from: null,
+      valid_to: null,
+      document_template_id: '',
+      detail_type: '',
+    });
+  }
+
+  removeProcedureDetailRow(rowId: string): void {
+    this.procedureDetailRows.update((rows) =>
+      rows.filter((r) => r.id !== rowId)
+    );
+  }
+
+  private orderedProcedureDetailPayload(): {
+    document_template_id: string;
+    detail_type: ServiceDocumentDetailType;
+    valid_from: string;
+    valid_to: string;
+  }[] {
+    return this.procedureDetailRows().map((r) => ({
+      document_template_id: r.document_template_id,
+      detail_type: r.detail_type,
+      valid_from: r.valid_from,
+      valid_to: r.valid_to,
+    }));
   }
 
   private toRequirementTableRow(
@@ -439,6 +721,7 @@ export class ProcedureNewComponent {
   ): Promise<void> {
     this.procedureRequirementsLoading.set(true);
     this.procedureRequirementsError.set(null);
+    this.procedureRequirementsLinkWarning.set(null);
     this.selectedProcedureRequirements.set([]);
     this.requirementTitleSearch.set('');
 
@@ -470,16 +753,24 @@ export class ProcedureNewComponent {
       return;
     }
 
+    let linkedRows = linkedRes.data ?? [];
     if (serviceId && linkedRes.error) {
-      this.procedureRequirementsError.set(
-        mapProcedureRequirementsError(linkedRes.error)
-      );
-      this.procedureRequirementRows.set([]);
-      return;
+      if (isRecoverableLinkedAssociationsLoadError(linkedRes.error)) {
+        this.procedureRequirementsLinkWarning.set(
+          'No se pudieron cargar los requisitos ya vinculados a este tr\u00e1mite (base de datos o configuraci\u00f3n). Puedes seleccionar requisitos en la tabla y guardar; si el guardado falla, contacta al administrador.'
+        );
+        linkedRows = [];
+      } else {
+        this.procedureRequirementsError.set(
+          mapProcedureRequirementsError(linkedRes.error)
+        );
+        this.procedureRequirementRows.set([]);
+        return;
+      }
     }
 
     const linkedById = new Map<string, boolean>();
-    for (const link of linkedRes.data ?? []) {
+    for (const link of linkedRows) {
       linkedById.set(link.catalog.id, link.is_required);
     }
 
@@ -518,6 +809,8 @@ export class ProcedureNewComponent {
 
     const nameVal = String(this.nameCtrl.value ?? '').trim();
     this.nameCtrl.setValue(nameVal);
+    const legalBasisVal = String(this.legalBasisCtrl.value ?? '').trim();
+    this.legalBasisCtrl.setValue(legalBasisVal);
     const descVal = String(this.descriptionCtrl.value ?? '').trim();
     this.descriptionCtrl.setValue(descVal);
     /** BD: `services.description` es NOT NULL; cadena vacía si el usuario no escribe nada. */
@@ -549,64 +842,80 @@ export class ProcedureNewComponent {
     const rowId = this.editId();
     const editing = rowId != null && rowId !== '';
 
+    this.spinner.show('global');
     this.submitting.set(true);
-    const isUmaRelated = this.form.controls.is_uma_related.getRawValue();
-    const isActive = this.form.controls.is_active.getRawValue();
-    const umaLimitScope: UmaLimitScope | null = isUmaRelated
-      ? this.form.controls.uma_limit_scope.getRawValue()
-      : null;
+    try {
+      const isUmaRelated = this.form.controls.is_uma_related.getRawValue();
+      const isActive = this.form.controls.is_active.getRawValue();
+      const umaLimitScope: UmaLimitScope | null = isUmaRelated
+        ? this.form.controls.uma_limit_scope.getRawValue()
+        : null;
 
-    const result = editing
-      ? await this.proceduresApi.updateForClient(rowId, clientId, {
-          name: nameVal,
-          description,
-          notes,
-          is_uma_related: isUmaRelated,
-          uma_limit_scope: umaLimitScope,
-          is_active: isActive,
-          service_type_id: serviceTypeId,
-        })
-      : await this.proceduresApi.insert({
-          name: nameVal,
-          description,
-          notes,
-          is_uma_related: isUmaRelated,
-          uma_limit_scope: umaLimitScope,
-          is_active: isActive,
-          service_type_id: serviceTypeId,
-          client_id: clientId,
-        });
-    if (result.error) {
+      const result = editing
+        ? await this.proceduresApi.updateForClient(rowId, clientId, {
+            name: nameVal,
+            legal_basis: legalBasisVal,
+            description,
+            notes,
+            is_uma_related: isUmaRelated,
+            uma_limit_scope: umaLimitScope,
+            is_active: isActive,
+            service_type_id: serviceTypeId,
+          })
+        : await this.proceduresApi.insert({
+            name: nameVal,
+            legal_basis: legalBasisVal,
+            description,
+            notes,
+            is_uma_related: isUmaRelated,
+            uma_limit_scope: umaLimitScope,
+            is_active: isActive,
+            service_type_id: serviceTypeId,
+            client_id: clientId,
+          });
+      if (result.error) {
+        this.submitError.set(
+          mapSaveError(result.error, editing ? 'update' : 'insert')
+        );
+        return;
+      }
+
+      const saved = result.data;
+      const serviceId = editing ? rowId! : saved?.id ?? null;
+      if (!serviceId) {
+        this.submitError.set(
+          'El tr\u00e1mite se guard\u00f3 pero no se obtuvo su identificador. No se pudieron asociar los requisitos.'
+        );
+        return;
+      }
+
+      const requirementLinks = this.orderedSelectedRequirementLinks();
+      const { error: linkErr } =
+        await this.requirementsApi.replaceLinksForService(
+          serviceId,
+          requirementLinks
+        );
+      if (linkErr) {
+        this.submitError.set(mapReplaceLinksError(linkErr));
+        return;
+      }
+
+      const detailPayload = this.orderedProcedureDetailPayload();
+      const { error: docDetErr } =
+        await this.serviceDocumentDetailsApi.replaceForService(
+          serviceId,
+          detailPayload
+        );
+      if (docDetErr) {
+        this.submitError.set(mapReplaceDocumentDetailsError(docDetErr));
+        return;
+      }
+
+      await this.router.navigate(['/catalog/procedures']);
+    } finally {
       this.submitting.set(false);
-      this.submitError.set(
-        mapSaveError(result.error, editing ? 'update' : 'insert')
-      );
-      return;
+      this.spinner.hide('global');
     }
-
-    const saved = result.data;
-    const serviceId = editing ? rowId! : saved?.id ?? null;
-    if (!serviceId) {
-      this.submitting.set(false);
-      this.submitError.set(
-        'El tr\u00e1mite se guard\u00f3 pero no se obtuvo su identificador. No se pudieron asociar los requisitos.'
-      );
-      return;
-    }
-
-    const requirementLinks = this.orderedSelectedRequirementLinks();
-    const { error: linkErr } =
-      await this.requirementsApi.replaceLinksForService(
-        serviceId,
-        requirementLinks
-      );
-    this.submitting.set(false);
-    if (linkErr) {
-      this.submitError.set(mapReplaceLinksError(linkErr));
-      return;
-    }
-
-    await this.router.navigate(['/catalog/procedures']);
   }
 
   nameHint(): string | undefined {
@@ -619,6 +928,20 @@ export class ProcedureNewComponent {
     }
     if (c.hasError('maxlength')) {
       return `Máximo ${NAME_MAX} caracteres.`;
+    }
+    return undefined;
+  }
+
+  legalBasisHint(): string | undefined {
+    const c = this.legalBasisCtrl;
+    if (!c.touched && !c.dirty) {
+      return undefined;
+    }
+    if (c.hasError('required') || c.hasError('pattern')) {
+      return 'El fundamento jurídico es obligatorio.';
+    }
+    if (c.hasError('maxlength')) {
+      return `Máximo ${LEGAL_BASIS_MAX} caracteres.`;
     }
     return undefined;
   }
@@ -655,6 +978,76 @@ function parseUmaLimitScope(
   raw: string | null | undefined
 ): UmaLimitScope | null {
   return raw === 'asignados' || raw === 'tecnicos' ? raw : null;
+}
+
+function isValidServiceDocumentDetailType(
+  v: string
+): v is ServiceDocumentDetailType {
+  return (
+    v === 'caratula' ||
+    v === 'resolutivo_aprobado' ||
+    v === 'resolutivo_rechazado' ||
+    v === 'resolutivo_suspendido'
+  );
+}
+
+function toIsoDateLocal(d: Date): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
+function mapDocumentTemplatesLoadError(err: {
+  message?: string;
+  code?: string;
+}): string {
+  const msg = (err.message ?? '').toLowerCase();
+  if (msg.includes('permission denied') || msg.includes('rls')) {
+    return 'No tienes permiso para ver las plantillas de documento.';
+  }
+  return (
+    err.message ||
+    'No se pudieron cargar las plantillas de documento de tu cliente.'
+  );
+}
+
+function mapProcedureDocumentDetailsLoadError(err: {
+  message?: string;
+  code?: string;
+}): string {
+  const msg = (err.message ?? '').toLowerCase();
+  if (msg.includes('permission denied') || msg.includes('rls')) {
+    return 'No tienes permiso para ver los detalles del tr\u00e1mite.';
+  }
+  return (
+    err.message || 'No se pudieron cargar los detalles guardados del tr\u00e1mite.'
+  );
+}
+
+function mapReplaceDocumentDetailsError(err: {
+  message?: string;
+  code?: string;
+}): string {
+  const msg = (err.message ?? '').toLowerCase();
+  if (msg.includes('permission denied') || msg.includes('rls')) {
+    return 'No tienes permiso para guardar los detalles del tr\u00e1mite.';
+  }
+  if (
+    msg.includes('schema cache') ||
+    msg.includes('does not exist') ||
+    msg.includes('relation') ||
+    err.code === '42P01'
+  ) {
+    return 'No se pueden guardar los detalles del tr\u00e1mite: falta crear la tabla en la base de datos. Contacta al administrador.';
+  }
+  if (err.code === '23503' || msg.includes('foreign key')) {
+    return 'Alguna plantilla ya no existe o el tr\u00e1mite no es v\u00e1lido. Recarga la p\u00e1gina e int\u00e9ntalo de nuevo.';
+  }
+  if (msg.includes('check') || err.code === '23514') {
+    return 'Los datos de detalle no cumplen las reglas del sistema (fechas o tipo). Revisa el formulario.';
+  }
+  return err.message || 'No se pudieron guardar los detalles del tr\u00e1mite.';
 }
 
 function mapRequirementCatalogLoadError(err: {
@@ -701,15 +1094,32 @@ function mapProcedureRequirementsError(err: {
   if (msg.includes('permission denied') || msg.includes('rls')) {
     return 'No tienes permiso para ver los requisitos vinculados.';
   }
-  if (
-    msg.includes('schema cache') ||
-    msg.includes('does not exist') ||
-    msg.includes('relation') ||
-    err.code === '42P01'
-  ) {
+  if (isRecoverableLinkedAssociationsLoadError(err)) {
     return 'No se pueden cargar las asociaciones de requisitos: el sistema necesita una actualización. Contacta al administrador.';
   }
   return err.message || 'No se pudieron cargar los requisitos del trámite.';
+}
+
+/**
+ * Errores de esquema / tabla / embed de PostgREST donde aún tiene sentido mostrar el catálogo.
+ * No incluye RLS ni permisos explícitos.
+ */
+function isRecoverableLinkedAssociationsLoadError(err: {
+  message?: string;
+  code?: string;
+}): boolean {
+  const msg = (err.message ?? '').toLowerCase();
+  if (msg.includes('permission denied') || msg.includes('rls')) {
+    return false;
+  }
+  return (
+    msg.includes('schema cache') ||
+    msg.includes('does not exist') ||
+    msg.includes('could not find a relationship') ||
+    msg.includes('relation') ||
+    err.code === '42P01' ||
+    err.code === 'PGRST205'
+  );
 }
 
 function mapLoadError(err: { message?: string; code?: string }): string {

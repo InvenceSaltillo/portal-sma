@@ -96,4 +96,8 @@ export interface DataTableColumn {
    * Tipo (`text`, `date`, `select`, …) y opciones los define el padre.
    */
   filter?: DataTableColumnFilter;
+  /** Clases Tailwind/CSS extra en `<th>` (cabecera y fila de filtros). */
+  headerClass?: string;
+  /** Clases Tailwind/CSS extra en `<td>` del cuerpo. */
+  cellClass?: string;
 }

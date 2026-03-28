@@ -14,6 +14,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { map } from 'rxjs/operators';
 import { ButtonModule } from 'primeng/button';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { NgxSpinnerService } from 'ngx-spinner';
 import { SelectModule } from 'primeng/select';
 import { AuthService } from '../../../core/auth/auth.service';
 import { RequirementsService } from '../../../core/services/requirements.service';
@@ -150,6 +151,7 @@ export class RequirementNewComponent {
   private readonly requirementsApi = inject(RequirementsService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
+  private readonly spinner = inject(NgxSpinnerService);
 
   private routeHandleSeq = 0;
 
@@ -317,59 +319,65 @@ export class RequirementNewComponent {
     const v = this.form.getRawValue();
     const accept = acceptMimeForFileType(v.file_type);
 
+    this.spinner.show('global');
     this.submitting.set(true);
-    let result;
-    if (editing) {
-      result = await this.requirementsApi.updateForClient(rowId, clientId, {
-        name: this.technicalNameEdit(),
-        title: v.title,
-        description: v.description,
-        legal_reference: v.legal_reference,
-        file_type: v.file_type,
-        accept,
-        max_size_mb: MAX_SIZE_MB,
-        is_active: v.is_active,
-      });
-    } else {
-      const { data: listRows, error: listErr } =
-        await this.requirementsApi.listByClientId(clientId);
-      if (listErr) {
-        this.submitting.set(false);
+    try {
+      let result;
+      if (editing) {
+        result = await this.requirementsApi.updateForClient(rowId, clientId, {
+          name: this.technicalNameEdit(),
+          title: v.title,
+          description: v.description,
+          legal_reference: v.legal_reference,
+          file_type: v.file_type,
+          accept,
+          max_size_mb: MAX_SIZE_MB,
+          is_active: v.is_active,
+        });
+      } else {
+        const { data: listRows, error: listErr } =
+          await this.requirementsApi.listByClientId(clientId);
+        if (listErr) {
+          this.submitError.set(
+            listErr.message ||
+              'No se pudo validar el identificador del requisito.'
+          );
+          return;
+        }
+        const existing = new Set(listRows.map((r) => r.name));
+        const base = slugifyPublicTitleToName(v.title, NAME_MAX);
+        if (!base) {
+          this.submitError.set(
+            'El título debe incluir al menos una letra o número para generar el identificador interno.'
+          );
+          return;
+        }
+        const uniqueName = ensureUniqueRequirementName(base, existing, NAME_MAX);
+        result = await this.requirementsApi.insert({
+          client_id: clientId,
+          name: uniqueName,
+          title: v.title,
+          description: v.description,
+          legal_reference: v.legal_reference,
+          file_type: v.file_type,
+          accept,
+          max_size_mb: MAX_SIZE_MB,
+          is_active: v.is_active,
+        });
+      }
+
+      if (result.error) {
         this.submitError.set(
-          listErr.message || 'No se pudo validar el identificador del requisito.'
+          result.error.message || 'No se pudo guardar el requisito.'
         );
         return;
       }
-      const existing = new Set(listRows.map((r) => r.name));
-      const base = slugifyPublicTitleToName(v.title, NAME_MAX);
-      if (!base) {
-        this.submitting.set(false);
-        this.submitError.set(
-          'El título debe incluir al menos una letra o número para generar el identificador interno.'
-        );
-        return;
-      }
-      const uniqueName = ensureUniqueRequirementName(base, existing, NAME_MAX);
-      result = await this.requirementsApi.insert({
-        client_id: clientId,
-        name: uniqueName,
-        title: v.title,
-        description: v.description,
-        legal_reference: v.legal_reference,
-        file_type: v.file_type,
-        accept,
-        max_size_mb: MAX_SIZE_MB,
-        is_active: v.is_active,
-      });
-    }
-    this.submitting.set(false);
 
-    if (result.error) {
-      this.submitError.set(result.error.message || 'No se pudo guardar el requisito.');
-      return;
+      await this.router.navigate(['/catalog/requirements']);
+    } finally {
+      this.submitting.set(false);
+      this.spinner.hide('global');
     }
-
-    await this.router.navigate(['/catalog/requirements']);
   }
 
   titleHint(): string | undefined {

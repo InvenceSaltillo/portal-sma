@@ -5,6 +5,7 @@ import {
   Output,
   viewChild,
 } from '@angular/core';
+import { NgClass } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import type { MenuItem } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
@@ -28,6 +29,7 @@ import type {
   selector: 'app-data-table',
   standalone: true,
   imports: [
+    NgClass,
     TableModule,
     Skeleton,
     FormsModule,
@@ -46,17 +48,58 @@ import type {
       padding-top: 0.35rem;
       padding-bottom: 0.5rem;
       vertical-align: top;
+      min-width: 0;
     }
-    :host ::ng-deep .data-table-filter-row .p-columnfilter {
+    /* PrimeNG 18: host es <p-columnFilter>; raíz interna .p-datatable-inline-filter (flex) */
+    :host ::ng-deep .data-table-filter-row th p-columnfilter {
+      display: block;
       width: 100%;
+      max-width: 100%;
+      min-width: 0;
+      box-sizing: border-box;
     }
-    :host ::ng-deep .data-table-filter-row .p-inputtext {
+    :host ::ng-deep .data-table-filter-row .p-datatable-filter.p-datatable-inline-filter {
       width: 100%;
+      max-width: 100%;
+      min-width: 0;
+      box-sizing: border-box;
+    }
+    :host ::ng-deep .data-table-filter-row .p-datatable-inline-filter > .p-fluid {
+      flex: 1 1 0%;
+      min-width: 0;
+      max-width: 100%;
+      width: auto;
+    }
+    :host ::ng-deep .data-table-filter-row .p-datatable-inline-filter .p-datatable-filter-element-container {
+      flex: 1 1 0% !important;
+      min-width: 0 !important;
+      width: auto !important;
+      max-width: 100%;
+    }
+    :host ::ng-deep .data-table-filter-row .p-inputtext,
+    :host ::ng-deep .data-table-filter-row input.p-inputtext {
+      width: 100% !important;
+      max-width: 100% !important;
+      min-width: 0;
+      box-sizing: border-box;
+    }
+    :host ::ng-deep .data-table-filter-row .p-inputwrapper,
+    :host ::ng-deep .data-table-filter-row .p-inputwrapper-filled {
+      width: 100%;
+      max-width: 100%;
       min-width: 0;
     }
     :host ::ng-deep .data-table-filter-row .p-select {
       width: 100%;
+      max-width: 100%;
       min-width: 0;
+    }
+    :host ::ng-deep .data-table-filter-row .p-datepicker,
+    :host ::ng-deep .data-table-filter-row .p-datepicker .p-inputtext {
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
+      box-sizing: border-box;
     }
     :host ::ng-deep .p-datatable-tbody > tr.data-table-row-clickable:hover {
       background-color: rgb(249 250 251);

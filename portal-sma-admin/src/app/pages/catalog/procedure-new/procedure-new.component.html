@@ -107,6 +107,33 @@
       </div>
 
       <div class="min-w-0 md:col-span-2">
+        <app-label for="procedure-legal-basis">
+          Fundamento jurídico <span class="text-error-500">*</span>
+        </app-label>
+        <textarea
+          id="procedure-legal-basis"
+          formControlName="legal_basis"
+          rows="4"
+          placeholder="Normativa, artículos o bases legales que sustentan el trámite."
+          class="mt-0 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
+          [class.border-error-500]="legalBasisCtrl.invalid && legalBasisCtrl.touched"
+        ></textarea>
+        @if (legalBasisHint(); as lbh) {
+          <p
+            class="mt-1.5 text-xs"
+            [class.text-error-500]="legalBasisCtrl.invalid"
+            [class.text-gray-500]="!legalBasisCtrl.invalid"
+          >
+            {{ lbh }}
+          </p>
+        } @else {
+          <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+            Hasta {{ legalBasisMaxLength }} caracteres.
+          </p>
+        }
+      </div>
+
+      <div class="min-w-0">
         <app-label for="procedure-description">Descripción</app-label>
         <textarea
           id="procedure-description"
@@ -131,12 +158,12 @@
         }
       </div>
 
-      <div class="min-w-0 md:col-span-2">
+      <div class="min-w-0">
         <app-label for="procedure-notes">Notas</app-label>
         <textarea
           id="procedure-notes"
           formControlName="notes"
-          rows="4"
+          rows="5"
           placeholder="Opcional. Observaciones internas o aclaraciones sobre el trámite."
           class="mt-0 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
           [class.border-error-500]="notesCtrl.invalid && notesCtrl.touched"
@@ -235,6 +262,14 @@
           </div>
         } @else {
           <div class="w-full min-w-0 space-y-3">
+            @if (procedureRequirementsLinkWarning(); as linkWarn) {
+              <div
+                class="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-200"
+                role="status"
+              >
+                {{ linkWarn }}
+              </div>
+            }
             <div>
               <label
                 class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
@@ -245,7 +280,7 @@
               <input
                 id="req-title-search"
                 type="search"
-                class="w-full min-w-0 max-w-md rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm placeholder:text-gray-400 focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 dark:placeholder:text-gray-500"
+                class="w-full min-w-0 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm placeholder:text-gray-400 focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 dark:placeholder:text-gray-500"
                 placeholder="Escribe parte del título del requisito"
                 [value]="requirementTitleSearch()"
                 (input)="onRequirementTitleSearchInput($event)"
@@ -268,6 +303,217 @@
               [emptyMessage]="procedureRequirementsTableEmptyMessage()"
             />
           </div>
+        }
+      </div>
+
+      <div
+        class="min-w-0 space-y-4 border-t border-gray-200 pt-8 md:col-span-2 dark:border-white/10"
+      >
+        <div>
+          <h2
+            class="text-lg font-semibold text-brand-600 dark:text-brand-400"
+          >
+            Detalles del trámite
+          </h2>
+          <div
+            class="mt-2 h-px bg-brand-600/35 dark:bg-brand-400/25"
+            aria-hidden="true"
+          ></div>
+          <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+            Vincula plantillas Word con tipo de documento y vigencia; puedes
+            añadir varias filas.
+          </p>
+        </div>
+
+        @if (procedureDocumentTemplatesError(); as docTplErr) {
+          <div
+            class="rounded-lg border border-error-200 bg-error-50 px-4 py-3 text-sm text-error-700 dark:border-error-500/30 dark:bg-error-500/10 dark:text-error-400"
+            role="alert"
+          >
+            {{ docTplErr }}
+          </div>
+        } @else {
+          @if (procedureDocumentDetailsWarning(); as detWarn) {
+            <div
+              class="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-200"
+              role="status"
+            >
+              {{ detWarn }}
+            </div>
+          }
+          @if (procedureDetailDraftError(); as draftErr) {
+            <div
+              class="rounded-lg border border-error-200 bg-error-50 px-4 py-3 text-sm text-error-700 dark:border-error-500/30 dark:bg-error-500/10 dark:text-error-400"
+              role="alert"
+            >
+              {{ draftErr }}
+            </div>
+          }
+
+          <div
+            [formGroup]="detailDraftForm"
+            class="grid grid-cols-1 gap-x-8 gap-y-5 md:grid-cols-2"
+          >
+            <div class="min-w-0 md:col-span-2">
+              <app-label for="detail-valid-from">
+                Vigencia <span class="text-error-500">*</span>
+              </app-label>
+              <div
+                class="mt-1 flex flex-wrap items-center gap-2 text-sm text-gray-700 dark:text-gray-300"
+              >
+                <p-datepicker
+                  inputId="detail-valid-from"
+                  formControlName="valid_from"
+                  dateFormat="dd/mm/yy"
+                  placeholder="dd/mm/aaaa"
+                  appendTo="body"
+                  [showIcon]="true"
+                  [showClear]="true"
+                  styleClass="procedure-detail-picker w-full min-w-[11rem] sm:w-auto"
+                />
+                <span class="shrink-0 text-gray-500 dark:text-gray-400">al</span>
+                <p-datepicker
+                  inputId="detail-valid-to"
+                  formControlName="valid_to"
+                  dateFormat="dd/mm/yy"
+                  placeholder="dd/mm/aaaa"
+                  appendTo="body"
+                  [showIcon]="true"
+                  [showClear]="true"
+                  styleClass="procedure-detail-picker w-full min-w-[11rem] sm:w-auto"
+                />
+              </div>
+            </div>
+
+            <div class="min-w-0">
+              <app-label for="detail-template">
+                Plantilla <span class="text-error-500">*</span>
+              </app-label>
+              <p-select
+                inputId="detail-template"
+                formControlName="document_template_id"
+                [options]="documentTemplateOptions()"
+                optionLabel="label"
+                optionValue="value"
+                placeholder="-- Seleccione --"
+                [filter]="true"
+                filterPlaceholder="Buscar plantilla…"
+                [showClear]="true"
+                appendTo="body"
+                styleClass="w-full min-w-0"
+              />
+            </div>
+
+            <div class="min-w-0">
+              <app-label for="detail-type">
+                Tipo <span class="text-error-500">*</span>
+              </app-label>
+              <p-select
+                inputId="detail-type"
+                formControlName="detail_type"
+                [options]="procedureDetailTypeOptions"
+                optionLabel="label"
+                optionValue="value"
+                placeholder="-- Seleccione --"
+                [filter]="true"
+                filterPlaceholder="Buscar tipo…"
+                [showClear]="true"
+                appendTo="body"
+                styleClass="w-full min-w-0"
+              />
+            </div>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2">
+            <p-button
+              type="button"
+              label="Agregar"
+              icon="pi pi-plus"
+              (onClick)="addProcedureDetailRow()"
+            />
+            <p-button
+              type="button"
+              label="Limpiar"
+              icon="pi pi-eraser"
+              severity="warn"
+              [outlined]="true"
+              (onClick)="clearProcedureDetailDraft()"
+            />
+          </div>
+
+          @if (procedureDetailsLoading()) {
+            <p
+              class="text-sm text-gray-500 dark:text-gray-400"
+              aria-live="polite"
+            >
+              Cargando detalles…
+            </p>
+          } @else {
+            <div
+              class="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700"
+            >
+              <table class="min-w-full text-left text-sm text-gray-800 dark:text-gray-200">
+                <thead>
+                  <tr
+                    class="bg-brand-600 text-white dark:bg-brand-700"
+                  >
+                    <th class="w-14 px-3 py-2.5 font-medium" scope="col"></th>
+                    <th class="px-3 py-2.5 font-medium" scope="col">
+                      Plantilla
+                    </th>
+                    <th class="px-3 py-2.5 font-medium" scope="col">Tipo</th>
+                    <th class="px-3 py-2.5 font-medium" scope="col">
+                      Fecha inicio
+                    </th>
+                    <th class="px-3 py-2.5 font-medium" scope="col">
+                      Fecha fin
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (row of procedureDetailRows(); track row.id) {
+                    <tr
+                      class="border-t border-gray-200 odd:bg-gray-50 dark:border-gray-700 dark:odd:bg-white/[0.03]"
+                    >
+                      <td class="px-3 py-2 align-middle">
+                        <p-button
+                          type="button"
+                          icon="pi pi-times"
+                          [rounded]="true"
+                          [text]="true"
+                          severity="warn"
+                          [attr.aria-label]="'Quitar fila'"
+                          (onClick)="removeProcedureDetailRow(row.id)"
+                        />
+                      </td>
+                      <td class="px-3 py-2 align-middle">
+                        {{ row.template_name }}
+                      </td>
+                      <td class="px-3 py-2 align-middle">
+                        {{ detailTypeLabel(row.detail_type) }}
+                      </td>
+                      <td class="px-3 py-2 align-middle whitespace-nowrap">
+                        {{ formatDetailDate(row.valid_from) }}
+                      </td>
+                      <td class="px-3 py-2 align-middle whitespace-nowrap">
+                        {{ formatDetailDate(row.valid_to) }}
+                      </td>
+                    </tr>
+                  } @empty {
+                    <tr>
+                      <td
+                        colspan="5"
+                        class="px-3 py-8 text-center text-gray-500 dark:text-gray-400"
+                      >
+                        No hay filas. Completa vigencia, plantilla y tipo, luego
+                        pulsa Agregar.
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
         }
       </div>
 

@@ -85,6 +85,9 @@ export class ProcedureComponent implements OnInit {
       {
         field: 'name',
         header: 'Nombre',
+        headerClass: 'min-w-[34rem]',
+        cellClass:
+          'min-w-[34rem] max-w-[60rem] align-top whitespace-normal break-words',
         filter: { type: 'text', placeholder: 'Buscar por nombre…' },
       },
       {
@@ -99,9 +102,21 @@ export class ProcedureComponent implements OnInit {
         },
       },
       {
+        field: 'legal_basis',
+        header: 'Fundamento jurídico',
+        sortable: false,
+        headerClass: 'min-w-[24rem]',
+        cellClass:
+          'min-w-[24rem] max-w-[60rem] align-top whitespace-normal break-words',
+        filter: { type: 'text', placeholder: 'Buscar en fundamento…' },
+      },
+      {
         field: 'description',
         header: 'Descripción',
         sortable: false,
+        headerClass: 'min-w-[34rem]',
+        cellClass:
+          'min-w-[34rem] max-w-[60rem] align-top whitespace-normal break-words',
         filter: { type: 'text', placeholder: 'Buscar en descripción…' },
       },
       {
@@ -264,6 +279,7 @@ export class ProcedureComponent implements OnInit {
           name: row.name,
           service_type_name: typeName,
           service_type_sort: typeName === '—' ? '\uffff' : typeName.toLowerCase(),
+          legal_basis: formatDescriptionCell(row.legal_basis),
           description: formatDescriptionCell(row.description),
           notes: formatDescriptionCell(row.notes),
           is_uma_related: uma ? 'Sí' : 'No',

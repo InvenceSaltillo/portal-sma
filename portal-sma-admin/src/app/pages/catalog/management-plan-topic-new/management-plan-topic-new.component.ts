@@ -14,6 +14,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { map } from 'rxjs/operators';
 import { ButtonModule } from 'primeng/button';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { NgxSpinnerService } from 'ngx-spinner';
 import { AuthService } from '../../../core/auth/auth.service';
 import { ManagementPlanTopicsService } from '../../../core/services/management-plan-topics.service';
 import { InputFieldComponent } from '../../../shared/components/form/input/input-field.component';
@@ -44,6 +45,7 @@ export class ManagementPlanTopicNewComponent {
   private readonly topicsApi = inject(ManagementPlanTopicsService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
+  private readonly spinner = inject(NgxSpinnerService);
 
   private routeHandleSeq = 0;
 
@@ -193,27 +195,32 @@ export class ManagementPlanTopicNewComponent {
 
     const descriptionVal = String(this.descriptionCtrl.value ?? '').trim();
 
+    this.spinner.show('global');
     this.submitting.set(true);
-    const result = editing
-      ? await this.topicsApi.updateForClient(id, clientId, {
-          name: nameVal,
-          description: descriptionVal === '' ? null : descriptionVal,
-        })
-      : await this.topicsApi.insert({
-          name: nameVal,
-          description: descriptionVal === '' ? null : descriptionVal,
-          client_id: clientId,
-        });
-    this.submitting.set(false);
+    try {
+      const result = editing
+        ? await this.topicsApi.updateForClient(id, clientId, {
+            name: nameVal,
+            description: descriptionVal === '' ? null : descriptionVal,
+          })
+        : await this.topicsApi.insert({
+            name: nameVal,
+            description: descriptionVal === '' ? null : descriptionVal,
+            client_id: clientId,
+          });
 
-    if (result.error) {
-      this.submitError.set(
-        mapSaveError(result.error, editing ? 'update' : 'insert')
-      );
-      return;
+      if (result.error) {
+        this.submitError.set(
+          mapSaveError(result.error, editing ? 'update' : 'insert')
+        );
+        return;
+      }
+
+      await this.router.navigate(['/catalog/management-plan-topics']);
+    } finally {
+      this.submitting.set(false);
+      this.spinner.hide('global');
     }
-
-    await this.router.navigate(['/catalog/management-plan-topics']);
   }
 
   nameHint(): string | undefined {

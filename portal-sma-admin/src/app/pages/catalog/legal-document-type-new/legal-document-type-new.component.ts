@@ -9,6 +9,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { map } from 'rxjs/operators';
 import { ButtonModule } from 'primeng/button';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { NgxSpinnerService } from 'ngx-spinner';
 import { AuthService } from '../../../core/auth/auth.service';
 import { LegalDocumentTypesService } from '../../../core/services/legal-document-types.service';
 import { InputFieldComponent } from '../../../shared/components/form/input/input-field.component';
@@ -36,6 +37,7 @@ export class LegalDocumentTypeNewComponent {
   private readonly legalDocumentTypesApi = inject(LegalDocumentTypesService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
+  private readonly spinner = inject(NgxSpinnerService);
 
   private routeHandleSeq = 0;
 
@@ -175,25 +177,30 @@ export class LegalDocumentTypeNewComponent {
     const id = this.editId();
     const editing = id != null && id !== '';
 
+    this.spinner.show('global');
     this.submitting.set(true);
-    const result = editing
-      ? await this.legalDocumentTypesApi.updateForClient(id, clientId, {
-          name: nameVal,
-        })
-      : await this.legalDocumentTypesApi.insert({
-          name: nameVal,
-          client_id: clientId,
-        });
-    this.submitting.set(false);
+    try {
+      const result = editing
+        ? await this.legalDocumentTypesApi.updateForClient(id, clientId, {
+            name: nameVal,
+          })
+        : await this.legalDocumentTypesApi.insert({
+            name: nameVal,
+            client_id: clientId,
+          });
 
-    if (result.error) {
-      this.submitError.set(
-        mapSaveError(result.error, editing ? 'update' : 'insert')
-      );
-      return;
+      if (result.error) {
+        this.submitError.set(
+          mapSaveError(result.error, editing ? 'update' : 'insert')
+        );
+        return;
+      }
+
+      await this.router.navigate(['/catalog/legal-document-types']);
+    } finally {
+      this.submitting.set(false);
+      this.spinner.hide('global');
     }
-
-    await this.router.navigate(['/catalog/legal-document-types']);
   }
 
   nameHint(): string | undefined {

@@ -9,6 +9,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { map } from 'rxjs/operators';
 import { ButtonModule } from 'primeng/button';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { NgxSpinnerService } from 'ngx-spinner';
 import { SelectModule } from 'primeng/select';
 import { AuthService } from '../../../core/auth/auth.service';
 import { ManagementPlanSubtopicsService } from '../../../core/services/management-plan-subtopics.service';
@@ -48,6 +49,7 @@ export class ManagementPlanSubtopicNewComponent {
   private readonly topicsApi = inject(ManagementPlanTopicsService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
+  private readonly spinner = inject(NgxSpinnerService);
 
   private routeHandleSeq = 0;
 
@@ -263,28 +265,33 @@ export class ManagementPlanSubtopicNewComponent {
     const id = this.editId();
     const editing = id != null && id !== '';
 
+    this.spinner.show('global');
     this.submitting.set(true);
-    const result = editing
-      ? await this.subtopicsApi.updateForClient(id, clientId, {
-          topic_id: topicId,
-          orden,
-          descripcion: descVal,
-        })
-      : await this.subtopicsApi.insert({
-          topic_id: topicId,
-          orden,
-          descripcion: descVal,
-        });
-    this.submitting.set(false);
+    try {
+      const result = editing
+        ? await this.subtopicsApi.updateForClient(id, clientId, {
+            topic_id: topicId,
+            orden,
+            descripcion: descVal,
+          })
+        : await this.subtopicsApi.insert({
+            topic_id: topicId,
+            orden,
+            descripcion: descVal,
+          });
 
-    if (result.error) {
-      this.submitError.set(
-        mapSaveError(result.error, editing ? 'update' : 'insert')
-      );
-      return;
+      if (result.error) {
+        this.submitError.set(
+          mapSaveError(result.error, editing ? 'update' : 'insert')
+        );
+        return;
+      }
+
+      await this.router.navigate(['/catalog/management-plan-subtopics']);
+    } finally {
+      this.submitting.set(false);
+      this.spinner.hide('global');
     }
-
-    await this.router.navigate(['/catalog/management-plan-subtopics']);
   }
 
   descripcionHint(): string {

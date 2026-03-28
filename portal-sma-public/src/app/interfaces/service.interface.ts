@@ -4,6 +4,8 @@ export interface Service {
   id?: string;
   service_type_id?: string;
   name: string;
+  /** Fundamento jurídico del trámite. */
+  legal_basis?: string;
   description: string;
   /** Observaciones del trámite (opcional). */
   notes?: string | null;

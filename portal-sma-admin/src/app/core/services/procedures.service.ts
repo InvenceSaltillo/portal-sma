@@ -25,6 +25,8 @@ export function umaLimitScopeLabel(
 export interface ProcedureRow {
   id: string;
   name: string;
+  /** Fundamento jurídico del trámite (obligatorio en admin). */
+  legal_basis?: string | null;
   description: string | null;
   /** Notas internas u observaciones del trámite (texto libre). */
   notes?: string | null;
@@ -44,6 +46,7 @@ export interface ProcedureRow {
 
 export interface ProcedureInsert {
   name: string;
+  legal_basis: string;
   /** La columna en BD es NOT NULL; usar cadena vacía si no hay texto. */
   description: string;
   notes: string | null;
@@ -56,6 +59,7 @@ export interface ProcedureInsert {
 
 export interface ProcedureUpdate {
   name: string;
+  legal_basis: string;
   description: string;
   notes: string | null;
   is_uma_related: boolean;
@@ -82,6 +86,7 @@ export class ProceduresService {
         `
         id,
         name,
+        legal_basis,
         description,
         notes,
         is_uma_related,
@@ -107,6 +112,7 @@ export class ProceduresService {
     row: ProcedureInsert
   ): Promise<{ data: ProcedureRow | null; error: PostgrestError | null }> {
     const name = row.name.trim();
+    const legal_basis = (row.legal_basis ?? '').trim();
     const description = (row.description ?? '').trim();
     const notes =
       row.notes != null && String(row.notes).trim() !== ''
@@ -117,6 +123,7 @@ export class ProceduresService {
       .from('services')
       .insert({
         name,
+        legal_basis,
         description,
         notes,
         is_uma_related: row.is_uma_related,
@@ -129,6 +136,7 @@ export class ProceduresService {
         `
         id,
         name,
+        legal_basis,
         description,
         notes,
         is_uma_related,
@@ -159,6 +167,7 @@ export class ProceduresService {
         `
         id,
         name,
+        legal_basis,
         description,
         notes,
         is_uma_related,
@@ -187,6 +196,7 @@ export class ProceduresService {
     patch: ProcedureUpdate
   ): Promise<{ data: ProcedureRow | null; error: PostgrestError | null }> {
     const name = patch.name.trim();
+    const legal_basis = (patch.legal_basis ?? '').trim();
     const description = (patch.description ?? '').trim();
     const notes =
       patch.notes != null && String(patch.notes).trim() !== ''
@@ -197,6 +207,7 @@ export class ProceduresService {
       .from('services')
       .update({
         name,
+        legal_basis,
         description,
         notes,
         is_uma_related: patch.is_uma_related,
@@ -210,6 +221,7 @@ export class ProceduresService {
         `
         id,
         name,
+        legal_basis,
         description,
         notes,
         is_uma_related,
