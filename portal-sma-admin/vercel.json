@@ -1,4 +1,5 @@
 {
+  "outputDirectory": "dist/portal-sma-admin/browser",
   "rewrites": [
     { "source": "/(.*\\..*)", "destination": "/$1" },
     { "source": "/(.*)", "destination": "/index.html" }
