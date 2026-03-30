@@ -47,12 +47,12 @@ export class ServiceService {
 
   async getByClientId(clientId: string): Promise<void> {
     try {
-      this.#state.update((state) => ({ ...state, loading: true }));
+      this.#state.update((state) => ({ ...state, loading: true, error: undefined }));
       const data = await firstValueFrom(
         this.http.get<any[]>(`${this.serviceUrl}?client_id=${clientId}`)
       );
 
-      this.#state.update((state) => ({ ...state, data, loading: false }));
+      this.#state.update((state) => ({ ...state, data, loading: false, error: undefined }));
     } catch (error) {
       console.error('Error fetching services:', error);
       this.#state.update((state) => ({ ...state, error, loading: false }));
@@ -61,7 +61,7 @@ export class ServiceService {
   }
 
   async getByServiceTypeAndClient(serviceTypeId: string, clientId: string): Promise<void> {
-    this.#state.update((state) => ({ ...state, loading: true }));
+    this.#state.update((state) => ({ ...state, loading: true, error: undefined }));
 
     try {
       // Usar nueva API
@@ -69,7 +69,7 @@ export class ServiceService {
         this.http.get<any[]>(`${this.serviceUrl}/by-type/${serviceTypeId}?client_id=${clientId}`)
       );
 
-      this.#state.update((state) => ({ ...state, data, loading: false }));
+      this.#state.update((state) => ({ ...state, data, loading: false, error: undefined }));
     } catch (error) {
       console.error('Error fetching services:', error);
       this.#state.update((state) => ({ ...state, error, loading: false }));

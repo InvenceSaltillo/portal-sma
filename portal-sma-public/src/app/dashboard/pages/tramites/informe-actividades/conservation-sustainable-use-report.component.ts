@@ -1,41 +1,30 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { RequirementsSectionComponent, Requirement } from '../../../../shared/sections/requirements-section/requirements-section.component';
+import { TramiteRequirementsBlockComponent } from '../../../../shared/components/tramite-requirements-block/tramite-requirements-block.component';
 import { SignatureSectionComponent, Signature } from '../../../../shared/sections/signature-section/signature-section.component';
 
 @Component({
   selector: 'app-conservation-sustainable-use-report',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RequirementsSectionComponent, SignatureSectionComponent],
+  imports: [CommonModule, ReactiveFormsModule, TramiteRequirementsBlockComponent, SignatureSectionComponent],
   templateUrl: './conservation-sustainable-use-report.component.html',
   styleUrl: './conservation-sustainable-use-report.component.css',
 })
 export default class ConservationSustainableUseReportComponent {
   private fb = inject(FormBuilder);
 
+  readonly tramiteServiceId = signal('');
+  onServiceIdBound(serviceId: string): void {
+    this.tramiteServiceId.set(serviceId);
+  }
+
   form: FormGroup = this.fb.group({
-    requirements: this.fb.group({
-      additional_information_document: [null, Validators.required],
-      official_id_document: [null, Validators.required],
-    }),
+    requirements: this.fb.group({}),
     signature: this.fb.group({
       signature_file: [null, Validators.required],
     }),
   });
-
-  requirementsList: Requirement[] = [
-    {
-      controlName: 'additional_information_document',
-      title: 'INFORMACIÓN ADICIONAL AL TRÁMITE',
-      legalReference: 'Artículos 42 párrafo segundo, 91 párrafo segundo y 103, Ley General de Vida Silvestre, publicado en el DOF el 3 de julio de 2000. Artículo 44, 50 fracción I y artículos 51, 96, 105 y 122, Reglamento de la Ley General de Vida Silvestre, publicado en el DOF el 30 de noviembre de 2006.',
-    },
-    {
-      controlName: 'official_id_document',
-      title: 'ACREDITAR PERSONALIDAD (Identificación Oficial)',
-      legalReference: 'Artículo 12, párrafo segundo, Reglamento de la Ley General de Vida Silvestre, publicado en el DOF el 30 de noviembre de 2006.',
-    },
-  ];
 
   signaturesList: Signature[] = [
     {

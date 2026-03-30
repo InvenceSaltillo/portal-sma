@@ -15,6 +15,9 @@ import serviceTypesRoutes from './routes/service-types.js';
 import requestsRoutes from './routes/requests.js';
 import speciesRoutes from './routes/species.js';
 import storageRoutes from './routes/storage.js';
+import adminUsersRoutes from './routes/admin-users.js';
+import agendaAppointmentsRoutes from './routes/agenda-appointments.js';
+import notificationsRoutes from './routes/notifications.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -92,6 +95,9 @@ app.use('/api/service-types', serviceTypesRoutes);
 app.use('/api/requests', requestsRoutes);
 app.use('/api/species', speciesRoutes);
 app.use('/api/storage', storageRoutes);
+app.use('/api/admin/users', adminUsersRoutes);
+app.use('/api/agenda-appointments', agendaAppointmentsRoutes);
+app.use('/api/notifications', notificationsRoutes);
 
 // 404 handler
 app.use(notFound);

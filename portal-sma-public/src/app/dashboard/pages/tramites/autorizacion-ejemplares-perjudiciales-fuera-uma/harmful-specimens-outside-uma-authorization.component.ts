@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RequestLocationSectionComponent } from '../../../../shared/sections/request-location-section/request-location-section.component';
@@ -10,7 +10,7 @@ import { AuthorizedPersonSectionComponent } from '../../../../shared/sections/au
 import { AddressContactSectionComponent } from '../../../../shared/sections/address-contact-section/address-contact-section.component';
 import { NotificationAddressContactSectionComponent } from '../../../../shared/sections/notification-address-contact-section/notification-address-contact-section.component';
 import { SpeciesControlSectionComponent } from '../../../../shared/sections/species-control-section/species-control-section.component';
-import { RequirementsSectionComponent, Requirement } from '../../../../shared/sections/requirements-section/requirements-section.component';
+import { TramiteRequirementsBlockComponent } from '../../../../shared/components/tramite-requirements-block/tramite-requirements-block.component';
 import { SignatureSectionComponent, Signature } from '../../../../shared/sections/signature-section/signature-section.component';
 import { PrivacyAcceptanceSectionComponent } from '../../../../shared/sections/privacy-acceptance-section/privacy-acceptance-section.component';
 import { SupabaseService } from '../../../../services/supabase.service';
@@ -30,7 +30,7 @@ import { SupabaseService } from '../../../../services/supabase.service';
     AddressContactSectionComponent,
     NotificationAddressContactSectionComponent,
     SpeciesControlSectionComponent,
-    RequirementsSectionComponent,
+    TramiteRequirementsBlockComponent,
     SignatureSectionComponent,
     PrivacyAcceptanceSectionComponent,
   ],
@@ -40,6 +40,11 @@ import { SupabaseService } from '../../../../services/supabase.service';
 export default class HarmfulSpecimensOutsideUmaAuthorizationComponent implements OnInit {
   private fb = inject(FormBuilder);
   private supabaseService = inject(SupabaseService);
+
+  readonly tramiteServiceId = signal('');
+  onServiceIdBound(serviceId: string): void {
+    this.tramiteServiceId.set(serviceId);
+  }
 
   form: FormGroup = this.fb.group({
     requestLocation: this.fb.group({
@@ -112,12 +117,7 @@ export default class HarmfulSpecimensOutsideUmaAuthorizationComponent implements
       disposal_method: ['', Validators.required],
       prevention_control_measures: ['', Validators.required],
     }),
-    requirements: this.fb.group({
-      evidence_predio: [null, Validators.required],
-      legal_tenure: [null, Validators.required],
-      official_id: [null, Validators.required],
-      predio_information: [null, Validators.required],
-    }),
+    requirements: this.fb.group({}),
     signature: this.fb.group({
       signature_file: [null, Validators.required],
     }),
@@ -183,31 +183,6 @@ export default class HarmfulSpecimensOutsideUmaAuthorizationComponent implements
   notificationStateOptions: { value: string; label: string }[] = [{ value: '', label: '-- Seleccione --' }];
   notificationMunicipalityOptions: { value: string; label: string }[] = [{ value: '', label: '-- Seleccione --' }];
   speciesOptions: { value: string; label: string }[] = [{ value: '', label: '-- Seleccione --' }];
-
-  // Requisitos para la sección (FUERA DE UMA)
-  requirementsList: Requirement[] = [
-    {
-      controlName: 'evidence_predio',
-      title: 'EVIDENCIA DE EJEMPLARES EN EL PREDIO',
-      legalReference: '',
-    },
-    {
-      controlName: 'legal_tenure',
-      title: 'LEGAL TENENCIA DEL PREDIO',
-      legalReference: '',
-    },
-    {
-      controlName: 'official_id',
-      title: 'ACREDITAR PERSONALIDAD (Identificación Oficial)',
-      legalReference:
-        'Artículo 12, párrafo segundo, Reglamento de la Ley General de Vida Silvestre, publicado en el DOF el 30 de noviembre de 2006.',
-    },
-    {
-      controlName: 'predio_information',
-      title: 'INFORMACION DEL PREDIO',
-      legalReference: '',
-    },
-  ];
 
   // Firmas para la sección
   signaturesList: Signature[] = [

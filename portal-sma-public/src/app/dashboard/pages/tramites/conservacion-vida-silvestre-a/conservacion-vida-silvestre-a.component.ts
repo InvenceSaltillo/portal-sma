@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RequestLocationSectionComponent } from '../../../../shared/sections/request-location-section/request-location-section.component';
@@ -12,7 +12,7 @@ import { AddressContactSectionComponent } from '../../../../shared/sections/addr
 import { NotificationAddressContactSectionComponent } from '../../../../shared/sections/notification-address-contact-section/notification-address-contact-section.component';
 import { PrivacyAcceptanceSectionComponent } from '../../../../shared/sections/privacy-acceptance-section/privacy-acceptance-section.component';
 import { AttachedDocumentationSectionComponent, DocumentationItem } from '../../../../shared/sections/attached-documentation-section/attached-documentation-section.component';
-import { RequirementsSectionComponent, Requirement } from '../../../../shared/sections/requirements-section/requirements-section.component';
+import { TramiteRequirementsBlockComponent } from '../../../../shared/components/tramite-requirements-block/tramite-requirements-block.component';
 import { SignatureSectionComponent, Signature } from '../../../../shared/sections/signature-section/signature-section.component';
 import { SupabaseService } from '../../../../services/supabase.service';
 import { DropdownModule } from 'primeng/dropdown';
@@ -35,7 +35,7 @@ import { DropdownModule } from 'primeng/dropdown';
     NotificationAddressContactSectionComponent,
     PrivacyAcceptanceSectionComponent,
     AttachedDocumentationSectionComponent,
-    RequirementsSectionComponent,
+    TramiteRequirementsBlockComponent,
     SignatureSectionComponent,
   ],
   templateUrl: './conservacion-vida-silvestre-a.component.html',
@@ -44,6 +44,11 @@ import { DropdownModule } from 'primeng/dropdown';
 export default class ConservacionVidaSilvestreAComponent implements OnInit {
   private fb = inject(FormBuilder);
   private supabaseService = inject(SupabaseService);
+
+  readonly tramiteServiceId = signal('');
+  onServiceIdBound(serviceId: string): void {
+    this.tramiteServiceId.set(serviceId);
+  }
 
   form: FormGroup = this.fb.group({
     requestLocation: this.fb.group({
@@ -129,12 +134,7 @@ export default class ConservacionVidaSilvestreAComponent implements OnInit {
       inventory_list: this.fb.array([]),
     }),
     attachedDocumentation: this.fb.group({}),
-    requirements: this.fb.group({
-      plan_manejo: [null, Validators.required],
-      inventario: [null, Validators.required],
-      official_id_document: [null, Validators.required],
-      legal_provenance: [null, Validators.required],
-    }),
+    requirements: this.fb.group({}),
     signature: this.fb.group({
       signature_file: [null, Validators.required],
     }),
@@ -273,33 +273,6 @@ export default class ConservacionVidaSilvestreAComponent implements OnInit {
       description:
         'Plan de manejo. (Sólo deberá presentarse para la modalidad B en caso de registro o cuando en la actualización se vayan a incorporar especies diferentes a las ya registradas, distintos a los registrados).',
       hasNotApplicable: true,
-    },
-  ];
-
-  requirementsList: Requirement[] = [
-    {
-      controlName: 'plan_manejo',
-      title: 'CONSERVACIÓN DE LA VIDA SILVESTRE FUERA DE SU HÁBITAT NATURAL, MODALIDAD "A": PLAN DE MANEJO',
-      legalReference:
-        'Artículo 131, Fracción II, Reglamento de la Ley General de Vida Silvestre publicado en el DOF el 30 de noviembre de 2006 y sus reformas.',
-    },
-    {
-      controlName: 'inventario',
-      title: 'CONSERVACIÓN DE LA VIDA SILVESTRE FUERA DE SU HÁBITAT NATURAL, MODALIDAD "A": INVENTARIO',
-      legalReference:
-        'Artículo 131, Párrafo tercero, Reglamento de la Ley General de Vida Silvestre publicado en el DOF el 30 de noviembre de 2006 y sus reformas.',
-    },
-    {
-      controlName: 'official_id_document',
-      title: 'ACREDITAR PERSONALIDAD (Identificación Oficial)',
-      legalReference:
-        'Artículo 12, párrafo segundo, Reglamento de la Ley General de Vida Silvestre, publicado en el DOF el 30 de noviembre de 2006.',
-    },
-    {
-      controlName: 'legal_provenance',
-      title: 'CONSERVACIÓN DE LA VIDA SILVESTRE FUERA DE SU HÁBITAT NATURAL MODALIDAD A: LEGAL PROCEDENCIA',
-      legalReference:
-        'Artículo 131, Fracción I, Reglamento de la Ley General de Vida Silvestre publicado en el DOF el 30 de noviembre de 2006 y sus reformas.',
     },
   ];
 

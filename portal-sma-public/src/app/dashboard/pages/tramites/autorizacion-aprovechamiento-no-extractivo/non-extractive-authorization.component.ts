@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RequestLocationSectionComponent } from '../../../../shared/sections/request-location-section/request-location-section.component';
@@ -10,7 +10,7 @@ import { AuthorizedPersonSectionComponent } from '../../../../shared/sections/au
 import { AddressContactSectionComponent } from '../../../../shared/sections/address-contact-section/address-contact-section.component';
 import { NotificationAddressContactSectionComponent } from '../../../../shared/sections/notification-address-contact-section/notification-address-contact-section.component';
 import { NonExtractiveInfoSectionComponent } from '../../../../shared/sections/non-extractive-info-section/non-extractive-info-section.component';
-import { RequirementsSectionComponent, Requirement } from '../../../../shared/sections/requirements-section/requirements-section.component';
+import { TramiteRequirementsBlockComponent } from '../../../../shared/components/tramite-requirements-block/tramite-requirements-block.component';
 import { SignatureSectionComponent, Signature } from '../../../../shared/sections/signature-section/signature-section.component';
 import { PrivacyAcceptanceSectionComponent } from '../../../../shared/sections/privacy-acceptance-section/privacy-acceptance-section.component';
 import { SupabaseService } from '../../../../services/supabase.service';
@@ -30,7 +30,7 @@ import { SupabaseService } from '../../../../services/supabase.service';
     AddressContactSectionComponent,
     NotificationAddressContactSectionComponent,
     NonExtractiveInfoSectionComponent,
-    RequirementsSectionComponent,
+    TramiteRequirementsBlockComponent,
     SignatureSectionComponent,
     PrivacyAcceptanceSectionComponent,
   ],
@@ -40,6 +40,11 @@ import { SupabaseService } from '../../../../services/supabase.service';
 export default class NonExtractiveAuthorizationComponent implements OnInit {
   private fb = inject(FormBuilder);
   private supabaseService = inject(SupabaseService);
+
+  readonly tramiteServiceId = signal('');
+  onServiceIdBound(serviceId: string): void {
+    this.tramiteServiceId.set(serviceId);
+  }
 
   form: FormGroup = this.fb.group({
     requestLocation: this.fb.group({
@@ -70,11 +75,7 @@ export default class NonExtractiveAuthorizationComponent implements OnInit {
       autorizada_apellido_paterno: ['', Validators.required],
       autorizada_apellido_materno: ['', Validators.required],
     }),
-    requirements: this.fb.group({
-      payment_proof: [null, Validators.required],
-      official_id: [null, Validators.required],
-      management_plan: [null, Validators.required],
-    }),
+    requirements: this.fb.group({}),
     signature: this.fb.group({
       signature_file: [null, Validators.required],
     }),
@@ -129,24 +130,6 @@ export default class NonExtractiveAuthorizationComponent implements OnInit {
     { value: '', label: '-- Seleccione --' },
     { value: 'uma', label: 'UMA' },
     { value: 'otro_predio', label: 'Otro predio' },
-  ];
-
-  requirementsList: Requirement[] = [
-    {
-      controlName: 'payment_proof',
-      title: 'Autorización de aprovechamiento no extractivo de vida silvestre: Comprobante de pago de derechos',
-      legalReference: 'Artículo 238 C, Fracciones I y II de la Ley Federal de Derechos vigente.',
-    },
-    {
-      controlName: 'official_id',
-      title: 'ACREDITAR PERSONALIDAD (Identificación Oficial)',
-      legalReference: 'Artículo 12, párrafo segundo, Reglamento de la Ley General de Vida Silvestre, publicado en el DOF el 30 de noviembre de 2006.',
-    },
-    {
-      controlName: 'management_plan',
-      title: 'Autorización de aprovechamiento no extractivo de vida silvestre: Plan de manejo',
-      legalReference: 'Artículo 132, primer párrafo, Reglamento de la Ley General de Vida Silvestre, publicado en el DOF el 30 de noviembre de 2006.',
-    },
   ];
 
   signaturesList: Signature[] = [

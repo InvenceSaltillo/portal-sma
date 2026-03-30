@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { UmaRegistrationSectionComponent } from '../../../../shared/sections/uma-registration-section/uma-registration-section.component';
@@ -12,8 +12,7 @@ import { AddressContactSectionComponent } from '../../../../shared/sections/addr
 import { NotificationAddressContactSectionComponent } from '../../../../shared/sections/notification-address-contact-section/notification-address-contact-section.component';
 import { ModificationInfoSectionComponent } from '../../../../shared/sections/modification-info-section/modification-info-section.component';
 import { AttachedDocumentationSectionComponent, DocumentationItem } from '../../../../shared/sections/attached-documentation-section/attached-documentation-section.component';
-import { REQUIREMENT_ACCEPT_SHP_EXCEL } from '../../../../shared/constants/requirement-file-accept';
-import { RequirementsSectionComponent, Requirement } from '../../../../shared/sections/requirements-section/requirements-section.component';
+import { TramiteRequirementsBlockComponent } from '../../../../shared/components/tramite-requirements-block/tramite-requirements-block.component';
 import { SignatureSectionComponent, Signature } from '../../../../shared/sections/signature-section/signature-section.component';
 import { PrivacyAcceptanceSectionComponent } from '../../../../shared/sections/privacy-acceptance-section/privacy-acceptance-section.component';
 import { SupabaseService } from '../../../../services/supabase.service';
@@ -35,7 +34,7 @@ import { SupabaseService } from '../../../../services/supabase.service';
     NotificationAddressContactSectionComponent,
     ModificationInfoSectionComponent,
     AttachedDocumentationSectionComponent,
-    RequirementsSectionComponent,
+    TramiteRequirementsBlockComponent,
     SignatureSectionComponent,
     PrivacyAcceptanceSectionComponent,
   ],
@@ -45,6 +44,11 @@ import { SupabaseService } from '../../../../services/supabase.service';
 export default class ModificacionUmmaComponent implements OnInit {
   private fb = inject(FormBuilder);
   private supabaseService = inject(SupabaseService);
+
+  readonly tramiteServiceId = signal('');
+  onServiceIdBound(serviceId: string): void {
+    this.tramiteServiceId.set(serviceId);
+  }
 
   form: FormGroup = this.fb.group({
     umaRegistration: this.fb.group({
@@ -127,14 +131,7 @@ export default class ModificacionUmmaComponent implements OnInit {
       new_marking_system: ['', Validators.required],
     }),
     attachedDocumentation: this.fb.group({}),
-    requirements: this.fb.group({
-      technical_manager_nomination: [null, Validators.required],
-      ownership_transfer_document: [null, Validators.required],
-      ownership_rights_document: [null, Validators.required],
-      shp_or_excel_file: [null, Validators.required],
-      official_id_document: [null, Validators.required],
-      biological_sheet_file: [null, Validators.required],
-    }),
+    requirements: this.fb.group({}),
     signature: this.fb.group({
       signature_file: [null, Validators.required],
     }),
@@ -231,51 +228,6 @@ export default class ModificacionUmmaComponent implements OnInit {
       description:
         'Copia de los documentos mediante los cuales se hayan transferido los derechos de propiedad o posesión legítima de los predios en donde se localiza la UMA, cuando se trate de cambio de titular.',
       hasNotApplicable: true,
-    },
-  ];
-
-  // Requisitos
-  requirementsList: Requirement[] = [
-    {
-      controlName: 'technical_manager_nomination',
-      title: 'Nombramiento de responsable técnico',
-      legalReference:
-        'Art. 7o. de la Ley General de Vida Silvestre y demás disposiciones aplicables a la designación de responsables técnicos en UMA.',
-    },
-    {
-      controlName: 'ownership_transfer_document',
-      title:
-        'TRANSFERENCIA DE DERECHOS DE PROPIEDAD (sólo cuando se trate de un cambio de titular)',
-      legalReference:
-        'Art. 79, fracción IV, Reglamento de la Ley General de Vida Silvestre, publicado en el DOF el 30 de noviembre de 2006.',
-    },
-    {
-      controlName: 'ownership_rights_document',
-      title:
-        'DERECHOS DE PROPIEDAD (cuando se trate de una modificación de superficie)',
-      legalReference:
-        'Artículos 29 y 79 del Reglamento de la Ley General de Vida Silvestre, publicado en el DOF el 30 de noviembre de 2006.',
-    },
-    {
-      controlName: 'shp_or_excel_file',
-      title:
-        'Archivo .SHP o Excel (cuando se trate de un registro de UMA o modificación en la superficie)',
-      legalReference:
-        'Artículos 29 y 79 del Reglamento de la Ley General de Vida Silvestre, publicado en el DOF el 30 de noviembre de 2006.',
-      accept: REQUIREMENT_ACCEPT_SHP_EXCEL,
-    },
-    {
-      controlName: 'official_id_document',
-      title: 'ACREDITAR PERSONALIDAD (Identificación Oficial)',
-      legalReference:
-        'Artículo 12, párrafo segundo, Reglamento de la Ley General de Vida Silvestre, publicado en el DOF el 30 de noviembre de 2006.',
-    },
-    {
-      controlName: 'biological_sheet_file',
-      title:
-        'CUADRO DE FICHA(S) BIOLÓGICA(S) DE LA(S) ESPECIE(S) (cuando se trate de una ampliación de especies)',
-      legalReference:
-        'Art. 77, párrafo segundo, Reglamento de la Ley General de Vida Silvestre, publicado en el DOF el 30 de noviembre de 2006.',
     },
   ];
 

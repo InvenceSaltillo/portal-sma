@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators } from '@angular/forms';
 import { UmaRegistrationSectionComponent } from '../../../../shared/sections/uma-registration-section/uma-registration-section.component';
@@ -12,7 +12,7 @@ import { AddressContactSectionComponent } from '../../../../shared/sections/addr
 import { NotificationAddressContactSectionComponent } from '../../../../shared/sections/notification-address-contact-section/notification-address-contact-section.component';
 import { TransactionInformationSectionComponent } from '../../../../shared/sections/transaction-information-section/transaction-information-section.component';
 import { ProductDetailSectionComponent } from '../../../../shared/sections/product-detail-section/product-detail-section.component';
-import { RequirementsSectionComponent, Requirement } from '../../../../shared/sections/requirements-section/requirements-section.component';
+import { TramiteRequirementsBlockComponent } from '../../../../shared/components/tramite-requirements-block/tramite-requirements-block.component';
 import { SignatureSectionComponent, Signature } from '../../../../shared/sections/signature-section/signature-section.component';
 import { PrivacyAcceptanceSectionComponent } from '../../../../shared/sections/privacy-acceptance-section/privacy-acceptance-section.component';
 import { SupabaseService } from '../../../../services/supabase.service';
@@ -34,7 +34,7 @@ import { SupabaseService } from '../../../../services/supabase.service';
     NotificationAddressContactSectionComponent,
     TransactionInformationSectionComponent,
     ProductDetailSectionComponent,
-    RequirementsSectionComponent,
+    TramiteRequirementsBlockComponent,
     SignatureSectionComponent,
     PrivacyAcceptanceSectionComponent,
   ],
@@ -44,6 +44,11 @@ import { SupabaseService } from '../../../../services/supabase.service';
 export default class CommercialExtractiveAuthorizationComponent implements OnInit {
   private fb = inject(FormBuilder);
   private supabaseService = inject(SupabaseService);
+
+  readonly tramiteServiceId = signal('');
+  onServiceIdBound(serviceId: string): void {
+    this.tramiteServiceId.set(serviceId);
+  }
 
   form: FormGroup = this.fb.group({
     umaRegistration: this.fb.group({
@@ -116,11 +121,7 @@ export default class CommercialExtractiveAuthorizationComponent implements OnIni
     productDetail: this.fb.group({
       products: this.fb.array([]),
     }),
-    requirements: this.fb.group({
-      payment_proof: [null, Validators.required],
-      monitoring_report: [null, Validators.required],
-      official_id: [null, Validators.required],
-    }),
+    requirements: this.fb.group({}),
     signature: this.fb.group({
       signature_file: [null, Validators.required],
     }),
@@ -184,25 +185,6 @@ export default class CommercialExtractiveAuthorizationComponent implements OnIni
   get privacyAcceptanceGroup(): FormGroup {
     return this.form.get('privacyAcceptance') as FormGroup;
   }
-
-  // Requisitos para la sección
-  requirementsList: Requirement[] = [
-    {
-      controlName: 'payment_proof',
-      title: 'COMPROBANTE DE PAGO DE DERECHOS POR ELABORACIÓN DE TASA DE APROVECHAMIENTO',
-      legalReference: 'Artículo 130, Fracción XXXIII, de la Ley de Hacienda para el Estado de Coahuila de Zaragoza vigente.',
-    },
-    {
-      controlName: 'monitoring_report',
-      title: 'INFORME DE MONITOREO EN UMA Y/O INVENTARIO',
-      legalReference: 'Artículo 91, párrafo último, Reglamento de la Ley General de Vida Silvestre, publicado en el DOF el 30 de noviembre de 2006.',
-    },
-    {
-      controlName: 'official_id',
-      title: 'ACREDITAR PERSONALIDAD (Identificación Oficial)',
-      legalReference: 'Artículo 12, párrafo segundo, Reglamento de la Ley General de Vida Silvestre, publicado en el DOF el 30 de noviembre de 2006.',
-    },
-  ];
 
   // Firmas para la sección
   signaturesList: Signature[] = [

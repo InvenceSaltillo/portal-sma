@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RequestLocationSectionComponent } from '../../../../shared/sections/request-location-section/request-location-section.component';
@@ -12,7 +12,7 @@ import { NotificationAddressContactSectionComponent } from '../../../../shared/s
 import { SupabaseService } from '../../../../services/supabase.service';
 import { PopoverIconComponent } from '../../../../shared/components/popover-icon/popover-icon.component';
 import { AttachedDocumentationSectionComponent, DocumentationItem } from '../../../../shared/sections/attached-documentation-section/attached-documentation-section.component';
-import { RequirementsSectionComponent, Requirement } from '../../../../shared/sections/requirements-section/requirements-section.component';
+import { TramiteRequirementsBlockComponent } from '../../../../shared/components/tramite-requirements-block/tramite-requirements-block.component';
 import { SignatureSectionComponent, Signature } from '../../../../shared/sections/signature-section/signature-section.component';
 import { PrivacyAcceptanceSectionComponent } from '../../../../shared/sections/privacy-acceptance-section/privacy-acceptance-section.component';
 
@@ -32,7 +32,7 @@ import { PrivacyAcceptanceSectionComponent } from '../../../../shared/sections/p
     NotificationAddressContactSectionComponent,
     PopoverIconComponent,
     AttachedDocumentationSectionComponent,
-    RequirementsSectionComponent,
+    TramiteRequirementsBlockComponent,
     SignatureSectionComponent,
     PrivacyAcceptanceSectionComponent,
   ],
@@ -42,6 +42,11 @@ import { PrivacyAcceptanceSectionComponent } from '../../../../shared/sections/p
 export default class MigratoryBirdsNoticeComponent implements OnInit {
   private fb = inject(FormBuilder);
   private supabaseService = inject(SupabaseService);
+
+  readonly tramiteServiceId = signal('');
+  onServiceIdBound(serviceId: string): void {
+    this.tramiteServiceId.set(serviceId);
+  }
 
   form: FormGroup = this.fb.group({
     requestLocation: this.fb.group({
@@ -107,10 +112,7 @@ export default class MigratoryBirdsNoticeComponent implements OnInit {
       uma_name_registration_location: ['', Validators.required],
     }),
     attachedDocumentation: this.fb.group({}),
-    requirements: this.fb.group({
-      owner_consent_document: [null, Validators.required],
-      official_id_document: [null, Validators.required],
-    }),
+    requirements: this.fb.group({}),
     signature: this.fb.group({
       signature_file: [null, Validators.required],
     }),
@@ -145,18 +147,6 @@ export default class MigratoryBirdsNoticeComponent implements OnInit {
       controlName: 'owner_consent_document',
       description: 'Documento donde conste el consentimiento del legítimo propietario o poseedor del predio.',
       hasNotApplicable: false,
-    },
-  ];
-  requirementsList: Requirement[] = [
-    {
-      controlName: 'owner_consent_document',
-      title: 'AVISO PARA REALIZAR APROVECHAMIENTO DE AVES SILVESTRES MIGRATORIAS EN PREDIOS DISTINTOS A DONDE SE LLEVA A CABO LA CONSERVACIÓN: Documento de consentimiento',
-      legalReference: 'Artículo 102, párrafo segundo, Reglamento de la Ley General de Vida Silvestre, publicado en el DOF el 30 de noviembre de 2006.',
-    },
-    {
-      controlName: 'official_id_document',
-      title: 'ACREDITAR PERSONALIDAD (Identificación Oficial)',
-      legalReference: 'Artículo 12, párrafo segundo, Reglamento de la Ley General de Vida Silvestre, publicado en el DOF el 30 de noviembre de 2006.',
     },
   ];
   signaturesList: Signature[] = [

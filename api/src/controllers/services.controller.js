@@ -116,6 +116,40 @@ export const getServicesByType = async (req, res, next) => {
 };
 
 /**
+ * Requisitos documentales vinculados al trámite (catálogo + orden).
+ * GET /api/services/:id/requirements
+ * Respeta RLS: usuario autenticado del mismo cliente que el servicio.
+ */
+export const getServiceRequirements = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    // RPC SECURITY DEFINER: el embed PostgREST + RLS a menudo deja requirement_catalog en null
+    // y el listado queda vacío aunque existan filas en service_requirements.
+    const { data, error } = await req.supabase.rpc('get_service_requirements_for_portal', {
+      p_service_id: id,
+    });
+
+    if (error) throw error;
+
+    let rows = data;
+    if (rows == null) rows = [];
+    if (typeof rows === 'string') {
+      try {
+        rows = JSON.parse(rows);
+      } catch {
+        rows = [];
+      }
+    }
+    if (!Array.isArray(rows)) rows = [];
+
+    res.json(rows);
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
  * Obtener campos de formulario por servicio
  * GET /api/services/:id/form-fields
  */

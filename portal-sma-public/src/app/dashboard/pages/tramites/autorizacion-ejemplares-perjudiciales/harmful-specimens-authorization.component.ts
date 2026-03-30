@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { UmaRegistrationSectionComponent } from '../../../../shared/sections/uma-registration-section/uma-registration-section.component';
@@ -11,7 +11,7 @@ import { AuthorizedPersonSectionComponent } from '../../../../shared/sections/au
 import { AddressContactSectionComponent } from '../../../../shared/sections/address-contact-section/address-contact-section.component';
 import { NotificationAddressContactSectionComponent } from '../../../../shared/sections/notification-address-contact-section/notification-address-contact-section.component';
 import { SpeciesControlSectionComponent } from '../../../../shared/sections/species-control-section/species-control-section.component';
-import { RequirementsSectionComponent, Requirement } from '../../../../shared/sections/requirements-section/requirements-section.component';
+import { TramiteRequirementsBlockComponent } from '../../../../shared/components/tramite-requirements-block/tramite-requirements-block.component';
 import { SignatureSectionComponent, Signature } from '../../../../shared/sections/signature-section/signature-section.component';
 import { SupabaseService } from '../../../../services/supabase.service';
 
@@ -31,7 +31,7 @@ import { SupabaseService } from '../../../../services/supabase.service';
     AddressContactSectionComponent,
     NotificationAddressContactSectionComponent,
     SpeciesControlSectionComponent,
-    RequirementsSectionComponent,
+    TramiteRequirementsBlockComponent,
     SignatureSectionComponent,
   ],
   templateUrl: './harmful-specimens-authorization.component.html',
@@ -40,6 +40,11 @@ import { SupabaseService } from '../../../../services/supabase.service';
 export default class HarmfulSpecimensAuthorizationComponent implements OnInit {
   private fb = inject(FormBuilder);
   private supabaseService = inject(SupabaseService);
+
+  readonly tramiteServiceId = signal('');
+  onServiceIdBound(serviceId: string): void {
+    this.tramiteServiceId.set(serviceId);
+  }
 
   form: FormGroup = this.fb.group({
     umaRegistration: this.fb.group({
@@ -115,9 +120,7 @@ export default class HarmfulSpecimensAuthorizationComponent implements OnInit {
       disposal_method: ['', Validators.required],
       prevention_control_measures: ['', Validators.required],
     }),
-    requirements: this.fb.group({
-      official_id: [null, Validators.required],
-    }),
+    requirements: this.fb.group({}),
     signature: this.fb.group({
       signature_file: [null, Validators.required],
     }),
@@ -180,16 +183,6 @@ export default class HarmfulSpecimensAuthorizationComponent implements OnInit {
   notificationStateOptions: { value: string; label: string }[] = [{ value: '', label: '-- Seleccione --' }];
   notificationMunicipalityOptions: { value: string; label: string }[] = [{ value: '', label: '-- Seleccione --' }];
   speciesOptions: { value: string; label: string }[] = [{ value: '', label: '-- Seleccione --' }];
-
-  // Requisitos para la sección
-  requirementsList: Requirement[] = [
-    {
-      controlName: 'official_id',
-      title: 'ACREDITAR PERSONALIDAD (Identificación Oficial)',
-      legalReference:
-        'Artículo 12, párrafo segundo, Reglamento de la Ley General de Vida Silvestre, publicado en el DOF el 30 de noviembre de 2006.',
-    },
-  ];
 
   // Firmas para la sección
   signaturesList: Signature[] = [

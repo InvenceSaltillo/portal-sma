@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RequestLocationSectionComponent } from '../../../../shared/sections/request-location-section/request-location-section.component';
@@ -13,7 +13,7 @@ import { PrivacyAcceptanceSectionComponent } from '../../../../shared/sections/p
 import { SupabaseService } from '../../../../services/supabase.service';
 import { PopoverIconComponent } from '../../../../shared/components/popover-icon/popover-icon.component';
 import { DropdownModule } from 'primeng/dropdown';
-import { RequirementsSectionComponent, Requirement } from '../../../../shared/sections/requirements-section/requirements-section.component';
+import { TramiteRequirementsBlockComponent } from '../../../../shared/components/tramite-requirements-block/tramite-requirements-block.component';
 import { SignatureSectionComponent, Signature } from '../../../../shared/sections/signature-section/signature-section.component';
 
 @Component({
@@ -32,7 +32,7 @@ import { SignatureSectionComponent, Signature } from '../../../../shared/section
     NotificationAddressContactSectionComponent,
     PopoverIconComponent,
     DropdownModule,
-    RequirementsSectionComponent,
+    TramiteRequirementsBlockComponent,
     SignatureSectionComponent,
     PrivacyAcceptanceSectionComponent,
   ],
@@ -42,6 +42,11 @@ import { SignatureSectionComponent, Signature } from '../../../../shared/section
 export default class TransferRightsComponent implements OnInit {
   private fb = inject(FormBuilder);
   private supabaseService = inject(SupabaseService);
+
+  readonly tramiteServiceId = signal('');
+  onServiceIdBound(serviceId: string): void {
+    this.tramiteServiceId.set(serviceId);
+  }
 
   form: FormGroup = this.fb.group({
     requestLocation: this.fb.group({
@@ -150,10 +155,7 @@ export default class TransferRightsComponent implements OnInit {
         email: ['', [Validators.required, Validators.email]],
       }),
     }),
-    requirements: this.fb.group({
-      contract_copy_document: [null, Validators.required],
-      official_id_document: [null, Validators.required],
-    }),
+    requirements: this.fb.group({}),
     signature: this.fb.group({
       signature_file: [null, Validators.required],
     }),
@@ -175,18 +177,6 @@ export default class TransferRightsComponent implements OnInit {
   ];
   transfereeAddressStateOptions: { value: string; label: string }[] = [{ value: '', label: '-- Seleccione --' }];
   transfereeAddressMunicipalityOptions: { value: string; label: string }[] = [{ value: '', label: '-- Seleccione --' }];
-  requirementsList: Requirement[] = [
-    {
-      controlName: 'contract_copy_document',
-      title: 'TRANSFERENCIA DE DERECHOS DERIVADOS DE AUTORIZACIONES DE APROVECHAMIENTO DE LA VIDA SILVESTRE: Copia del contrato',
-      legalReference: 'Artículos 89 párrafo primero y 100 párrafo segundo, Ley General de Vida Silvestre, publicado en el DOF el 3 de julio de 2000.',
-    },
-    {
-      controlName: 'official_id_document',
-      title: 'ACREDITAR PERSONALIDAD (Identificación Oficial)',
-      legalReference: 'Artículo 12, párrafo segundo, Reglamento de la Ley General de Vida Silvestre, publicado en el DOF el 30 de noviembre de 2006.',
-    },
-  ];
   signaturesList: Signature[] = [
     {
       controlName: 'signature_file',

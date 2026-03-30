@@ -8,11 +8,14 @@ export interface Requirement {
   controlName: string;
   title: string;
   legalReference: string;
+  description?: string | null;
   /**
    * Lista `accept` del input file (coma-separada), alineada con `requirement_catalog.accept`.
    * Por defecto solo PDF.
    */
   accept?: string;
+  /** Si se omite, usa el `maxSizeMB` de la sección. */
+  maxSizeMB?: number;
 }
 
 @Component({

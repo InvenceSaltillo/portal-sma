@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RequestLocationSectionComponent } from '../../../../shared/sections/request-location-section/request-location-section.component';
@@ -11,7 +11,7 @@ import { AddressContactSectionComponent } from '../../../../shared/sections/addr
 import { NotificationAddressContactSectionComponent } from '../../../../shared/sections/notification-address-contact-section/notification-address-contact-section.component';
 import { SpecimenReleaseInfoSectionComponent } from '../../../../shared/sections/specimen-release-info-section/specimen-release-info-section.component';
 import { AttachedDocumentationSectionComponent, DocumentationItem } from '../../../../shared/sections/attached-documentation-section/attached-documentation-section.component';
-import { RequirementsSectionComponent, Requirement } from '../../../../shared/sections/requirements-section/requirements-section.component';
+import { TramiteRequirementsBlockComponent } from '../../../../shared/components/tramite-requirements-block/tramite-requirements-block.component';
 import { SignatureSectionComponent, Signature } from '../../../../shared/sections/signature-section/signature-section.component';
 import { PrivacyAcceptanceSectionComponent } from '../../../../shared/sections/privacy-acceptance-section/privacy-acceptance-section.component';
 import { SupabaseService } from '../../../../services/supabase.service';
@@ -32,7 +32,7 @@ import { SupabaseService } from '../../../../services/supabase.service';
     NotificationAddressContactSectionComponent,
     SpecimenReleaseInfoSectionComponent,
     AttachedDocumentationSectionComponent,
-    RequirementsSectionComponent,
+    TramiteRequirementsBlockComponent,
     SignatureSectionComponent,
     PrivacyAcceptanceSectionComponent,
   ],
@@ -42,6 +42,11 @@ import { SupabaseService } from '../../../../services/supabase.service';
 export default class SpecimenReleaseAuthorizationComponent implements OnInit {
   private fb = inject(FormBuilder);
   private supabaseService = inject(SupabaseService);
+
+  readonly tramiteServiceId = signal('');
+  onServiceIdBound(serviceId: string): void {
+    this.tramiteServiceId.set(serviceId);
+  }
 
   form: FormGroup = this.fb.group({
     requestLocation: this.fb.group({
@@ -204,20 +209,6 @@ export default class SpecimenReleaseAuthorizationComponent implements OnInit {
       controlName: 'proyecto_repoblacion',
       description: 'Proyecto de repoblación, reintroducción o traslocación.',
       hasNotApplicable: false,
-    },
-  ];
-
-  // Requisitos para la sección
-  requirementsList: Requirement[] = [
-    {
-      controlName: 'proyecto_liberacion',
-      title: 'AUTORIZACIÓN PARA LA LIBERACIÓN DE EJEMPLARES DE VIDA SILVESTRE AL HÁBITAT NATURAL: Proyecto',
-      legalReference: 'Articulos 80 incisos a, b y c. Ley General de Vida Silvestre, publicado en el DOF el 3 de julio de 2000.',
-    },
-    {
-      controlName: 'acreditar_personalidad',
-      title: 'ACREDITAR PERSONALIDAD (Identificación Oficial)',
-      legalReference: 'Articulo 12, párrafo segundo, Reglamento de la Ley General de Vida Silvestre, publicado en el DOF el 30 de noviembre de 2006.',
     },
   ];
 

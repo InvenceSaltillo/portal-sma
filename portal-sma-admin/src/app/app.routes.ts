@@ -57,6 +57,7 @@ import { PromoterByUmaComponent } from './pages/configuration/promoter-by-uma/pr
 import { FormatConfigurationComponent } from './pages/configuration/format-configuration/format-configuration.component';
 import { ParameterConfigurationComponent } from './pages/configuration/parameter-configuration/parameter-configuration.component';
 import { SignInComponent } from './pages/auth-pages/sign-in/sign-in.component';
+import { NotificationsComponent } from './pages/notifications/notifications.component';
 import { authGuard } from './core/auth/auth.guard';
 import { guestGuard } from './core/auth/guest.guard';
 
@@ -89,8 +90,15 @@ export const routes: Routes = [
         path: 'calendar',
         component: CalendarComponent,
         pathMatch: 'full',
+        data: { calendarMode: 'agenda' },
         title:
           'Portal SMA - Agenda',
+      },
+      {
+        path: 'notifications',
+        component: NotificationsComponent,
+        pathMatch: 'full',
+        title: 'Portal SMA - Notificaciones',
       },
       {
         path: 'catalog/procedure-types/new',
@@ -255,6 +263,7 @@ export const routes: Routes = [
       {
         path: 'single-window/agenda-administration',
         component: AgendaAdministrationComponent,
+        pathMatch: 'full',
         title: 'Portal SMA - Administración de Agenda',
       },
       {

@@ -1,5 +1,13 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, QueryList, ViewChildren, ChangeDetectorRef } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  ElementRef,
+  OnDestroy,
+  OnInit,
+  QueryList,
+  ViewChildren,
+} from '@angular/core';
 import { SidebarService } from '../../services/sidebar.service';
 import { NavigationEnd, Router, RouterModule } from '@angular/router';
 import { combineLatest, Subscription } from 'rxjs';
@@ -23,7 +31,7 @@ type NavItem = {
   ],
   templateUrl: './app-sidebar.component.html',
 })
-export class AppSidebarComponent {
+export class AppSidebarComponent implements OnInit, OnDestroy {
 
   // Main nav items
   navItems: NavItem[] = [
@@ -227,8 +235,13 @@ export class AppSidebarComponent {
     this.subscription.unsubscribe();
   }
 
+  /** Ruta actual sin query ni hash (misma base que `setActiveMenuFromRoute`). */
+  private currentUrlPath(): string {
+    return this.router.url.split('?')[0].split('#')[0];
+  }
+
   isActive(path: string): boolean {
-    return this.router.url === path;
+    return this.currentUrlPath() === path;
   }
 
   toggleSubmenu(section: string, index: number) {
@@ -259,31 +272,40 @@ export class AppSidebarComponent {
   }
 
   private setActiveMenuFromRoute(currentUrl: string) {
+    const urlPath = currentUrl.split('?')[0].split('#')[0];
+
+    // Si la ruta ya no es un subítem, cerrar el acordeón para no dejar el padre en "activo" (p. ej. /calendar tras /single-window/agenda-administration).
+    this.openSubmenu = null;
+
     const menuGroups = [
       { items: this.navItems, prefix: 'main' },
       { items: this.othersItems, prefix: 'others' },
     ];
 
-    menuGroups.forEach(group => {
-      group.items.forEach((nav, i) => {
-        if (nav.subItems) {
-          nav.subItems.forEach(subItem => {
-            if (currentUrl === subItem.path) {
-              const key = `${group.prefix}-${i}`;
-              this.openSubmenu = key;
-
-              setTimeout(() => {
-                const el = document.getElementById(key);
-                if (el) {
-                  this.subMenuHeights[key] = el.scrollHeight;
-                  this.cdr.detectChanges(); // Ensure UI updates
-                }
-              });
-            }
-          });
+    for (const group of menuGroups) {
+      for (let i = 0; i < group.items.length; i++) {
+        const nav = group.items[i];
+        if (!nav.subItems) {
+          continue;
         }
-      });
-    });
+        for (const subItem of nav.subItems) {
+          if (urlPath === subItem.path) {
+            const key = `${group.prefix}-${i}`;
+            this.openSubmenu = key;
+            setTimeout(() => {
+              const el = document.getElementById(key);
+              if (el) {
+                this.subMenuHeights[key] = el.scrollHeight;
+                this.cdr.detectChanges();
+              }
+            });
+            return;
+          }
+        }
+      }
+    }
+
+    this.cdr.detectChanges();
   }
 
   onSubmenuClick() {

@@ -1,0 +1,40 @@
+/* Anula min-h-screen global de styles.css para que el calendario no ocupe toda la ventana. */
+.custom-calendar .fc.fc-media-screen {
+  min-height: 0;
+}
+
+/* Hora “dentro” de la celda (hover o selección al crear cita). */
+/* :host ::ng-deep .fc td.fc-timegrid-slot {
+  position: relative;
+}
+
+:host ::ng-deep .fc td.fc-timegrid-slot:hover::after,
+:host ::ng-deep .fc td.fc-timegrid-slot:has(.fc-highlight)::after {
+  content: attr(data-hover-time);
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 2;
+
+  color: rgba(51, 65, 85, 1);
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.85);
+}
+
+.dark :host ::ng-deep .fc td.fc-timegrid-slot:hover::after,
+.dark :host ::ng-deep .fc td.fc-timegrid-slot:has(.fc-highlight)::after {
+  color: rgba(226, 232, 240, 0.98);
+  text-shadow: 0 1px 0 rgba(2, 6, 23, 0.55);
+} */
+
+/* En selección vertical (drag), FullCalendar hereda texto blanco en .fc-event-main.
+   Forzamos contraste para que el rango de hora siempre sea visible. */
+:host ::ng-deep .fc-v-event .fc-event-main {
+  color: #000000 !important;
+  height: 100%;
+}

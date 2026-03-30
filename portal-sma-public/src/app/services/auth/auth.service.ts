@@ -3,7 +3,7 @@ import { GlobalState } from './../../interfaces/global-state.interface';
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { LoginResponse, RegisterResponse } from '../../interfaces/auth.interface';
 import { lastValueFrom } from 'rxjs';
-import { environment } from '../../../environments/environment.development';
+import { environment } from '../../../environments/environment';
 import { Router } from '@angular/router';
 import { AuthChangeEvent, AuthSession, createClient, Session, SupabaseClient, User } from '@supabase/supabase-js';
 import { supabaseClient } from './../../core/supabase.client';
@@ -32,7 +32,7 @@ export class AuthService {
   public user = computed(() => this.#state().data?.user);
   public loading = computed(() => this.#state().loading);
 
-  authUrl = `${environment.apiUrl}auth`
+  authUrl = `${environment.apiUrl}/auth`;
 
   constructor() { }
 

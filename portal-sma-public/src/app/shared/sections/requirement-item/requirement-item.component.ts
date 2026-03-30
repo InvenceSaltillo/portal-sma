@@ -40,6 +40,7 @@ export class RequirementItemComponent implements OnInit, OnDestroy {
   @Input({ required: true }) controlName!: string;
   @Input({ required: true }) title!: string;
   @Input({ required: true }) legalReference!: string;
+  @Input() description: string | null = null;
   @Input() maxSizeMB: number = 10;
   /** Lista `accept` HTML (coma-separada), ej. `application/pdf` o extensiones + MIME. */
   @Input() accept: string = 'application/pdf';
@@ -51,7 +52,7 @@ export class RequirementItemComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     // Inicializar el control si no existe
     if (!this.group.get(this.controlName)) {
-      this.group.addControl(this.controlName, new FormControl(null, Validators.required));
+      this.group.addControl(this.controlName, new FormControl(null));
     }
 
     // Si ya hay un archivo cargado, mostrarlo

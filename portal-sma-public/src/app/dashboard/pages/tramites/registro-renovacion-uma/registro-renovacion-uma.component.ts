@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
@@ -15,8 +15,7 @@ import { AddressContactSectionComponent } from '../../../../shared/sections/addr
 import { NotificationAddressContactSectionComponent } from '../../../../shared/sections/notification-address-contact-section/notification-address-contact-section.component';
 import { SignatureSectionComponent, Signature } from '../../../../shared/sections/signature-section/signature-section.component';
 import { SignatureItemComponent } from '../../../../shared/sections/signature-item/signature-item.component';
-import { REQUIREMENT_ACCEPT_SHP_EXCEL } from '../../../../shared/constants/requirement-file-accept';
-import { RequirementsSectionComponent, Requirement } from '../../../../shared/sections/requirements-section/requirements-section.component';
+import { TramiteRequirementsBlockComponent } from '../../../../shared/components/tramite-requirements-block/tramite-requirements-block.component';
 import { PrivacyAcceptanceSectionComponent } from '../../../../shared/sections/privacy-acceptance-section/privacy-acceptance-section.component';
 import { SupabaseService } from '../../../../services/supabase.service';
 import { PopoverIconComponent } from '../../../../shared/components/popover-icon/popover-icon.component';
@@ -46,7 +45,7 @@ import { DropdownModule } from 'primeng/dropdown';
     NotificationAddressContactSectionComponent,
     SignatureSectionComponent,
     SignatureItemComponent,
-    RequirementsSectionComponent,
+    TramiteRequirementsBlockComponent,
     PrivacyAcceptanceSectionComponent,
     PopoverIconComponent,
     DropdownModule,
@@ -181,18 +180,7 @@ export default class RegistroRenovacionUmaComponent implements OnInit {
       pfc_municipality_id: [''],
       especie_grupo_especies: [''],
     }),
-    requirements: this.fb.group({
-      inventario_ejemplares: [null, Validators.required],
-      plan_manejo_carta_adhesion: [null, Validators.required],
-      nombramiento_responsable_tecnico: [null, Validators.required],
-      carta_topografica: [null, Validators.required],
-      documentos_propiedad_planos: [null, Validators.required],
-      archivo_shp_excel: [null, Validators.required],
-      documentacion_renovacion: [null, Validators.required],
-      acreditar_personalidad: [null, Validators.required],
-      actas_asamblea_ejidos: [null, Validators.required],
-      estudios_poblacionales: [null, Validators.required],
-    }),
+    requirements: this.fb.group({}),
     signature: this.fb.group({
       signature_file: [null, Validators.required],
     }),
@@ -204,8 +192,13 @@ export default class RegistroRenovacionUmaComponent implements OnInit {
     }),
   });
 
-  serviceId: string | null = null;
+  /** UUID del trámite: query `?serviceId=` o asignación del wrapper tras createComponent. */
+  readonly serviceIdSig = signal<string>('');
   loading = false;
+
+  onServiceIdBound(serviceId: string): void {
+    this.serviceIdSig.set(serviceId);
+  }
 
   get requestLocationGroup(): FormGroup {
     return this.form.get('requestLocation') as FormGroup;
@@ -296,78 +289,11 @@ export default class RegistroRenovacionUmaComponent implements OnInit {
     },
   ];
 
-  requirementsList: Requirement[] = [
-    {
-      controlName: 'inventario_ejemplares',
-      title:
-        'En caso de registro, el Inventario de ejemplares, acompañado de la documentación que acredite su legal procedencia, solo cuando se trate de UMA sujetas a manejo Intensivo',
-      legalReference:
-        'Artículo 30, Fracción IV, Reglamento de la Ley General de Vida Silvestre, publicado en el DOF el 30 de noviembre de 2006.',
-    },
-    {
-      controlName: 'plan_manejo_carta_adhesion',
-      title:
-        'En caso de registro, el plan de manejo o carta de adhesión a los planes de manejo tipo establecidos por la Secretaría',
-      legalReference:
-        'Artículo 30, Fracción II, Reglamento de la Ley General de Vida Silvestre, publicado en el DOF el 30 de noviembre de 2006.',
-    },
-    {
-      controlName: 'nombramiento_responsable_tecnico',
-      title: 'Nombramiento de responsable técnico',
-      legalReference: 'Art. 47 bis 1 de la LGVS, Art. 34 bis del Reglamento de la LGVS',
-    },
-    {
-      controlName: 'carta_topografica',
-      title:
-        'En caso de registro, carta topográfica del Instituto Nacional de Estadística, Geografía e Informática o porción digitalizada del mismo, escala 1:50,000 o de escala adecuada al tamaño del predio, a efecto de ubicar el predio o instalación',
-      legalReference:
-        'Artículo 30, Fracción III, Reglamento de la Ley General de Vida Silvestre, publicado en el DOF el 30 de noviembre de 2006.',
-    },
-    {
-      controlName: 'documentos_propiedad_planos',
-      title:
-        'En caso de registro, copia de los documentos que acrediten los derechos de propiedad o legítima posesión de los predios o instalaciones y planos correspondientes a los mismos.',
-      legalReference:
-        'Artículo 30, Fracción I, Reglamento de la Ley General de Vida Silvestre, publicado en el DOF el 30 de noviembre de 2006.',
-    },
-    {
-      controlName: 'archivo_shp_excel',
-      title: 'Archivo .SHP o Excel (Cuando se trate de un Registro de UMA o Modificación en la Superficie)',
-      legalReference:
-        'Artículo 30, Fracción III, Reglamento de la Ley General de Vida Silvestre, publicado en el DOF el 30 de noviembre de 2006.',
-      accept: REQUIREMENT_ACCEPT_SHP_EXCEL,
-    },
-    {
-      controlName: 'documentacion_renovacion',
-      title:
-        'Cuando se trate de la renovación del registro solo deberá presentar: La documentación que acredite que se ha renovado, prorrogado o ampliado la vigencia de los derechos de posesión sobre predios sujetos a manejo para la conservación y aprovechamiento sustentable de la vida silvestre.',
-      legalReference:
-        'Artículo 36, Párrafo primero, Reglamento de la Ley General de Vida Silvestre, publicado en el DOF el 30 de noviembre de 2006.',
-    },
-    {
-      controlName: 'acreditar_personalidad',
-      title: 'ACREDITAR PERSONALIDAD (Identificación Oficial)',
-      legalReference:
-        'Artículo 12, Párrafo segundo, Reglamento de la Ley General de Vida Silvestre, publicado en el DOF el 30 de noviembre de 2006.',
-    },
-    {
-      controlName: 'actas_asamblea_ejidos',
-      title:
-        'En caso de registro, cuando se trate de ejidos o tierras comunales, se deberán anexar las actas de asamblea celebradas en términos de la legislación agraria, en las cuales se tome como resolución real',
-      legalReference:
-        'Artículo 32, Párrafo penúltimo, Reglamento de la Ley General de Vida Silvestre, publicado en el DOF el 30 de noviembre de 2006.',
-    },
-    {
-      controlName: 'estudios_poblacionales',
-      title: 'En caso de registro, estudios poblacionales (solo para fauna).',
-      legalReference:
-        'Art. 47 Bis, Párrafo segundo, Decreto por el que se reforman y adicionan diversas disposiciones de la Ley General de Vida Silvestre, publicado en el DOF el 6 de junio de 2012.',
-    },
-  ];
-
   ngOnInit(): void {
-    // serviceId puede venir por query params (ruta directa) o ser asignado por el tramite-wrapper después de cargar el componente
-    this.serviceId = this.route.snapshot.queryParamMap.get('serviceId');
+    const q = this.route.snapshot.queryParamMap.get('serviceId');
+    if (q) {
+      this.serviceIdSig.set(q);
+    }
     this.loadStates();
     this.listenRequestLocationStateChanges();
     this.listenAddressStateChanges();
@@ -416,7 +342,8 @@ export default class RegistroRenovacionUmaComponent implements OnInit {
       this.toastr.warning('Por favor complete todos los campos requeridos', 'Formulario incompleto');
       return;
     }
-    if (!this.serviceId) {
+    const serviceId = this.serviceIdSig();
+    if (!serviceId) {
       this.toastr.error('No se especificó el trámite', 'Error');
       return;
     }
@@ -435,7 +362,7 @@ export default class RegistroRenovacionUmaComponent implements OnInit {
       const result = await this.requestService.submitRequest({
         form: this.form,
         formFields: [],
-        serviceId: this.serviceId,
+        serviceId,
         userId: user.id,
       });
 

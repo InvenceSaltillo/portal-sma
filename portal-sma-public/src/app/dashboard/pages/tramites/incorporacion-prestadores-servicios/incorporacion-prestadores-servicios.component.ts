@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RequestLocationSectionComponent } from '../../../../shared/sections/request-location-section/request-location-section.component';
@@ -10,7 +10,7 @@ import { AuthorizedPersonSectionComponent } from '../../../../shared/sections/au
 import { AddressContactSectionComponent } from '../../../../shared/sections/address-contact-section/address-contact-section.component';
 import { NotificationAddressContactSectionComponent } from '../../../../shared/sections/notification-address-contact-section/notification-address-contact-section.component';
 import { PrivacyAcceptanceSectionComponent } from '../../../../shared/sections/privacy-acceptance-section/privacy-acceptance-section.component';
-import { RequirementsSectionComponent, Requirement } from '../../../../shared/sections/requirements-section/requirements-section.component';
+import { TramiteRequirementsBlockComponent } from '../../../../shared/components/tramite-requirements-block/tramite-requirements-block.component';
 import { SignatureSectionComponent, Signature } from '../../../../shared/sections/signature-section/signature-section.component';
 import { SupabaseService } from '../../../../services/supabase.service';
 import { DropdownModule } from 'primeng/dropdown';
@@ -33,7 +33,7 @@ import { PopoverIconComponent } from '../../../../shared/components/popover-icon
     AddressContactSectionComponent,
     NotificationAddressContactSectionComponent,
     PrivacyAcceptanceSectionComponent,
-    RequirementsSectionComponent,
+    TramiteRequirementsBlockComponent,
     SignatureSectionComponent,
   ],
   templateUrl: './incorporacion-prestadores-servicios.component.html',
@@ -42,6 +42,11 @@ import { PopoverIconComponent } from '../../../../shared/components/popover-icon
 export default class IncorporacionPrestadoresServiciosComponent implements OnInit {
   private fb = inject(FormBuilder);
   private supabaseService = inject(SupabaseService);
+
+  readonly tramiteServiceId = signal('');
+  onServiceIdBound(serviceId: string): void {
+    this.tramiteServiceId.set(serviceId);
+  }
 
   form: FormGroup = this.fb.group({
     requestLocation: this.fb.group({
@@ -106,9 +111,7 @@ export default class IncorporacionPrestadoresServiciosComponent implements OnIni
     transactionInfo: this.fb.group({
       exploitation_place: ['', Validators.required],
     }),
-    requirements: this.fb.group({
-      official_id_document: [null, Validators.required],
-    }),
+    requirements: this.fb.group({}),
     signature: this.fb.group({
       signature_file: [null, Validators.required],
     }),
@@ -178,15 +181,6 @@ export default class IncorporacionPrestadoresServiciosComponent implements OnIni
   exploitationPlaceOptions: { value: string; label: string }[] = [
     { value: 'comercializacion', label: 'Comercialización' },
     { value: 'transformacion_tratamiento_preparacion', label: 'Transformación, tratamiento y preparación' },
-  ];
-
-  requirementsList: Requirement[] = [
-    {
-      controlName: 'official_id_document',
-      title: 'ACREDITAR PERSONALIDAD (Identificación Oficial)',
-      legalReference:
-        'Artículo 12, párrafo segundo, Reglamento de la Ley General de Vida Silvestre, publicado en el DOF el 30 de noviembre de 2006.',
-    },
   ];
 
   signaturesList: Signature[] = [

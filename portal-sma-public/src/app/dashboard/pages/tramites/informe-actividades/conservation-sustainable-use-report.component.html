@@ -1,8 +1,9 @@
 <div class="text-3xl text-black relative p-3 border border-slate-100 rounded-md mt-4 mx-2 sm:mx-20 shadow-md">
   <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-6">
-    <app-requirements-section
-      [group]="requirementsGroup"
-      [requirements]="requirementsList"
+    <app-tramite-requirements-block
+      #tramiteReq
+      [form]="form"
+      [serviceId]="tramiteServiceId()"
     />
 
     <app-signature-section
@@ -14,7 +15,7 @@
       <button
         type="submit"
         class="btn-primary cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-        [disabled]="form.invalid"
+        [disabled]="form.invalid || tramiteReq.submitBlocked()"
       >
         Continuar
       </button>

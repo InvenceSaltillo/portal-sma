@@ -33,6 +33,33 @@ import { PdfService } from '../../../services/pdf/pdf.service';
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 type SexValue = 'male' | 'female' | 'unsexed';
 
+/** Texto legible para toastr (evita toast vacío con HttpErrorResponse u objetos). */
+function formatRequestLoadError(err: unknown): string {
+  if (err == null) return '';
+  if (typeof err === 'string') return err.trim() || 'Error al cargar datos.';
+  if (err instanceof Error) return (err.message || '').trim() || 'Error al cargar datos.';
+  const e = err as {
+    message?: string;
+    status?: number;
+    error?: unknown;
+  };
+  const body = e.error;
+  if (typeof body === 'string' && body.trim()) return body.trim();
+  if (body && typeof body === 'object') {
+    const o = body as { error?: string; message?: string };
+    if (typeof o.error === 'string' && o.error.trim()) return o.error.trim();
+    if (typeof o.message === 'string' && o.message.trim()) return o.message.trim();
+  }
+  if (e.message && String(e.message).trim()) return String(e.message).trim();
+  if (e.status === 0) {
+    return 'No se pudo conectar con el servidor. Revisa la API, CORS o tu conexión.';
+  }
+  if (typeof e.status === 'number') {
+    return `Error del servidor (${e.status}). Intenta más tarde o contacta a soporte.`;
+  }
+  return 'No se pudieron cargar los datos. Intenta de nuevo más tarde.';
+}
+
 interface SpeciesRow {
   speciesId: string;
   speciesLabel: string;        // “Común - Científico”
@@ -159,10 +186,16 @@ export default class RequestComponent implements OnInit {
       const serviceError = this.serviceService.error();
       const miscError = this.miscService.error();
       if (serviceTypeError || serviceError || miscError) {
-        this.toastr.error(
-          serviceTypeError || serviceError,
-          '¡Ups!',
-        );
+        const parts = [
+          serviceTypeError ? formatRequestLoadError(serviceTypeError) : '',
+          serviceError ? formatRequestLoadError(serviceError) : '',
+          miscError ? formatRequestLoadError(miscError) : '',
+        ].filter((p) => p.length > 0);
+        const message =
+          parts.length > 0
+            ? parts.join(' ')
+            : 'Ocurrió un error al cargar la solicitud.';
+        this.toastr.error(message, 'Error');
       }
       if (serviceTypeError) {
         this.router.navigateByUrl('dashboard/home');

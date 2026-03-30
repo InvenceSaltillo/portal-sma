@@ -1,0 +1,20 @@
+@if (serviceId()) {
+  @if (loading()) {
+    <div class="p-6 border border-slate-100 rounded-md shadow-md bg-white text-center text-gray-600">
+      Cargando requisitos documentales…
+    </div>
+  } @else if (error()) {
+    <div class="p-4 border border-red-200 rounded-md bg-red-50 text-red-800 text-sm">
+      {{ error() }}
+    </div>
+  } @else if (list().length === 0) {
+    <div class="p-4 border border-amber-200 rounded-md bg-amber-50 text-amber-900 text-sm">
+      Este trámite no tiene requisitos documentales configurados en el sistema. Si necesitas adjuntar documentos, contacta a la ventanilla.
+    </div>
+  } @else {
+    <app-requirements-section
+      [group]="requirementsGroup"
+      [requirements]="list()"
+    />
+  }
+}

@@ -521,9 +521,10 @@
     }
 
     <!-- Requisitos -->
-    <app-requirements-section
-      [group]="requirementsGroup"
-      [requirements]="requirementsList"
+    <app-tramite-requirements-block
+      #tramiteReq
+      [form]="form"
+      [serviceId]="serviceIdSig()"
     />
 
     <!-- Firma -->
@@ -571,7 +572,7 @@
       <button
         type="submit"
         class="btn-primary cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-        [disabled]="loading || form.invalid"
+        [disabled]="loading || form.invalid || tramiteReq.submitBlocked()"
       >
         @if (loading) {
           <span>Enviando...</span>

@@ -29,8 +29,9 @@
       [controlName]="requirement.controlName"
       [title]="requirement.title"
       [legalReference]="requirement.legalReference"
+      [description]="requirement.description ?? null"
       [accept]="requirement.accept ?? 'application/pdf'"
-      [maxSizeMB]="maxSizeMB"
+      [maxSizeMB]="requirement.maxSizeMB ?? maxSizeMB"
     />
   }
 </div>

@@ -1,4 +1,14 @@
-import { Component, OnInit, OnDestroy, inject, ViewContainerRef, ComponentRef } from '@angular/core';
+import {
+  ApplicationRef,
+  ChangeDetectorRef,
+  Component,
+  ComponentRef,
+  OnDestroy,
+  OnInit,
+  ViewChild,
+  ViewContainerRef,
+  inject,
+} from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { getComponentNameForService, hasSpecificComponent } from '../../../config/service-to-component.map';
 import { CommonModule } from '@angular/common';
@@ -118,13 +128,20 @@ import { DropdownModule } from 'primeng/dropdown';
           </div>
         </div>
       }
+      <!-- Ancla explícita: el VCR inyectado en el host a veces no alinea CD con el árbol del formulario -->
+      <ng-container #tramiteOutlet />
     </div>
   `
 })
 export default class TramiteWrapperComponent implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
-  private viewContainer = inject(ViewContainerRef);
+  /** Respaldo si ViewChild aún no existe (p. ej. primera corrida). */
+  private hostViewContainer = inject(ViewContainerRef);
+  private cdr = inject(ChangeDetectorRef);
+  private appRef = inject(ApplicationRef);
+
+  @ViewChild('tramiteOutlet', { read: ViewContainerRef }) tramiteOutlet?: ViewContainerRef;
   private formBuilder = inject(FormBuilder);
   serviceTypeService = inject(ServiceTypeService); // Público para acceso desde template
   serviceService = inject(ServiceService); // Público para acceso desde template
@@ -314,13 +331,20 @@ export default class TramiteWrapperComponent implements OnInit, OnDestroy {
         throw new Error(`Componente ${componentName} no encontrado en el módulo`);
       }
 
-      // Crear instancia del componente
-      this.componentRef = this.viewContainer.createComponent(ComponentClass);
+      const outlet = this.tramiteOutlet ?? this.hostViewContainer;
+      this.componentRef = outlet.createComponent(ComponentClass);
 
-      // Pasar serviceId al componente si tiene esa propiedad
-      if (this.componentRef.instance && 'serviceId' in this.componentRef.instance) {
-        this.componentRef.instance.serviceId = serviceId;
+      // El primer CD de createComponent corre antes de poder asignar el id; por eso no basta
+      // mutar propiedades planas: los hijos (p. ej. requisitos) pueden quedar con serviceId ''.
+      // onServiceIdBound + signal en cada trámite fuerza una segunda actualización reactiva.
+      const inst = this.componentRef.instance as Record<string, unknown>;
+      if (inst && typeof inst['onServiceIdBound'] === 'function') {
+        (inst['onServiceIdBound'] as (id: string) => void)(serviceId);
       }
+
+      this.componentRef.changeDetectorRef.detectChanges();
+      this.cdr.markForCheck();
+      this.appRef.tick();
 
       this.loading = false;
     } catch (err: any) {

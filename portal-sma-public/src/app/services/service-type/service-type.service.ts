@@ -31,12 +31,12 @@ export class ServiceTypeService {
   async getByClientId(clientId: string): Promise<void> {
     // Usar nueva API
     try {
-      this.#state.update((state) => ({ ...state, loading: true }));
+      this.#state.update((state) => ({ ...state, loading: true, error: undefined }));
       const data = await firstValueFrom(
         this.http.get<any[]>(`${this.serviceTypeUrl}?client_id=${clientId}`)
       );
 
-      this.#state.update((state) => ({ ...state, data, loading: false }));
+      this.#state.update((state) => ({ ...state, data, loading: false, error: undefined }));
     } catch (error) {
       console.error('Error fetching service types:', error);
       this.#state.update((state) => ({ ...state, error, loading: false }));

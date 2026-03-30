@@ -68,10 +68,10 @@
       [speciesOptions]="speciesOptions"
     />
 
-    <!-- Reusable section: Requirements -->
-    <app-requirements-section
-      [group]="requirementsGroup"
-      [requirements]="requirementsList"
+    <app-tramite-requirements-block
+      #tramiteReq
+      [form]="form"
+      [serviceId]="tramiteServiceId()"
     />
 
     <!-- Reusable section: Signature -->
@@ -89,7 +89,7 @@
       <button
         type="submit"
         class="btn-primary cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-        [disabled]="form.invalid"
+        [disabled]="form.invalid || tramiteReq.submitBlocked()"
       >
         Enviar Trámite
       </button>

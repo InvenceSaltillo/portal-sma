@@ -2,8 +2,14 @@
   <!-- Título del requisito -->
   <h3 class="text-base font-bold uppercase text-gray-900 mb-2">{{ title }}</h3>
 
+  @if (description) {
+    <p class="text-sm text-gray-700 mb-2">{{ description }}</p>
+  }
+
   <!-- Referencia legal -->
-  <p class="text-sm text-gray-600 mb-4">{{ legalReference }}</p>
+  @if (legalReference) {
+    <p class="text-sm text-gray-600 mb-4">{{ legalReference }}</p>
+  }
 
   <!-- Dropzone -->
   <div
