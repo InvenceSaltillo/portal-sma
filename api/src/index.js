@@ -8,6 +8,7 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import { injectSupabase } from './middleware/supabase-client.js';
 import { errorHandler, notFound } from './middleware/error-handler.js';
+import { isOriginAllowed } from './config/cors-origins.js';
 
 // Routes
 import servicesRoutes from './routes/services.js';
@@ -22,25 +23,6 @@ import notificationsRoutes from './routes/notifications.js';
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-/** Orígenes permitidos en CORS (desarrollo: localhost y 127.0.0.1 suelen ser distintos para el navegador). */
-function parseCorsOrigins() {
-  const raw = process.env.CORS_ORIGIN;
-  if (raw && String(raw).trim()) {
-    return String(raw)
-      .split(',')
-      .map((s) => s.trim())
-      .filter(Boolean);
-  }
-  return [
-    'http://localhost:4200',
-    'http://127.0.0.1:4200',
-    'http://localhost:4300',
-    'http://127.0.0.1:4300',
-  ];
-}
-
-const allowedCorsOrigins = parseCorsOrigins();
-
 // Middleware de seguridad
 // Sin cross-origin en CORP, el navegador puede bloquear la respuesta aunque CORS esté bien (Angular muestra status 0).
 app.use(
@@ -51,14 +33,11 @@ app.use(
 app.use(
   cors({
     origin(origin, callback) {
-      if (!origin) {
-        return callback(null, true);
-      }
-      if (allowedCorsOrigins.includes(origin)) {
+      if (isOriginAllowed(origin)) {
         return callback(null, true);
       }
       console.warn(
-        `[CORS] Origen no permitido: ${origin}. Configura CORS_ORIGIN en .env (coma para varios). Permitidos: ${allowedCorsOrigins.join(', ')}`
+        `[CORS] Origen no permitido: ${origin}. Configura CORS_ORIGIN en .env (coma para varios). En desarrollo se permiten localhost/LAN; en producción sólo la lista explícita.`
       );
       callback(null, false);
     },
