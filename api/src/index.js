@@ -23,6 +23,21 @@ import notificationsRoutes from './routes/notifications.js';
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Vercel (y otros reverse proxies) envían X-Forwarded-For; sin esto express-rate-limit lanza ERR_ERL_UNEXPECTED_X_FORWARDED_FOR.
+if (
+  process.env.VERCEL === '1' ||
+  process.env.TRUST_PROXY === '1' ||
+  process.env.RAILWAY_ENVIRONMENT
+) {
+  app.set('trust proxy', 1);
+}
+
+if (process.env.VERCEL === '1' && !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+  console.warn(
+    '[API] Falta SUPABASE_SERVICE_ROLE_KEY en el entorno de Vercel. Citas de agenda, notificaciones y rutas que usan el cliente admin fallarán hasta que la añadas en Settings → Environment Variables (mismo proyecto que SUPABASE_URL).'
+  );
+}
+
 // Middleware de seguridad
 // Sin cross-origin en CORP, el navegador puede bloquear la respuesta aunque CORS esté bien (Angular muestra status 0).
 app.use(
