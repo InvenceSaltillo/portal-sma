@@ -37,7 +37,7 @@ app.use(
         return callback(null, true);
       }
       console.warn(
-        `[CORS] Origen no permitido: ${origin}. Configura CORS_ORIGIN en .env (coma para varios). En desarrollo se permiten localhost/LAN; en producción sólo la lista explícita.`
+        `[CORS] Origen no permitido: ${origin}. En Vercel define CORS_ORIGIN, ADMIN_ORIGIN o PORTAL_ORIGIN (coma para varios), o CORS_ORIGIN_REGEX para dominio propio. En desarrollo se permiten localhost/LAN; en producción también https://*.vercel.app con host portal-sma*.`
       );
       callback(null, false);
     },
